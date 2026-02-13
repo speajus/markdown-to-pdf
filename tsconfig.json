@@ -11,6 +11,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
+  "ts-node": {
+    "experimentalResolver": true
+  },
   "include": ["src/**/*", "samples/**/*"]
 }
 
