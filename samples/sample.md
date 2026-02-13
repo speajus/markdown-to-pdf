@@ -6,6 +6,8 @@ This report covers the engineering progress for **Acme Platform** during Q4 2025
 
 > "Ship small, ship often, and measure everything." — Acme Engineering Principles
 
+![Acme Logo](samples/logo.png)
+
 ---
 
 ## Infrastructure Improvements
