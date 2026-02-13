@@ -5,6 +5,8 @@ import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
 import https from 'https';
 import http from 'http';
+import fs from 'fs';
+import path from 'path';
 
 function fetchImageBuffer(url: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -146,7 +148,14 @@ export async function renderMarkdownToPdf(
 
   async function renderImage(tok: Tokens.Image): Promise<void> {
     try {
-      const imgBuffer = await fetchImageBuffer(tok.href);
+      let imgBuffer: Buffer;
+      if (tok.href.startsWith('http://') || tok.href.startsWith('https://')) {
+        imgBuffer = await fetchImageBuffer(tok.href);
+      } else {
+        // Local file path — resolve relative to CWD
+        const imgPath = path.resolve(tok.href);
+        imgBuffer = fs.readFileSync(imgPath);
+      }
       ensureSpace(200);
       doc.image(imgBuffer, { fit: [contentWidth, 400], align: 'center' });
       doc.moveDown(0.5);
