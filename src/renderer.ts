@@ -302,7 +302,9 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Blockquote;
         const bq = theme.blockquote;
         ensureSpace(30);
+        const bqPadding = 6; // vertical padding above and below text
         const startY = doc.y;
+        doc.y += bqPadding; // add top padding before text
         const textX = margins.left + bq.borderWidth + bq.indent;
         const textWidth = contentWidth - bq.borderWidth - bq.indent;
         for (const child of t.tokens) {
@@ -317,6 +319,7 @@ export async function renderMarkdownToPdf(
             await renderToken(child);
           }
         }
+        doc.y += bqPadding; // add bottom padding after text
         const endY = doc.y;
         doc.save();
         doc.rect(margins.left, startY, bq.borderWidth, endY - startY).fill(bq.borderColor);
