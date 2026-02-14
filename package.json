@@ -15,6 +15,10 @@
   "keywords": ["markdown", "pdf", "converter"],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/speajus/markdown-to-pdf"
+  },
   "type": "commonjs",
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
