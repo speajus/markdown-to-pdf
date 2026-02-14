@@ -45,6 +45,8 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # First publish requires NPM_TOKEN secret; after that, remove the
+      # secret and rely on OIDC Trusted Publishers (id-token: write above).
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
