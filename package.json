@@ -2,17 +2,17 @@
   "name": "@speajus/markdown-to-pdf",
   "version": "1.0.0",
   "description": "A new project created with Intent by Augment.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "files": [
-    "dist"
+    "dist/src"
   ],
   "scripts": {
     "build": "tsc",
     "generate": "ts-node samples/generate.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["markdown", "pdf", "converter"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
