@@ -29,8 +29,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           npm version patch -m "v%s"
 
-      - name: Remove .npmrc auth token for OIDC
-        run: npm config delete //registry.npmjs.org/:_authToken
+      - name: Clean .npmrc auth for OIDC
+        run: |
+          sed -i '/_authToken/d' "$HOME/.npmrc"
+          echo "Cleaned .npmrc:"
+          cat "$HOME/.npmrc"
 
       - run: npm publish --provenance --access public
 
