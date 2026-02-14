@@ -1,6 +1,6 @@
 {
   "name": "@speajus/markdown-to-pdf",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A new project created with Intent by Augment.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
