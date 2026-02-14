@@ -30,6 +30,5 @@ jobs:
           npm version patch -m "v%s"
 
       - run: NODE_AUTH_TOKEN="" npm publish --provenance --access public
-
       - name: Push version commit and tag
         run: git push --follow-tags
