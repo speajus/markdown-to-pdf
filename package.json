@@ -1,0 +1,30 @@
+{
+  "name": "@speajus/markdown-to-pdf",
+  "version": "1.0.0",
+  "description": "A new project created with Intent by Augment.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "generate": "ts-node samples/generate.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "marked": "^17.0.2",
+    "pdfkit": "^0.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/pdfkit": "^0.17.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
