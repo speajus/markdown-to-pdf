@@ -64,5 +64,7 @@ export interface ThemeConfig {
 export interface PdfOptions {
   theme?: ThemeConfig;
   pageLayout?: PageLayout;
+  /** Base directory for resolving relative image paths */
+  basePath?: string;
 }
 

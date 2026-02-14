@@ -22,8 +22,11 @@ export async function generatePdf(
   outputPath: string,
   options?: PdfOptions,
 ): Promise<void> {
-  const markdown = fs.readFileSync(path.resolve(inputPath), 'utf-8');
-  const buffer = await renderMarkdownToPdf(markdown, options);
+  const resolvedInput = path.resolve(inputPath);
+  const markdown = fs.readFileSync(resolvedInput, 'utf-8');
+  const basePath = path.dirname(resolvedInput);
+  const mergedOptions: PdfOptions = { ...options, basePath: options?.basePath ?? basePath };
+  const buffer = await renderMarkdownToPdf(markdown, mergedOptions);
   const dir = path.dirname(path.resolve(outputPath));
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.resolve(outputPath), buffer);

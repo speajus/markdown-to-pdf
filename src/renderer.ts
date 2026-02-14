@@ -2,25 +2,54 @@ import type { PdfOptions } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
+import { Resvg } from '@resvg/resvg-js';
 import { PassThrough } from 'stream';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 
-function fetchImageBuffer(url: string): Promise<Buffer> {
+function isSvg(buf: Buffer): boolean {
+  // Check for XML/SVG signature in the first 256 bytes
+  const head = buf.subarray(0, 256).toString('utf-8').trimStart();
+  return head.startsWith('<svg') || head.startsWith('<?xml');
+}
+
+function convertSvgToPng(svgData: Buffer): Buffer {
+  const resvg = new Resvg(svgData, { font: { loadSystemFonts: true } });
+  const rendered = resvg.render();
+  return Buffer.from(rendered.asPng());
+}
+
+const FETCH_TIMEOUT_MS = 10_000;
+const MAX_REDIRECTS = 5;
+
+function fetchImageBuffer(url: string, redirectCount = 0): Promise<Buffer> {
+  if (redirectCount > MAX_REDIRECTS) {
+    return Promise.reject(new Error(`Too many redirects fetching ${url}`));
+  }
   return new Promise((resolve, reject) => {
     const get = url.startsWith('https') ? https.get : http.get;
-    get(url, (res) => {
+    const req = get(url, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        fetchImageBuffer(res.headers.location).then(resolve, reject);
+        res.resume(); // drain the response so the socket can be reused / freed
+        fetchImageBuffer(res.headers.location, redirectCount + 1).then(resolve, reject);
+        return;
+      }
+      if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+        res.resume();
+        reject(new Error(`HTTP ${res.statusCode} fetching ${url}`));
         return;
       }
       const chunks: Buffer[] = [];
       res.on('data', (chunk: Buffer) => chunks.push(chunk));
       res.on('end', () => resolve(Buffer.concat(chunks)));
       res.on('error', reject);
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    req.setTimeout(FETCH_TIMEOUT_MS, () => {
+      req.destroy(new Error(`Timeout fetching ${url} after ${FETCH_TIMEOUT_MS}ms`));
+    });
   });
 }
 
@@ -30,6 +59,7 @@ export async function renderMarkdownToPdf(
 ): Promise<Buffer> {
   const theme = options?.theme ?? defaultTheme;
   const layout = options?.pageLayout ?? defaultPageLayout;
+  const basePath = options?.basePath ?? process.cwd();
   const { margins } = layout;
 
   const doc = new PDFDocument({ size: layout.pageSize, margins });
@@ -81,12 +111,12 @@ export async function renderMarkdownToPdf(
     doc.fillColor(theme.body.color);
   }
 
-  function renderInlineTokens(
+  async function renderInlineTokens(
     inlineTokens: Token[],
     continued: boolean,
     insideBold = false,
     insideItalic = false,
-  ): void {
+  ): Promise<void> {
     for (let i = 0; i < inlineTokens.length; i++) {
       const isLast = i === inlineTokens.length - 1;
       const cont = continued || !isLast;
@@ -95,7 +125,7 @@ export async function renderMarkdownToPdf(
         case 'text': {
           const t = tok as Tokens.Text;
           if (t.tokens && t.tokens.length > 0) {
-            renderInlineTokens(t.tokens, cont, insideBold, insideItalic);
+            await renderInlineTokens(t.tokens, cont, insideBold, insideItalic);
           } else {
             applyBodyFont(insideBold, insideItalic);
             doc.text(t.text, { continued: cont });
@@ -104,12 +134,12 @@ export async function renderMarkdownToPdf(
         }
         case 'strong': {
           const t = tok as Tokens.Strong;
-          renderInlineTokens(t.tokens, cont, true, insideItalic);
+          await renderInlineTokens(t.tokens, cont, true, insideItalic);
           break;
         }
         case 'em': {
           const t = tok as Tokens.Em;
-          renderInlineTokens(t.tokens, cont, insideBold, true);
+          await renderInlineTokens(t.tokens, cont, insideBold, true);
           break;
         }
         case 'codespan': {
@@ -118,6 +148,10 @@ export async function renderMarkdownToPdf(
         }
         case 'link': {
           renderLink(tok as Tokens.Link, cont);
+          break;
+        }
+        case 'image': {
+          await renderImage(tok as Tokens.Image);
           break;
         }
         case 'del': {
@@ -152,12 +186,33 @@ export async function renderMarkdownToPdf(
       if (tok.href.startsWith('http://') || tok.href.startsWith('https://')) {
         imgBuffer = await fetchImageBuffer(tok.href);
       } else {
-        // Local file path — resolve relative to CWD
-        const imgPath = path.resolve(tok.href);
+        // Local file path — resolve relative to the markdown file's directory
+        const imgPath = path.resolve(basePath, tok.href);
         imgBuffer = fs.readFileSync(imgPath);
       }
-      ensureSpace(200);
-      doc.image(imgBuffer, { fit: [contentWidth, 400], align: 'center' });
+
+      // Convert SVG to PNG since pdfkit doesn't support SVG natively
+      if (isSvg(imgBuffer)) {
+        imgBuffer = convertSvgToPng(imgBuffer);
+      }
+
+      // Read the image's intrinsic dimensions via pdfkit
+      // openImage exists at runtime but is missing from @types/pdfkit
+      const img = (doc as any).openImage(imgBuffer) as { width: number; height: number };
+      const maxHeight = doc.page.height - margins.top - margins.bottom;
+
+      // Scale down to fit content area, but never scale up beyond natural size
+      let displayWidth = Math.min(img.width, contentWidth);
+      let displayHeight = img.height * (displayWidth / img.width);
+
+      // Also cap height to the printable area
+      if (displayHeight > maxHeight) {
+        displayHeight = maxHeight;
+        displayWidth = img.width * (displayHeight / img.height);
+      }
+
+      ensureSpace(displayHeight + 10);
+      doc.image(imgBuffer, { width: displayWidth, height: displayHeight });
       doc.moveDown(0.5);
     } catch {
       ensureSpace(20);
@@ -182,12 +237,12 @@ export async function renderMarkdownToPdf(
         if (child.type === 'text') {
           const t = child as Tokens.Text;
           if (t.tokens && t.tokens.length > 0) {
-            renderInlineTokens(t.tokens, false);
+            await renderInlineTokens(t.tokens, false);
           } else {
             doc.text(t.text);
           }
         } else if (child.type === 'paragraph') {
-          renderInlineTokens((child as Tokens.Paragraph).tokens, false);
+          await renderInlineTokens((child as Tokens.Paragraph).tokens, false);
         } else if (child.type === 'list') {
           await renderList(child as Tokens.List, depth + 1);
         }
@@ -202,6 +257,7 @@ export async function renderMarkdownToPdf(
     const cellPad = theme.table.cellPadding;
     const colWidth = contentWidth / colCount;
     const rowH = theme.body.fontSize + cellPad * 2 + 4;
+    const textInsetY = (rowH - theme.body.fontSize) / 2;
 
     ensureSpace(rowH * 2);
     const startX = margins.left;
@@ -214,7 +270,7 @@ export async function renderMarkdownToPdf(
     doc.font('Helvetica-Bold').fontSize(theme.body.fontSize).fillColor(theme.body.color);
     for (let c = 0; c < colCount; c++) {
       const cellX = startX + c * colWidth;
-      doc.text(table.header[c].text, cellX + cellPad, y + cellPad, {
+      doc.text(table.header[c].text, cellX + cellPad, y + textInsetY, {
         width: colWidth - cellPad * 2,
         height: rowH,
         align: table.align[c] || 'left',
@@ -237,7 +293,7 @@ export async function renderMarkdownToPdf(
       ensureSpace(rowH);
       for (let c = 0; c < colCount; c++) {
         const cellX = startX + c * colWidth;
-        doc.text(row[c].text, cellX + cellPad, y + cellPad, {
+        doc.text(row[c].text, cellX + cellPad, y + textInsetY, {
           width: colWidth - cellPad * 2,
           height: rowH,
           align: table.align[c] || 'left',
@@ -279,7 +335,7 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Paragraph;
         ensureSpace(theme.body.fontSize * 2);
         resetBodyFont();
-        renderInlineTokens(t.tokens, false);
+        await renderInlineTokens(t.tokens, false);
         doc.moveDown(0.5);
         break;
       }
@@ -322,7 +378,7 @@ export async function renderMarkdownToPdf(
             const font = bq.italic ? 'Helvetica-Oblique' : theme.body.font;
             doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
             doc.text('', textX, doc.y, { width: textWidth });
-            renderInlineTokens(p.tokens, false, false, bq.italic);
+            await renderInlineTokens(p.tokens, false, false, bq.italic);
             doc.moveDown(0.3);
           } else {
             await renderToken(child);

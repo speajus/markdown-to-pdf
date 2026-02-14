@@ -1,3 +1,5 @@
+![Acme Logo](./logo.svg)
+
 # Acme Platform — Q4 Engineering Report
 
 ## Executive Summary
@@ -6,7 +8,6 @@ This report covers the engineering progress for **Acme Platform** during Q4 2025
 
 > "Ship small, ship often, and measure everything." — Acme Engineering Principles
 
-![Acme Logo](samples/logo.png)
 
 ---
 
@@ -110,7 +111,7 @@ The most impactful improvement was adding automated canary analysis. Previously,
 
 We aim to achieve **99.99% uptime** by end of 2026. This requires investment in multi-region failover, automated chaos testing, and a dedicated platform reliability team.
 
-![Architecture Diagram](https://via.placeholder.com/400x200.png)
+![Architecture Diagram](https://picsum.photos/id/1/400/200)
 
 For questions or feedback, contact the engineering team at [eng@acme.dev](https://acme.dev/contact) or visit the [Acme Developer Portal](http://developer.acme.dev).
 

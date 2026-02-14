@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100">
+  <rect width="360" height="100" rx="6" fill="#1a1e2e"/>
+  <!-- Stylised "A" mark -->
+  <g transform="translate(20,12)">
+    <polygon points="28,0 0,76 14,76 28,30 42,76 56,76" fill="#e63946"/>
+    <rect x="10" y="50" width="36" height="10" rx="2" fill="#e63946"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="95" y="55" font-family="Helvetica,Arial,sans-serif" font-weight="bold"
+        font-size="42" fill="#ffffff" letter-spacing="6">ACME</text>
+  <!-- Tagline -->
+  <text x="96" y="78" font-family="Helvetica,Arial,sans-serif" font-weight="normal"
+        font-size="14" fill="#8a8fa3" letter-spacing="4">ENGINEERING</text>
+</svg>
+
