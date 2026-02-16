@@ -1,8 +1,29 @@
 #!/usr/bin/env ts-node
 
 import path from 'path';
-import { generatePdf } from './index.js';
+import fs from 'fs';
+import { generatePdf, createNodeImageRenderer } from './index.js';
 
+export async function readMdWritePdf(inputPath: string, outputPath: string): Promise<void> {
+
+  console.log(`Converting ${inputPath} → ${outputPath}`);
+
+  const resolvedInput = path.resolve(inputPath);
+  const markdown = fs.readFileSync(resolvedInput, "utf-8");
+  const basePath = path.dirname(resolvedInput);
+
+  // Use Node.js image renderer with the basePath
+  const renderImage = createNodeImageRenderer(basePath);
+
+  const buffer = await generatePdf(markdown, { basePath, renderImage });
+
+  const dir = path.dirname(path.resolve(outputPath));
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.resolve(outputPath), buffer);
+
+  console.log(`Done. PDF written to ${path.resolve(outputPath)}`);
+
+}
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
@@ -11,16 +32,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const inputPath = args[0];
-  const outputPath = args[1] ?? inputPath.replace(/\.md$/i, '.pdf');
-
-  console.log(`Converting ${inputPath} → ${outputPath}`);
-  await generatePdf(inputPath, outputPath);
-  console.log(`Done. PDF written to ${path.resolve(outputPath)}`);
+  readMdWritePdf(args[0], args[1]);
 }
 
-main().catch((err) => {
-  console.error('Error:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error('Error:', err);
+    process.exit(1);
+  });
+}
 

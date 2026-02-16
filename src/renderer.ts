@@ -2,56 +2,8 @@ import type { PdfOptions } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
-import { Resvg } from '@resvg/resvg-js';
 import { PassThrough } from 'stream';
-import https from 'https';
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
-
-function isSvg(buf: Buffer): boolean {
-  // Check for XML/SVG signature in the first 256 bytes
-  const head = buf.subarray(0, 256).toString('utf-8').trimStart();
-  return head.startsWith('<svg') || head.startsWith('<?xml');
-}
-
-function convertSvgToPng(svgData: Buffer): Buffer {
-  const resvg = new Resvg(svgData, { font: { loadSystemFonts: true } });
-  const rendered = resvg.render();
-  return Buffer.from(rendered.asPng());
-}
-
-const FETCH_TIMEOUT_MS = 10_000;
-const MAX_REDIRECTS = 5;
-
-function fetchImageBuffer(url: string, redirectCount = 0): Promise<Buffer> {
-  if (redirectCount > MAX_REDIRECTS) {
-    return Promise.reject(new Error(`Too many redirects fetching ${url}`));
-  }
-  return new Promise((resolve, reject) => {
-    const get = url.startsWith('https') ? https.get : http.get;
-    const req = get(url, (res) => {
-      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        res.resume(); // drain the response so the socket can be reused / freed
-        fetchImageBuffer(res.headers.location, redirectCount + 1).then(resolve, reject);
-        return;
-      }
-      if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
-        res.resume();
-        reject(new Error(`HTTP ${res.statusCode} fetching ${url}`));
-        return;
-      }
-      const chunks: Buffer[] = [];
-      res.on('data', (chunk: Buffer) => chunks.push(chunk));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-      res.on('error', reject);
-    });
-    req.on('error', reject);
-    req.setTimeout(FETCH_TIMEOUT_MS, () => {
-      req.destroy(new Error(`Timeout fetching ${url} after ${FETCH_TIMEOUT_MS}ms`));
-    });
-  });
-}
+import { createNodeImageRenderer } from './node-image-renderer.js';
 
 export async function renderMarkdownToPdf(
   markdown: string,
@@ -60,6 +12,10 @@ export async function renderMarkdownToPdf(
   const theme = options?.theme ?? defaultTheme;
   const layout = options?.pageLayout ?? defaultPageLayout;
   const basePath = options?.basePath ?? process.cwd();
+
+  // Use provided image renderer or create default Node.js renderer
+  const imageRenderer = options?.renderImage ?? createNodeImageRenderer(basePath);
+
   const { margins } = layout;
 
   const doc = new PDFDocument({ size: layout.pageSize, margins });
@@ -182,19 +138,8 @@ export async function renderMarkdownToPdf(
 
   async function renderImage(tok: Tokens.Image): Promise<void> {
     try {
-      let imgBuffer: Buffer;
-      if (tok.href.startsWith('http://') || tok.href.startsWith('https://')) {
-        imgBuffer = await fetchImageBuffer(tok.href);
-      } else {
-        // Local file path — resolve relative to the markdown file's directory
-        const imgPath = path.resolve(basePath, tok.href);
-        imgBuffer = fs.readFileSync(imgPath);
-      }
-
-      // Convert SVG to PNG since pdfkit doesn't support SVG natively
-      if (isSvg(imgBuffer)) {
-        imgBuffer = convertSvgToPng(imgBuffer);
-      }
+      // Use the pluggable image renderer
+      const imgBuffer = await imageRenderer(tok.href);
 
       // Read the image's intrinsic dimensions via pdfkit
       // openImage exists at runtime but is missing from @types/pdfkit

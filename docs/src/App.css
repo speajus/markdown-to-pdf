@@ -1,0 +1,97 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.header {
+  background: #2c3e50;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.header .info {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.panel-header {
+  background: #ecf0f1;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 1px solid #ddd;
+}
+
+.editor-wrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-wrapper .w-md-editor {
+  height: 100% !important;
+}
+
+.editor-wrapper .w-md-editor-text-pre,
+.editor-wrapper .w-md-editor-text-input {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+}
+
+.pdf-viewer {
+  flex: 1;
+  border: none;
+  background: white;
+  width: 100%;
+  height: 100%;
+}
+

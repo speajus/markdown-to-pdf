@@ -66,5 +66,11 @@ export interface PdfOptions {
   pageLayout?: PageLayout;
   /** Base directory for resolving relative image paths */
   basePath?: string;
+  /**
+   * Custom image renderer function.
+   * Takes an image URL/path and returns a Buffer containing the image data (PNG/JPEG).
+   * If not provided, a default Node.js implementation will be used.
+   */
+  renderImage?: (imageUrl: string) => Promise<Buffer>;
 }
 
