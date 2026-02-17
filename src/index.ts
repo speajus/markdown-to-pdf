@@ -14,6 +14,5 @@ export {
   renderMarkdownToPdf as generatePdf,
   renderMarkdownToPdf,
 } from "./renderer.js";
-export { createNodeImageRenderer } from './node-image-renderer.js';
 export { createBrowserImageRenderer } from './browser-image-renderer.js';
 

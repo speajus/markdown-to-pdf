@@ -3,8 +3,7 @@ import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
-import { createNodeImageRenderer } from './node-image-renderer.js';
-
+import { DEFAULTS } from './defaults.js';
 export async function renderMarkdownToPdf(
   markdown: string,
   options?: PdfOptions,
@@ -14,7 +13,7 @@ export async function renderMarkdownToPdf(
   const basePath = options?.basePath ?? process.cwd();
 
   // Use provided image renderer or create default Node.js renderer
-  const imageRenderer = options?.renderImage ?? createNodeImageRenderer(basePath);
+  const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
 
   const { margins } = layout;
 

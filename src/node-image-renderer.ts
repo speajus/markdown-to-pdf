@@ -3,6 +3,7 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { DEFAULTS } from './defaults';
 
 function isSvg(buf: Buffer): boolean {
   // Check for XML/SVG signature in the first 256 bytes
@@ -79,3 +80,4 @@ export function createNodeImageRenderer(basePath: string = process.cwd()): (imag
   };
 }
 
+DEFAULTS.renderImage = createNodeImageRenderer;

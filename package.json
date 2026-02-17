@@ -4,15 +4,22 @@
   "description": "A new project created with Intent by Augment.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "exports":{
+    "node":{
+      "require": "./dist/src/index.js",
+      "import": "./dist/src/index.js"
+    },
+    "browser": {
+      "require": "./dist/src/browser.js",
+      "import": "./dist/src/browser.js"
+    }
+  },
   "files": [
     "dist/src"
   ],
   "scripts": {
     "build": "tsc",
     "generate": "tsx samples/generate.ts",
-    "docs:dev": "cd docs && npm run dev",
-    "docs:build": "cd docs && npm run build",
-    "docs:preview": "cd docs && npm run preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

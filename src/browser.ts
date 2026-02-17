@@ -1,6 +1,9 @@
 /**
  * Browser-specific entry point that excludes Node.js dependencies
  */
+import { renderMarkdownToPdf } from "./renderer.js";
+export { createBrowserImageRenderer } from "./browser-image-renderer.js";
+
 
 export type {
   TextStyle,
@@ -14,9 +17,4 @@ export type {
 } from './types.js';
 
 export { defaultTheme, defaultPageLayout } from './styles.js';
-export {
-  renderMarkdownToPdf as generatePdf,
-  renderMarkdownToPdf,
-} from "./renderer-browser.js";
-export { createBrowserImageRenderer } from './browser-image-renderer.js';
-
+export { renderMarkdownToPdf } from "./renderer.js";

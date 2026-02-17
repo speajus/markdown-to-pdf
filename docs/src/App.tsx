@@ -46,6 +46,16 @@ function hello() {
 
 > This is a blockquote. You can use it to highlight important information.
 
+## Sample Images
+
+**SVG image:**
+
+![SVG logo](https://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg)
+
+**PNG image:**
+
+![PNG demo](https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png)
+
 Try editing this markdown and click **Generate PDF** to see the result!
 
 Press **Ctrl/Cmd + Enter** to quickly generate the PDF.
