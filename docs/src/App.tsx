@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { PDFViewer } from '@react-pdf/renderer';
-import { MarkdownPDF } from './MarkdownPDF';
+import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
 import './App.css';
 
@@ -53,7 +52,7 @@ Press **Ctrl/Cmd + Enter** to quickly generate the PDF.
 `;
 
 function App() {
-  const [markdown, setMarkdown] = useState(defaultMarkdown);
+  const [markdown, setMarkdown] = useState<string | undefined>(defaultMarkdown);
 
   return (
     <div className="container">
@@ -68,9 +67,9 @@ function App() {
           <div className="editor-wrapper">
             <MDEditor
               value={markdown}
-              onChange={(val) => setMarkdown(val || '')}
-              height="100%"
+              onChange={setMarkdown}
               preview="edit"
+              highlightEnable={false}
               hideToolbar={false}
             />
           </div>
@@ -78,9 +77,9 @@ function App() {
 
         <div className="preview-panel">
           <div className="panel-header">PDF Preview (Live)</div>
-          <PDFViewer className="pdf-viewer">
-            <MarkdownPDF markdown={markdown} />
-          </PDFViewer>
+          <div className="pdf-viewer">
+            <BrowserPdfRenderer markdown={markdown??''} />
+          </div>
         </div>
       </div>
     </div>
