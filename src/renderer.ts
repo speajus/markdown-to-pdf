@@ -10,7 +10,7 @@ export async function renderMarkdownToPdf(
 ): Promise<Buffer> {
   const theme = options?.theme ?? defaultTheme;
   const layout = options?.pageLayout ?? defaultPageLayout;
-  const basePath = options?.basePath ?? process.cwd();
+  const basePath = options?.basePath ?? '';
 
   // Use provided image renderer or create default Node.js renderer
   const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
