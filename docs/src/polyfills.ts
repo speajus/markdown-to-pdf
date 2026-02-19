@@ -7,6 +7,4 @@ import { Buffer } from 'buffer';
 import process from 'process';
 
 // Make Buffer and process available globally
-(window as any).Buffer = Buffer;
-(window as any).process = process;
-
+Object.assign(window, { Buffer, process });

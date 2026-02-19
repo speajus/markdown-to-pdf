@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
+import { themes } from '../../src/browser';
 import './App.css';
 
 const defaultMarkdown = `# Welcome to Markdown to PDF Editor
@@ -10,29 +11,64 @@ This is a **live editor** where you can test the markdown-to-pdf conversion enti
 ## Features
 
 - **Bold text** and *italic text*
-- \`inline code\` and code blocks
+- \`inline code\` and code blocks with **syntax highlighting**
 - Lists (ordered and unordered)
-- Tables
-- Links
-- Blockquotes
-- And more!
+- Tables, Links, Blockquotes, and more!
 
-## Sample Code Block
+## Syntax Highlighted Code
+
+Fenced code blocks with a language tag are automatically syntax highlighted.
+
+### JavaScript
 
 \`\`\`javascript
-function hello() {
-  console.log("Hello, World!");
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
 }
+
+// Print the first 10 Fibonacci numbers
+const results = [];
+for (let i = 0; i < 10; i++) {
+  results.push(fibonacci(i));
+}
+console.log("Fibonacci:", results);
+\`\`\`
+
+### TypeScript
+
+\`\`\`typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  active: boolean;
+}
+
+async function fetchUser(id: number): Promise<User> {
+  const response = await fetch(\\\`/api/users/\\\${id}\\\`);
+  if (!response.ok) {
+    throw new Error("User not found");
+  }
+  return response.json();
+}
+\`\`\`
+
+### Plain Code Block (no highlighting)
+
+\`\`\`
+This is a plain code block without a language tag.
+It uses the default monospace style with no syntax colors.
 \`\`\`
 
 ## Sample Table
 
 | Feature | Supported |
 |---------|-----------|
-| Headers | ✓ |
-| Lists | ✓ |
-| Tables | ✓ |
-| Code | ✓ |
+| Headers | Yes |
+| Lists | Yes |
+| Tables | Yes |
+| Syntax Highlighting | Yes |
 
 ## Sample List
 
@@ -56,18 +92,33 @@ function hello() {
 
 ![PNG demo](https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png)
 
-Try editing this markdown and click **Generate PDF** to see the result!
-
-Press **Ctrl/Cmd + Enter** to quickly generate the PDF.
+Try editing this markdown and see the PDF preview update live!
 `;
+
+const themeNames = Object.keys(themes);
 
 function App() {
   const [markdown, setMarkdown] = useState<string | undefined>(defaultMarkdown);
+  const [themeName, setThemeName] = useState<string>('Default');
 
   return (
     <div className="container">
       <div className="header">
-        <h1>📝 Markdown to PDF Editor</h1>
+        <div className="header-top">
+          <h1>📝 Markdown to PDF Editor</h1>
+          <div className="theme-selector">
+            <label htmlFor="theme-select">Theme:</label>
+            <select
+              id="theme-select"
+              value={themeName}
+              onChange={(e) => setThemeName(e.target.value)}
+            >
+              {themeNames.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
       </div>
 
@@ -88,7 +139,7 @@ function App() {
         <div className="preview-panel">
           <div className="panel-header">PDF Preview (Live)</div>
           <div className="pdf-viewer">
-            <BrowserPdfRenderer markdown={markdown??''} />
+            <BrowserPdfRenderer markdown={markdown??''} theme={themes[themeName]} />
           </div>
         </div>
       </div>

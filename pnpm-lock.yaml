@@ -17,6 +17,9 @@ importers:
       pdfkit:
         specifier: ^0.17.2
         version: 0.17.2
+      prismjs:
+        specifier: ^1.30.0
+        version: 1.30.0
     devDependencies:
       '@types/node':
         specifier: ^25.2.3
@@ -24,6 +27,9 @@ importers:
       '@types/pdfkit':
         specifier: ^0.17.5
         version: 0.17.5
+      '@types/prismjs':
+        specifier: ^1.26.6
+        version: 1.26.6
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -274,6 +280,9 @@ packages:
   '@types/pdfkit@0.17.5':
     resolution: {integrity: sha512-T3ZHnvF91HsEco5ClhBCOuBwobZfPcI2jaiSHybkkKYq4KhVIIurod94JVKvDIG0JXT6o3KiERC0X0//m8dyrg==}
 
+  '@types/prismjs@1.26.6':
+    resolution: {integrity: sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw==}
+
   base64-js@0.0.8:
     resolution: {integrity: sha512-3XSA2cR/h/73EzlXXdU6YNycmYI7+kicTxks4eJg2g39biHR84slg2+des+p7iHYhbRg/udIS4TD53WabcOUkw==}
     engines: {node: '>= 0.4'}
@@ -333,6 +342,10 @@ packages:
 
   png-js@1.0.0:
     resolution: {integrity: sha512-k+YsbhpA9e+EFfKjTCH3VW6aoKlyNYI6NYdTfDL4CIvFnvsuO84ttonmZE7rc+v23SLTH8XX+5w/Ak9v0xGY4g==}
+
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
+    engines: {node: '>=6'}
 
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
@@ -508,6 +521,8 @@ snapshots:
     dependencies:
       '@types/node': 25.2.3
 
+  '@types/prismjs@1.26.6': {}
+
   base64-js@0.0.8: {}
 
   base64-js@1.5.1: {}
@@ -592,6 +607,8 @@ snapshots:
       png-js: 1.0.0
 
   png-js@1.0.0: {}
+
+  prismjs@1.30.0: {}
 
   resolve-pkg-maps@1.0.0: {}
 

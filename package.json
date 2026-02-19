@@ -4,8 +4,8 @@
   "description": "A new project created with Intent by Augment.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
-  "exports":{
-    "node":{
+  "exports": {
+    "node": {
       "require": "./dist/src/index.js",
       "import": "./dist/src/index.js"
     },
@@ -18,7 +18,7 @@
     "dist/src"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/src/fonts && cp src/fonts/* dist/src/fonts/",
     "generate": "tsx samples/generate.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -37,11 +37,13 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "marked": "^17.0.2",
-    "pdfkit": "^0.17.2"
+    "pdfkit": "^0.17.2",
+    "prismjs": "^1.30.0"
   },
   "devDependencies": {
     "@types/node": "^25.2.3",
     "@types/pdfkit": "^0.17.5",
+    "@types/prismjs": "^1.26.6",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

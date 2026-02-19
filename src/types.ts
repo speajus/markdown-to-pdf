@@ -72,5 +72,24 @@ export interface PdfOptions {
    * If not provided, a default Node.js implementation will be used.
    */
   renderImage?: (imageUrl: string) => Promise<Buffer>;
+  /**
+   * Enable syntax highlighting for fenced code blocks with a language tag.
+   * Uses Prism.js for tokenization. Supported languages: javascript, typescript, java.
+   * @default true
+   */
+  syntaxHighlight?: boolean;
+  /**
+   * Emoji font configuration.
+   *
+   * - `true` (default) — use the bundled Noto Emoji font (Node.js only;
+   *   silently skipped in browser environments).
+   * - `false` — disable emoji font switching; emoji will render with the
+   *   current body font (which usually means missing glyphs).
+   * - A `string` path to a custom `.ttf` / `.otf` emoji font file (Node.js).
+   * - A `Buffer` containing raw font data (works in both Node.js and browser).
+   *
+   * @default true
+   */
+  emojiFont?: boolean | string | Buffer;
 }
 

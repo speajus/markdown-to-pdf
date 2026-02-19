@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
+import type { ThemeConfig } from '../../src/browser';
 
 interface BrowserPdfRendererProps {
   markdown: string;
+  theme?: ThemeConfig;
 }
 
-export function BrowserPdfRenderer({ markdown }: BrowserPdfRendererProps) {
+export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps) {
   const [pdfUrl, setPdfUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,6 +35,7 @@ export function BrowserPdfRenderer({ markdown }: BrowserPdfRendererProps) {
           // Generate PDF using the refactored library (src/index.ts)
           const buffer = await renderMarkdownToPdf(markdown, {
             renderImage,
+            theme,
           });
 
           if (!mounted) return;
@@ -66,7 +69,7 @@ export function BrowserPdfRenderer({ markdown }: BrowserPdfRendererProps) {
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [markdown]);
+  }, [markdown, theme]);
 
   if (loading) {
     return (

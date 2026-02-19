@@ -17,4 +17,5 @@ export type {
 } from './types.js';
 
 export { defaultTheme, defaultPageLayout } from './styles.js';
+export { themes, modernTheme, academicTheme, minimalTheme, oceanTheme } from './themes/index.js';
 export { renderMarkdownToPdf } from "./renderer.js";
