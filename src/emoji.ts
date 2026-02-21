@@ -139,3 +139,11 @@ export function containsEmoji(text: string): boolean {
   return EMOJI_RE.test(text);
 }
 
+/**
+ * Returns the module-level emoji regex.  Useful for external callers
+ * (e.g. `preRenderEmoji`) that need to scan text with the same pattern.
+ */
+export function getEmojiRegex(): RegExp {
+  return EMOJI_RE;
+}
+

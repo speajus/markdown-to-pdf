@@ -5,7 +5,8 @@ import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
 import { DEFAULTS } from './defaults.js';
 import { renderCode } from './highlight.prism.js';
-import { splitEmojiSegments, containsEmoji } from './emoji.js';
+import { splitEmojiSegments, containsEmoji, getEmojiRegex } from './emoji.js';
+import { preRenderEmoji } from './color-emoji.js';
 
 /** Name used to register the emoji font with PDFKit */
 const EMOJI_FONT_NAME = 'NotoEmoji';
@@ -65,6 +66,20 @@ export async function renderMarkdownToPdf(
     }
   }
 
+  // ── Color emoji pre-render ─────────────────────────────────────────────
+  // When a colorEmoji renderer is provided, pre-scan the entire markdown for
+  // every unique emoji and convert them all to PNG buffers up-front.  This
+  // lets `renderTextWithEmoji` remain synchronous during page rendering.
+  let emojiImageCache: Map<string, Buffer> | undefined;
+  const colorEmojiEnabled = !!options?.colorEmoji;
+  if (options?.colorEmoji) {
+    emojiImageCache = await preRenderEmoji(
+      markdown,
+      options.colorEmoji,
+      getEmojiRegex(),
+    );
+  }
+
   const tokens = marked.lexer(markdown);
   const contentWidth = doc.page.width - margins.left - margins.right;
 
@@ -93,6 +108,10 @@ export async function renderMarkdownToPdf(
    * non-emoji portions.  The `continued` flag behaves exactly like the
    * native PDFKit option — pass `true` to keep the line open.
    *
+   * When `colorEmojiEnabled` is true and `emojiImageCache` is populated,
+   * emoji characters are rendered as inline PNG images instead of font
+   * glyphs, with manual (x, y) positioning to keep them in the text flow.
+   *
    * Supports both `renderTextWithEmoji(text, opts?)` and the positioned
    * form `renderTextWithEmoji(text, x, y, opts?)` used by table cells.
    */
@@ -114,7 +133,10 @@ export async function renderMarkdownToPdf(
       opts = xOrOpts ?? {};
     }
 
-    if (!emojiEnabled || !containsEmoji(text)) {
+    const hasEmoji = containsEmoji(text);
+
+    // ── Fast path: no emoji handling needed ──────────────────────────────
+    if ((!emojiEnabled && !colorEmojiEnabled) || !hasEmoji) {
       if (firstX !== undefined) {
         doc.text(text, firstX, firstY, opts);
       } else {
@@ -128,6 +150,84 @@ export async function renderMarkdownToPdf(
     const prevSize = (doc as any)._fontSize ?? theme.body.fontSize;
 
     const segments = splitEmojiSegments(text);
+
+    // ── Color emoji path: render emoji as inline PNG images ──────────────
+    if (colorEmojiEnabled && emojiImageCache && emojiImageCache.size > 0) {
+      const emojiRe = getEmojiRegex();
+      const emojiSize = prevSize;  // match font size
+      // Small downward offset to visually align emoji with text baseline
+      const baselineOffset = emojiSize * 0.15;
+
+      // Track cursor position manually.
+      let curX = firstX ?? doc.x;
+      let curY = firstY ?? doc.y;
+      // After placing an image we can't rely on PDFKit's `continued`
+      // state, so we switch to explicit (x, y) positioning.
+      let useExplicitCoords = firstX !== undefined;
+
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        const isLast = i === segments.length - 1;
+        const cont = isLast ? !!opts.continued : true;
+
+        if (seg.isEmoji) {
+          // Split merged emoji segment into individual emoji
+          emojiRe.lastIndex = 0;
+          let em: RegExpExecArray | null;
+          while ((em = emojiRe.exec(seg.text)) !== null) {
+            const png = emojiImageCache.get(em[0]);
+            if (png) {
+              // Place the emoji image inline
+              const savedY = doc.y;
+              doc.image(png, curX, curY + baselineOffset, {
+                width: emojiSize,
+                height: emojiSize,
+              });
+              // doc.image() advances doc.y by the image height — restore it
+              doc.y = savedY;
+              curX += emojiSize;
+            } else {
+              // Fallback: render as monochrome font glyph if available
+              if (emojiEnabled) {
+                doc.font(EMOJI_FONT_NAME).fontSize(prevSize);
+              }
+              doc.text(em[0], curX, curY, { continued: true, lineBreak: false });
+              curX = doc.x;
+              curY = doc.y;
+              doc.font(prevFont).fontSize(prevSize);
+            }
+          }
+          useExplicitCoords = true;
+        } else {
+          // Text segment
+          doc.font(prevFont).fontSize(prevSize);
+          if (useExplicitCoords) {
+            doc.text(seg.text, curX, curY, { ...opts, continued: cont });
+          } else {
+            doc.text(seg.text, { ...opts, continued: cont });
+          }
+          curX = doc.x;
+          curY = doc.y;
+          useExplicitCoords = true;
+        }
+      }
+
+      // If the caller wanted `continued: false` (the default for the last
+      // segment), we need to close the line.  When the last segment was an
+      // emoji image we haven't called doc.text() so the cursor is still on
+      // the same line.  Emit a zero-width text to advance to the next line.
+      if (!opts.continued) {
+        const lastSeg = segments[segments.length - 1];
+        if (lastSeg?.isEmoji) {
+          doc.text('', curX, curY, { continued: false });
+        }
+      }
+
+      doc.font(prevFont).fontSize(prevSize);
+      return;
+    }
+
+    // ── Monochrome font path (original behaviour) ────────────────────────
     for (let i = 0; i < segments.length; i++) {
       const seg = segments[i];
       const isLast = i === segments.length - 1;

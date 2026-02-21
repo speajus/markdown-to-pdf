@@ -3,6 +3,7 @@
  */
 import { renderMarkdownToPdf } from "./renderer.js";
 export { createBrowserImageRenderer } from "./browser-image-renderer.js";
+export { createBrowserColorEmojiRenderer } from './color-emoji.js';
 
 
 export type {
@@ -16,6 +17,7 @@ export type {
   SyntaxHighlightTheme,
   ThemeConfig,
   PdfOptions,
+  ColorEmojiRenderer,
 } from './types.js';
 
 export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme } from './styles.js';
