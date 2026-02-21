@@ -41,6 +41,18 @@ export interface TableStyles {
   cellPadding: number;
 }
 
+export interface TokenColors {
+  [key: string]: string;
+}
+
+export interface SyntaxHighlightTheme {
+  background: string;
+  gutter: string;
+  defaultText: string;
+  lineHighlight: string;
+  tokens: TokenColors;
+}
+
 export interface ThemeConfig {
   headings: {
     h1: TextStyle;
@@ -59,6 +71,11 @@ export interface ThemeConfig {
   linkColor: string;
   horizontalRuleColor: string;
   table: TableStyles;
+  /**
+   * Syntax highlighting colors for fenced code blocks.
+   * When omitted, falls back to a VS Code Dark+ inspired palette.
+   */
+  syntaxHighlight?: SyntaxHighlightTheme;
 }
 
 export interface PdfOptions {

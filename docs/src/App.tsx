@@ -82,6 +82,23 @@ It uses the default monospace style with no syntax colors.
 
 > This is a blockquote. You can use it to highlight important information.
 
+## Emoji Support 🎉
+
+Emoji characters render correctly in the PDF:
+
+- 🚀 Rocket launch
+- ✅ Task complete
+- 🎯 Hit the target
+- 👋🏻 Wave (with skin tone)
+
+| Status | Meaning |
+|--------|---------|
+| ✅ | Done |
+| 🔄 | In progress |
+| ❌ | Blocked |
+
+> 💬 Blockquotes with emoji work too!
+
 ## Sample Images
 
 **SVG image:**

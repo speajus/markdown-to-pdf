@@ -12,10 +12,12 @@ export type {
   CodeBlockStyle,
   BlockquoteStyle,
   TableStyles,
+  TokenColors,
+  SyntaxHighlightTheme,
   ThemeConfig,
   PdfOptions,
 } from './types.js';
 
-export { defaultTheme, defaultPageLayout } from './styles.js';
+export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme } from './styles.js';
 export { themes, modernTheme, academicTheme, minimalTheme, oceanTheme } from './themes/index.js';
 export { renderMarkdownToPdf } from "./renderer.js";

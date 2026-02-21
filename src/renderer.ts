@@ -411,6 +411,7 @@ export async function renderMarkdownToPdf(
             padding: cs.padding,
             lineNumbers: true,
             drawBackground: true,
+            theme: theme.syntaxHighlight,
           });
           doc.x = margins.left;
           doc.y = newY;

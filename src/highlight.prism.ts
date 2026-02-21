@@ -13,22 +13,12 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-java';
 import type PDFDocument from 'pdfkit';
+import type { SyntaxHighlightTheme } from './types.js';
+import { defaultSyntaxHighlightTheme } from './styles.js';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-interface TokenColors {
-  [key: string]: string;
-}
-
-interface HighlightTheme {
-  background: string;
-  gutter: string;
-  defaultText: string;
-  lineHighlight: string;
-  tokens: TokenColors;
-}
 
 interface FlatToken {
   type: string | null;
@@ -46,66 +36,20 @@ export interface RenderCodeOptions {
   padding?: number;
   lineNumbers?: boolean;
   drawBackground?: boolean;
-  theme?: Partial<HighlightTheme>;
+  theme?: Partial<SyntaxHighlightTheme>;
 }
-
-// ---------------------------------------------------------------------------
-// Theme — VS Code Dark+ inspired. Swap hex values to retheme.
-// ---------------------------------------------------------------------------
-export const THEME: HighlightTheme = {
-  background: '#1e1e1e',
-  gutter: '#858585',
-  defaultText: '#d4d4d4',
-  lineHighlight: '#2a2a2a',
-
-  tokens: {
-    comment: '#6a9955',
-    prolog: '#6a9955',
-    doctype: '#6a9955',
-    cdata: '#6a9955',
-
-    keyword: '#569cd6',
-    'control-flow': '#c586c0',
-    builtin: '#4ec9b0',
-
-    'class-name': '#4ec9b0',
-    function: '#dcdcaa',
-    'function-variable': '#dcdcaa',
-
-    string: '#ce9178',
-    'template-string': '#ce9178',
-    'template-punctuation': '#ce9178',
-    regex: '#d16969',
-
-    number: '#b5cea8',
-    boolean: '#569cd6',
-    null: '#569cd6',
-    undefined: '#569cd6',
-
-    operator: '#d4d4d4',
-    punctuation: '#d4d4d4',
-    parameter: '#9cdcfe',
-    property: '#9cdcfe',
-    'literal-property': '#9cdcfe',
-
-    annotation: '#dcdcaa',
-    'generic-function': '#dcdcaa',
-
-    default: '#d4d4d4',
-  },
-};
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-export function colorFor(tokenType: string | null): string {
-  if (!tokenType) return THEME.tokens.default;
+export function colorFor(tokenType: string | null, theme: SyntaxHighlightTheme): string {
+  if (!tokenType) return theme.tokens.default;
   const types = tokenType.split(' ');
   for (const t of types) {
-    if (THEME.tokens[t]) return THEME.tokens[t];
+    if (theme.tokens[t]) return theme.tokens[t];
   }
-  return THEME.tokens.default;
+  return theme.tokens.default;
 }
 
 /**
@@ -186,13 +130,13 @@ export function renderCode(
     drawBackground = true,
   } = opts;
 
-  const theme: HighlightTheme = opts.theme
+  const theme: SyntaxHighlightTheme = opts.theme
     ? {
-        ...THEME,
-        tokens: { ...THEME.tokens, ...(opts.theme.tokens || {}) },
+        ...defaultSyntaxHighlightTheme,
+        tokens: { ...defaultSyntaxHighlightTheme.tokens, ...(opts.theme.tokens || {}) },
         ...opts.theme,
-      } as HighlightTheme
-    : THEME;
+      } as SyntaxHighlightTheme
+    : defaultSyntaxHighlightTheme;
 
   const blockWidth =
     opts.width || doc.page.width - x - (doc.page.margins as any).right;
@@ -252,7 +196,7 @@ export function renderCode(
     let curX = codeX;
     for (const seg of lineTokens) {
       if (!seg.content) continue;
-      const color = colorFor(seg.type);
+      const color = colorFor(seg.type, theme);
       const segWidth = doc.widthOfString(seg.content);
 
       doc.fillColor(color).text(seg.content, curX, curY, {

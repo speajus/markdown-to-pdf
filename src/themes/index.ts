@@ -22,6 +22,22 @@ export const modernTheme: ThemeConfig = {
   linkColor: '#0984e3',
   horizontalRuleColor: '#b2bec3',
   table: { headerBackground: '#dfe6e9', borderColor: '#b2bec3', cellPadding: 7 },
+  syntaxHighlight: {
+    background: '#2d3436',
+    gutter: '#636e72',
+    defaultText: '#dfe6e9',
+    lineHighlight: '#353b48',
+    tokens: {
+      comment: '#636e72', prolog: '#636e72', doctype: '#636e72', cdata: '#636e72',
+      keyword: '#0984e3', 'control-flow': '#6c5ce7', builtin: '#00cec9',
+      'class-name': '#00cec9', function: '#fdcb6e', 'function-variable': '#fdcb6e',
+      string: '#55efc4', 'template-string': '#55efc4', 'template-punctuation': '#55efc4', regex: '#fd79a8',
+      number: '#ffeaa7', boolean: '#0984e3', null: '#0984e3', undefined: '#0984e3',
+      operator: '#dfe6e9', punctuation: '#b2bec3', parameter: '#74b9ff', property: '#74b9ff',
+      'literal-property': '#74b9ff', annotation: '#fdcb6e', 'generic-function': '#fdcb6e',
+      default: '#dfe6e9',
+    },
+  },
 };
 
 /** Academic — serif fonts, formal look inspired by LaTeX */
@@ -43,6 +59,22 @@ export const academicTheme: ThemeConfig = {
   linkColor: '#2e4057',
   horizontalRuleColor: '#aab7b8',
   table: { headerBackground: '#eaecee', borderColor: '#aab7b8', cellPadding: 6 },
+  syntaxHighlight: {
+    background: '#1a1a2e',
+    gutter: '#7f8c8d',
+    defaultText: '#d5d8dc',
+    lineHighlight: '#22223a',
+    tokens: {
+      comment: '#7f8c8d', prolog: '#7f8c8d', doctype: '#7f8c8d', cdata: '#7f8c8d',
+      keyword: '#6c3483', 'control-flow': '#8e44ad', builtin: '#2e86c1',
+      'class-name': '#2e86c1', function: '#d4ac0d', 'function-variable': '#d4ac0d',
+      string: '#27ae60', 'template-string': '#27ae60', 'template-punctuation': '#27ae60', regex: '#c0392b',
+      number: '#e67e22', boolean: '#6c3483', null: '#6c3483', undefined: '#6c3483',
+      operator: '#d5d8dc', punctuation: '#aab7b8', parameter: '#5dade2', property: '#5dade2',
+      'literal-property': '#5dade2', annotation: '#d4ac0d', 'generic-function': '#d4ac0d',
+      default: '#d5d8dc',
+    },
+  },
 };
 
 /** Minimal — lots of whitespace, muted greys */
@@ -64,6 +96,22 @@ export const minimalTheme: ThemeConfig = {
   linkColor: '#555555',
   horizontalRuleColor: '#e0e0e0',
   table: { headerBackground: '#fafafa', borderColor: '#e0e0e0', cellPadding: 8 },
+  syntaxHighlight: {
+    background: '#f8f8f8',
+    gutter: '#999999',
+    defaultText: '#333333',
+    lineHighlight: '#f0f0f0',
+    tokens: {
+      comment: '#999999', prolog: '#999999', doctype: '#999999', cdata: '#999999',
+      keyword: '#333333', 'control-flow': '#333333', builtin: '#555555',
+      'class-name': '#555555', function: '#333333', 'function-variable': '#333333',
+      string: '#666666', 'template-string': '#666666', 'template-punctuation': '#666666', regex: '#777777',
+      number: '#444444', boolean: '#333333', null: '#333333', undefined: '#333333',
+      operator: '#333333', punctuation: '#666666', parameter: '#555555', property: '#555555',
+      'literal-property': '#555555', annotation: '#333333', 'generic-function': '#333333',
+      default: '#333333',
+    },
+  },
 };
 
 /** Ocean — deep blue palette */
@@ -85,6 +133,22 @@ export const oceanTheme: ThemeConfig = {
   linkColor: '#2471a3',
   horizontalRuleColor: '#aed6f1',
   table: { headerBackground: '#d4e6f1', borderColor: '#85c1e9', cellPadding: 6 },
+  syntaxHighlight: {
+    background: '#1b2631',
+    gutter: '#5d6d7e',
+    defaultText: '#d6eaf8',
+    lineHighlight: '#1c2e40',
+    tokens: {
+      comment: '#5d6d7e', prolog: '#5d6d7e', doctype: '#5d6d7e', cdata: '#5d6d7e',
+      keyword: '#5dade2', 'control-flow': '#af7ac5', builtin: '#48c9b0',
+      'class-name': '#48c9b0', function: '#f7dc6f', 'function-variable': '#f7dc6f',
+      string: '#82e0aa', 'template-string': '#82e0aa', 'template-punctuation': '#82e0aa', regex: '#f1948a',
+      number: '#f0b27a', boolean: '#5dade2', null: '#5dade2', undefined: '#5dade2',
+      operator: '#d6eaf8', punctuation: '#aed6f1', parameter: '#85c1e9', property: '#85c1e9',
+      'literal-property': '#85c1e9', annotation: '#f7dc6f', 'generic-function': '#f7dc6f',
+      default: '#d6eaf8',
+    },
+  },
 };
 
 /** Record of all built-in themes keyed by display name */

@@ -2,6 +2,28 @@ import { useState, useEffect, useRef } from 'react';
 import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
 import type { ThemeConfig } from '../../src/browser';
 
+/**
+ * Lazily fetch the Noto Emoji font and cache the resulting Buffer so we only
+ * download it once across all renders.
+ */
+let emojiFontPromise: Promise<Buffer | null> | null = null;
+
+function loadEmojiFont(): Promise<Buffer | null> {
+  if (!emojiFontPromise) {
+    emojiFontPromise = fetch('/fonts/NotoEmoji-Regular.ttf')
+      .then((res) => {
+        if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((ab) => Buffer.from(ab))
+      .catch((err) => {
+        console.warn('Could not load emoji font – emoji will not render:', err);
+        return null;
+      });
+  }
+  return emojiFontPromise;
+}
+
 interface BrowserPdfRendererProps {
   markdown: string;
   theme?: ThemeConfig;
@@ -32,10 +54,14 @@ export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps)
           // Create browser image renderer
           const renderImage = createBrowserImageRenderer(true);
 
+          // Load the emoji font (cached after first fetch)
+          const emojiFont = await loadEmojiFont();
+
           // Generate PDF using the refactored library (src/index.ts)
           const buffer = await renderMarkdownToPdf(markdown, {
             renderImage,
             theme,
+            ...(emojiFont ? { emojiFont } : { emojiFont: false }),
           });
 
           if (!mounted) return;
