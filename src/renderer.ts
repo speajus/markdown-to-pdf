@@ -305,16 +305,29 @@ export async function renderMarkdownToPdf(
 
   function renderCodespan(text: string, continued: boolean): void {
     const cs = theme.code.inline;
+    const hPad = 2;   // horizontal padding each side
+    const vPad = 1;   // vertical padding each side
+
     doc.font(cs.font).fontSize(cs.fontSize);
     const textW = doc.widthOfString(text);
     const textH = doc.currentLineHeight();
-    const bgX = doc.x;
-    const bgY = doc.y;
+
+    // Read the real flow X position from PDFKit's internal LineWrapper.
+    // After continued:true, doc.x stays at the left margin — the actual
+    // cursor position is _wrapper.startX + _wrapper.continuedX.
+    const w = (doc as any)._wrapper;
+    const flowX = w ? (w.startX + w.continuedX) : doc.x;
+    const flowY = doc.y;
+
+    // Draw background at the current flow position (behind the text)
     doc.save();
-    doc.rect(bgX, bgY, textW + 4, textH + 2).fill(cs.backgroundColor);
+    doc.roundedRect(flowX - hPad, flowY, textW + hPad * 2, textH + vPad * 2, 2)
+      .fill(cs.backgroundColor);
     doc.restore();
+
+    // Render inline — no explicit x,y so PDFKit's flow advances correctly
     doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
-    doc.text(text, bgX + 2, bgY + 1, { continued });
+    doc.text(text, { continued });
     resetBodyFont();
   }
 
