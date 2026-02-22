@@ -1,4 +1,48 @@
-import type { ThemeConfig, PageLayout } from './types.js';
+import type { ThemeConfig, PageLayout, SyntaxHighlightTheme } from './types.js';
+
+/** Prism.js default light theme — used as the default (print-friendly). */
+export const defaultSyntaxHighlightTheme: SyntaxHighlightTheme = {
+  background: '#f5f2f0',
+  gutter: '#708090',
+  defaultText: '#000000',
+  lineHighlight: '#b3d4fc',
+
+  tokens: {
+    comment: '#708090',
+    prolog: '#708090',
+    doctype: '#708090',
+    cdata: '#708090',
+
+    keyword: '#0077aa',
+    'control-flow': '#0077aa',
+    builtin: '#669900',
+
+    'class-name': '#DD4A68',
+    function: '#DD4A68',
+    'function-variable': '#DD4A68',
+
+    string: '#669900',
+    'template-string': '#669900',
+    'template-punctuation': '#669900',
+    regex: '#ee9900',
+
+    number: '#990055',
+    boolean: '#990055',
+    null: '#990055',
+    undefined: '#990055',
+
+    operator: '#9a6e3a',
+    punctuation: '#999999',
+    parameter: '#000000',
+    property: '#990055',
+    'literal-property': '#990055',
+
+    annotation: '#0077aa',
+    'generic-function': '#DD4A68',
+
+    default: '#000000',
+  },
+};
 
 export const defaultTheme: ThemeConfig = {
   headings: {
@@ -43,6 +87,7 @@ export const defaultTheme: ThemeConfig = {
     borderColor: '#cccccc',
     cellPadding: 6,
   },
+  syntaxHighlight: defaultSyntaxHighlightTheme,
 };
 
 export const defaultPageLayout: PageLayout = {
