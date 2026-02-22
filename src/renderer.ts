@@ -183,9 +183,9 @@ export async function renderMarkdownToPdf(
       const placeholder = ' '.repeat(spacesPerEmoji);
       const placeholderW = doc.widthOfString(placeholder);
 
-      // Vertical alignment: centre emoji within the font's ascender.
-      const ascender = ((doc as any)._font?.ascender ?? 800) / 1000 * prevSize;
-      const yOffset = Math.max(0, (ascender - emojiSize) / 2);
+      // Vertical alignment: centre emoji within the current line height.
+      const lineH = doc.currentLineHeight(true);
+      const yOffset = Math.max(0, (lineH - emojiSize) / 2);
 
       // Only use explicit (firstX, firstY) coordinates on the very first
       // doc.text() call, and only when no wrapper already exists (i.e.
@@ -208,7 +208,9 @@ export async function renderMarkdownToPdf(
             if (png) {
               // Position BEFORE rendering the placeholder.
               const emojiX = getFlowX();
-              const emojiY = doc.y;
+              // For positioned calls (table cells), doc.y may be stale from
+              // a previous cell — use the explicit firstY instead.
+              const emojiY = (!usedExplicitCoords && firstY !== undefined) ? firstY : doc.y;
 
               doc.font(prevFont).fontSize(prevSize);
               if (!usedExplicitCoords && firstX !== undefined) {
@@ -217,11 +219,21 @@ export async function renderMarkdownToPdf(
               } else {
                 doc.text(placeholder, { ...opts, continued: eCont });
               }
-              // _wrapper.continuedX is now updated by PDFKit.
+
+              // Compute alignment-aware X position for the emoji image.
+              let placedX = emojiX + (placeholderW - emojiSize) / 2;
+              if (firstX !== undefined && typeof opts.width === 'number' && !(doc as any)._wrapper) {
+                // Table cell with alignment — PDFKit already rendered the
+                // placeholder at the aligned position; match it.
+                const cellW = opts.width as number;
+                const a = (opts.align as string) || 'left';
+                if (a === 'center') placedX = firstX + (cellW - emojiSize) / 2;
+                else if (a === 'right') placedX = firstX + cellW - emojiSize;
+              }
 
               emojiPlacements.push({
                 png,
-                x: emojiX + (placeholderW - emojiSize) / 2,
+                x: placedX,
                 y: emojiY + yOffset,
               });
             } else {
