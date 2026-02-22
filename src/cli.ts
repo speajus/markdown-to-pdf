@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 
 import path from 'path';
 import fs from 'fs';
@@ -29,11 +29,14 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.error('Usage: ts-node src/cli.ts <input.md> [output.pdf]');
+    console.error('Usage: markdown-to-pdf <input.md> [output.pdf]');
     process.exit(1);
   }
 
-  readMdWritePdf(args[0], args[1]);
+  const inputPath = args[0];
+  const outputPath = args[1] || inputPath.replace(/\.md$/i, '.pdf');
+
+  readMdWritePdf(inputPath, outputPath);
 }
 
 if (require.main === module) {

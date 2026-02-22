@@ -19,7 +19,7 @@ A lightweight TypeScript library that converts Markdown files into styled PDF do
 ## Installation
 
 ```bash
-npm install
+npm install @speajus/markdown-to-pdf
 ```
 
 ## Quick Start
@@ -29,32 +29,39 @@ npm install
 Convert a Markdown file to PDF from the command line:
 
 ```bash
-npx ts-node src/cli.ts <input.md> [output.pdf]
+# Run directly with npx (no install needed)
+npx @speajus/markdown-to-pdf <input.md> [output.pdf]
+
+# Or if installed globally / as a project dependency
+markdown-to-pdf <input.md> [output.pdf]
 ```
 
 If the output path is omitted, the PDF is written alongside the input file with a `.pdf` extension.
 
 ```bash
 # Converts README.md → README.pdf
-npx ts-node src/cli.ts README.md
+npx @speajus/markdown-to-pdf README.md
 
 # Explicit output path
-npx ts-node src/cli.ts docs/report.md output/report.pdf
+npx @speajus/markdown-to-pdf docs/report.md output/report.pdf
 ```
 
 ### Programmatic API
 
 ```typescript
-import { generatePdf } from './src/index';
+import { generatePdf } from '@speajus/markdown-to-pdf';
 
-// File-based — reads Markdown from disk, writes PDF to disk
-await generatePdf('samples/sample.md', 'output/sample.pdf');
-
-// Buffer-based — returns a PDF Buffer for further processing
-import { renderMarkdownToPdf } from './src/index';
-
+// Returns a PDF Buffer
 const markdown = '# Hello World\n\nThis is a **test**.';
-const pdfBuffer = await renderMarkdownToPdf(markdown);
+const pdfBuffer = await generatePdf(markdown);
+
+// With options
+import { generatePdf, createNodeImageRenderer } from '@speajus/markdown-to-pdf';
+
+const buffer = await generatePdf(markdown, {
+  basePath: '/path/to/markdown/directory',
+  renderImage: createNodeImageRenderer('/path/to/markdown/directory'),
+});
 ```
 
 ### Generate Sample PDFs
@@ -82,9 +89,9 @@ interface PdfOptions {
 ### Page Layout
 
 ```typescript
-import { generatePdf } from './src/index';
+import { generatePdf } from '@speajus/markdown-to-pdf';
 
-await generatePdf('input.md', 'output.pdf', {
+await generatePdf(markdown, {
   pageLayout: {
     pageSize: 'A4',
     margins: { top: 72, right: 72, bottom: 72, left: 72 },
@@ -99,9 +106,9 @@ The default layout uses **Letter** page size with 50pt margins on all sides.
 Override any part of the default theme to customize the look of the generated PDF:
 
 ```typescript
-import { generatePdf, defaultTheme } from './src/index';
+import { generatePdf, defaultTheme } from '@speajus/markdown-to-pdf';
 
-await generatePdf('input.md', 'output.pdf', {
+await generatePdf(markdown, {
   theme: {
     ...defaultTheme,
     headings: {

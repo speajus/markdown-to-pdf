@@ -38,9 +38,7 @@ jobs:
         working-directory: docs
 
       - name: Build docs
-        run: |
-          npx tsc
-          npx vite build --base=/markdown-to-pdf/
+        run: npx vite build --base=/markdown-to-pdf/
         working-directory: docs
 
       - name: Upload artifact
