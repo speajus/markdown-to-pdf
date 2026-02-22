@@ -105,18 +105,20 @@ body {
   overflow: auto;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .editor-wrapper .w-md-editor {
   height: 100% !important;
 }
 
-.editor-wrapper .w-md-editor-text-pre,
+
+/*.editor-wrapper .w-md-editor-text-pre,*/
 .editor-wrapper .w-md-editor-text-input {
   font-size: 14px !important;
   line-height: 1.6 !important;
   height: 200vh;
-}
+} /**/
 
 .preview-panel {
   flex: 1;

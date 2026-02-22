@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
 import { themes } from '../../src/browser';
+import '@uiw/react-md-editor/markdown-editor.css';
 import './App.css';
 
 const defaultMarkdown = `# Welcome to Markdown to PDF Editor
@@ -142,13 +143,17 @@ function App() {
       <div className="content">
         <div className="editor-panel">
           <div className="panel-header">Markdown Editor</div>
-          <div className="editor-wrapper">
+          <div className="editor-wrapper" style={{ height:'100%', overflow:'visible' }}>
             <MDEditor
               value={markdown}
               onChange={setMarkdown}
               preview="edit"
               highlightEnable={false}
-              hideToolbar={false}
+              style={{ flex: 1 }} 
+               height="100%"
+  visibleDragbar={false}
+  overflow={false}
+             
             />
           </div>
         </div>

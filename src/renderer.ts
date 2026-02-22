@@ -152,18 +152,45 @@ export async function renderMarkdownToPdf(
     const segments = splitEmojiSegments(text);
 
     // ── Color emoji path: render emoji as inline PNG images ──────────────
+    // Strategy: two-pass rendering.
+    //   Pass 1 – Render all text through doc.text() with `continued`,
+    //            exactly like the monochrome path.  For emoji segments,
+    //            render a space-placeholder to reserve width.  Read the
+    //            real X position from PDFKit's internal wrapper state
+    //            (_wrapper.startX + _wrapper.continuedX) — doc.x stays
+    //            at the left margin after continued:true so it is NOT
+    //            usable for positioning.
+    //   Pass 2 – Overlay emoji PNG images at the recorded positions.
     if (colorEmojiEnabled && emojiImageCache && emojiImageCache.size > 0) {
       const emojiRe = getEmojiRegex();
       const emojiSize = prevSize;  // match font size
-      // Small downward offset to visually align emoji with text baseline
-      const baselineOffset = emojiSize * 0.15;
+      const emojiPlacements: Array<{ png: Buffer; x: number; y: number }> = [];
 
-      // Track cursor position manually.
-      let curX = firstX ?? doc.x;
-      let curY = firstY ?? doc.y;
-      // After placing an image we can't rely on PDFKit's `continued`
-      // state, so we switch to explicit (x, y) positioning.
-      let useExplicitCoords = firstX !== undefined;
+      // Read the actual text-flow X from PDFKit's internal LineWrapper.
+      // After doc.text(…, {continued:true}), _wrapper.continuedX tracks
+      // cumulative rendered width; startX is the original doc.x at
+      // wrapper creation time.
+      const getFlowX = (): number => {
+        const w = (doc as any)._wrapper;
+        if (w) return w.startX + w.continuedX;
+        return firstX ?? doc.x;
+      };
+
+      // Build a space-placeholder string whose width ≈ emojiSize.
+      doc.font(prevFont).fontSize(prevSize);
+      const spaceW = doc.widthOfString(' ');
+      const spacesPerEmoji = Math.max(1, Math.round(emojiSize / spaceW));
+      const placeholder = ' '.repeat(spacesPerEmoji);
+      const placeholderW = doc.widthOfString(placeholder);
+
+      // Vertical alignment: centre emoji within the font's ascender.
+      const ascender = ((doc as any)._font?.ascender ?? 800) / 1000 * prevSize;
+      const yOffset = Math.max(0, (ascender - emojiSize) / 2);
+
+      // Only use explicit (firstX, firstY) coordinates on the very first
+      // doc.text() call, and only when no wrapper already exists (i.e.
+      // we are not continuing from a prior renderTextWithEmoji call).
+      let usedExplicitCoords = false;
 
       for (let i = 0; i < segments.length; i++) {
         const seg = segments[i];
@@ -171,57 +198,67 @@ export async function renderMarkdownToPdf(
         const cont = isLast ? !!opts.continued : true;
 
         if (seg.isEmoji) {
-          // Split merged emoji segment into individual emoji
           emojiRe.lastIndex = 0;
           let em: RegExpExecArray | null;
           while ((em = emojiRe.exec(seg.text)) !== null) {
             const png = emojiImageCache.get(em[0]);
+            const isLastEmoji = isLast && emojiRe.lastIndex >= seg.text.length;
+            const eCont = isLastEmoji ? !!opts.continued : true;
+
             if (png) {
-              // Place the emoji image inline
-              const savedY = doc.y;
-              doc.image(png, curX, curY + baselineOffset, {
-                width: emojiSize,
-                height: emojiSize,
-              });
-              // doc.image() advances doc.y by the image height — restore it
-              doc.y = savedY;
-              curX += emojiSize;
-            } else {
-              // Fallback: render as monochrome font glyph if available
-              if (emojiEnabled) {
-                doc.font(EMOJI_FONT_NAME).fontSize(prevSize);
+              // Position BEFORE rendering the placeholder.
+              const emojiX = getFlowX();
+              const emojiY = doc.y;
+
+              doc.font(prevFont).fontSize(prevSize);
+              if (!usedExplicitCoords && firstX !== undefined) {
+                doc.text(placeholder, firstX, firstY, { ...opts, continued: eCont });
+                usedExplicitCoords = true;
+              } else {
+                doc.text(placeholder, { ...opts, continued: eCont });
               }
-              doc.text(em[0], curX, curY, { continued: true, lineBreak: false });
-              curX = doc.x;
-              curY = doc.y;
+              // _wrapper.continuedX is now updated by PDFKit.
+
+              emojiPlacements.push({
+                png,
+                x: emojiX + (placeholderW - emojiSize) / 2,
+                y: emojiY + yOffset,
+              });
+            } else {
+              // Fallback: monochrome glyph.
+              if (emojiEnabled) doc.font(EMOJI_FONT_NAME).fontSize(prevSize);
+              if (!usedExplicitCoords && firstX !== undefined) {
+                doc.text(em[0], firstX, firstY, { ...opts, continued: isLastEmoji ? !!opts.continued : true });
+                usedExplicitCoords = true;
+              } else {
+                doc.text(em[0], { ...opts, continued: isLastEmoji ? !!opts.continued : true });
+              }
               doc.font(prevFont).fontSize(prevSize);
             }
           }
-          useExplicitCoords = true;
         } else {
-          // Text segment
+          // ── Text segment ──
           doc.font(prevFont).fontSize(prevSize);
-          if (useExplicitCoords) {
-            doc.text(seg.text, curX, curY, { ...opts, continued: cont });
+          if (!usedExplicitCoords && firstX !== undefined) {
+            doc.text(seg.text, firstX, firstY, { ...opts, continued: cont });
+            usedExplicitCoords = true;
           } else {
             doc.text(seg.text, { ...opts, continued: cont });
           }
-          curX = doc.x;
-          curY = doc.y;
-          useExplicitCoords = true;
         }
       }
 
-      // If the caller wanted `continued: false` (the default for the last
-      // segment), we need to close the line.  When the last segment was an
-      // emoji image we haven't called doc.text() so the cursor is still on
-      // the same line.  Emit a zero-width text to advance to the next line.
-      if (!opts.continued) {
-        const lastSeg = segments[segments.length - 1];
-        if (lastSeg?.isEmoji) {
-          doc.text('', curX, curY, { continued: false });
-        }
+      // ── Pass 2: overlay emoji images at recorded positions ──
+      const savedY = doc.y;
+      const savedX = doc.x;
+      for (const ep of emojiPlacements) {
+        doc.image(ep.png, ep.x, ep.y, {
+          width: emojiSize,
+          height: emojiSize,
+        });
       }
+      doc.y = savedY;
+      doc.x = savedX;
 
       doc.font(prevFont).fontSize(prevSize);
       return;
