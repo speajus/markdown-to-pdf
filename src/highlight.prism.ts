@@ -9,7 +9,26 @@
  */
 
 import Prism from 'prismjs';
-import loadLanguages from 'prismjs/components/index.js';
+// Static imports for commonly-used languages — these are self-registering
+// side-effect imports that work in both Node.js and browser environments.
+// Base Prism already includes: markup, css, clike, javascript.
+import 'prismjs/components/prism-typescript.js';
+import 'prismjs/components/prism-python.js';
+import 'prismjs/components/prism-bash.js';
+import 'prismjs/components/prism-json.js';
+import 'prismjs/components/prism-jsx.js';
+import 'prismjs/components/prism-tsx.js';
+import 'prismjs/components/prism-yaml.js';
+import 'prismjs/components/prism-sql.js';
+import 'prismjs/components/prism-go.js';
+import 'prismjs/components/prism-rust.js';
+import 'prismjs/components/prism-java.js';
+import 'prismjs/components/prism-c.js';
+import 'prismjs/components/prism-cpp.js';
+import 'prismjs/components/prism-diff.js';
+import 'prismjs/components/prism-markdown.js';
+import 'prismjs/components/prism-docker.js';
+
 import type PDFDocument from 'pdfkit';
 import type { SyntaxHighlightTheme } from './types.js';
 import { defaultSyntaxHighlightTheme } from './styles.js';
@@ -28,16 +47,38 @@ let languagesLoaded = false;
  *                   When omitted or `undefined`, **all** available Prism.js
  *                   languages (~300) are loaded.
  *
+ * In Node.js, this dynamically loads grammars via `prismjs/components/`.
+ * In browser environments (Vite, webpack, etc.) the dynamic loader is not
+ * available; a set of common languages is pre-loaded via static imports
+ * and unknown languages degrade to unstyled plain text.
+ *
  * Safe to call multiple times — subsequent calls are no-ops.
  */
 export function loadHighlightLanguages(languages?: string[]): void {
   if (languagesLoaded) return;
-  loadLanguages.silent = true;
-  if (languages && languages.length > 0) {
-    loadLanguages(languages);
-  } else {
-    loadLanguages();           // loads every language
+
+  try {
+    // prismjs/components/index.js uses require.resolve() internally,
+    // which is only available in Node.js.  In browser bundlers (Vite,
+    // webpack) it is transformed to __require.resolve which does not exist.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const loadLanguages = require('prismjs/components/index.js') as {
+      (languages?: string | string[]): void;
+      silent: boolean;
+    };
+    loadLanguages.silent = true;
+    if (languages && languages.length > 0) {
+      loadLanguages(languages);
+    } else {
+      loadLanguages();           // loads every language
+    }
+  } catch {
+    // Browser / ESM environment — require.resolve not available.
+    // The static imports above cover the most common languages;
+    // any unsupported language falls back to unstyled plain text
+    // in tokenizeToLines().
   }
+
   languagesLoaded = true;
 }
 
