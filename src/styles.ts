@@ -1,46 +1,46 @@
 import type { ThemeConfig, PageLayout, SyntaxHighlightTheme } from './types.js';
 
-/** VS Code Dark+ inspired syntax highlighting palette — used as the default. */
+/** Xcode-light inspired syntax highlighting palette — used as the default. */
 export const defaultSyntaxHighlightTheme: SyntaxHighlightTheme = {
-  background: '#1e1e1e',
-  gutter: '#858585',
-  defaultText: '#d4d4d4',
-  lineHighlight: '#2a2a2a',
+  background: '#f5f5f5',
+  gutter: '#8e8e93',
+  defaultText: '#000000',
+  lineHighlight: '#ecf5ff',
 
   tokens: {
-    comment: '#6a9955',
-    prolog: '#6a9955',
-    doctype: '#6a9955',
-    cdata: '#6a9955',
+    comment: '#8e8e93',
+    prolog: '#8e8e93',
+    doctype: '#8e8e93',
+    cdata: '#8e8e93',
 
-    keyword: '#569cd6',
-    'control-flow': '#c586c0',
-    builtin: '#4ec9b0',
+    keyword: '#ad3da4',
+    'control-flow': '#ad3da4',
+    builtin: '#3e6d8e',
 
-    'class-name': '#4ec9b0',
-    function: '#dcdcaa',
-    'function-variable': '#dcdcaa',
+    'class-name': '#3e6d8e',
+    function: '#326d74',
+    'function-variable': '#326d74',
 
-    string: '#ce9178',
-    'template-string': '#ce9178',
-    'template-punctuation': '#ce9178',
-    regex: '#d16969',
+    string: '#c41a16',
+    'template-string': '#c41a16',
+    'template-punctuation': '#c41a16',
+    regex: '#e44d2e',
 
-    number: '#b5cea8',
-    boolean: '#569cd6',
-    null: '#569cd6',
-    undefined: '#569cd6',
+    number: '#1c00cf',
+    boolean: '#ad3da4',
+    null: '#ad3da4',
+    undefined: '#ad3da4',
 
-    operator: '#d4d4d4',
-    punctuation: '#d4d4d4',
-    parameter: '#9cdcfe',
-    property: '#9cdcfe',
-    'literal-property': '#9cdcfe',
+    operator: '#000000',
+    punctuation: '#000000',
+    parameter: '#000000',
+    property: '#326d74',
+    'literal-property': '#326d74',
 
-    annotation: '#dcdcaa',
-    'generic-function': '#dcdcaa',
+    annotation: '#643820',
+    'generic-function': '#326d74',
 
-    default: '#d4d4d4',
+    default: '#000000',
   },
 };
 
