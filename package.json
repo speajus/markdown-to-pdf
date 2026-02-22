@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc && mkdir -p dist/src/fonts && cp src/fonts/* dist/src/fonts/",
     "generate": "tsx samples/generate.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsx samples/generate.ts"
   },
   "keywords": [
     "markdown",

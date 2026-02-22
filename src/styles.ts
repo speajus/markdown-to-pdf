@@ -1,44 +1,44 @@
 import type { ThemeConfig, PageLayout, SyntaxHighlightTheme } from './types.js';
 
-/** Xcode-light inspired syntax highlighting palette — used as the default. */
+/** Prism.js default light theme — used as the default (print-friendly). */
 export const defaultSyntaxHighlightTheme: SyntaxHighlightTheme = {
-  background: '#f5f5f5',
-  gutter: '#8e8e93',
+  background: '#f5f2f0',
+  gutter: '#708090',
   defaultText: '#000000',
-  lineHighlight: '#ecf5ff',
+  lineHighlight: '#b3d4fc',
 
   tokens: {
-    comment: '#8e8e93',
-    prolog: '#8e8e93',
-    doctype: '#8e8e93',
-    cdata: '#8e8e93',
+    comment: '#708090',
+    prolog: '#708090',
+    doctype: '#708090',
+    cdata: '#708090',
 
-    keyword: '#ad3da4',
-    'control-flow': '#ad3da4',
-    builtin: '#3e6d8e',
+    keyword: '#0077aa',
+    'control-flow': '#0077aa',
+    builtin: '#669900',
 
-    'class-name': '#3e6d8e',
-    function: '#326d74',
-    'function-variable': '#326d74',
+    'class-name': '#DD4A68',
+    function: '#DD4A68',
+    'function-variable': '#DD4A68',
 
-    string: '#c41a16',
-    'template-string': '#c41a16',
-    'template-punctuation': '#c41a16',
-    regex: '#e44d2e',
+    string: '#669900',
+    'template-string': '#669900',
+    'template-punctuation': '#669900',
+    regex: '#ee9900',
 
-    number: '#1c00cf',
-    boolean: '#ad3da4',
-    null: '#ad3da4',
-    undefined: '#ad3da4',
+    number: '#990055',
+    boolean: '#990055',
+    null: '#990055',
+    undefined: '#990055',
 
-    operator: '#000000',
-    punctuation: '#000000',
+    operator: '#9a6e3a',
+    punctuation: '#999999',
     parameter: '#000000',
-    property: '#326d74',
-    'literal-property': '#326d74',
+    property: '#990055',
+    'literal-property': '#990055',
 
-    annotation: '#643820',
-    'generic-function': '#326d74',
+    annotation: '#0077aa',
+    'generic-function': '#DD4A68',
 
     default: '#000000',
   },

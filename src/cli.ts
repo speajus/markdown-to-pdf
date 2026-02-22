@@ -3,8 +3,9 @@
 import path from 'path';
 import fs from 'fs';
 import { generatePdf, createNodeImageRenderer } from './index.js';
+import type { PdfOptions } from './types.js';
 
-export async function readMdWritePdf(inputPath: string, outputPath: string): Promise<void> {
+export async function readMdWritePdf(inputPath: string, outputPath: string, extraOptions?: Partial<PdfOptions>): Promise<void> {
 
   console.log(`Converting ${inputPath} → ${outputPath}`);
 
@@ -15,7 +16,7 @@ export async function readMdWritePdf(inputPath: string, outputPath: string): Pro
   // Use Node.js image renderer with the basePath
   const renderImage = createNodeImageRenderer(basePath);
 
-  const buffer = await generatePdf(markdown, { basePath, renderImage });
+  const buffer = await generatePdf(markdown, { basePath, renderImage, ...extraOptions });
 
   const dir = path.dirname(path.resolve(outputPath));
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

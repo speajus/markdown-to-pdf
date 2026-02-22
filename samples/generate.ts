@@ -1,20 +1,23 @@
-import { generatePdf } from '../src/index.js';
 import path from 'path';
 import fs from 'fs';
 import { readMdWritePdf } from '../src/cli.js';
+import { themes } from '../src/themes/index.js';
+
 async function main() {
   const outputDir = path.join(__dirname, '..', 'output');
+  fs.mkdirSync(outputDir, { recursive: true });
 
-  // Ensure output directory exists
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
+  const mdFiles = fs.readdirSync(__dirname).filter((f) => f.endsWith('.md'));
   const all: Promise<void>[] = [];
-  for (const file of fs.readdirSync(__dirname)) {
-    const pdfFile = file.replace(/\.md$/i, '.pdf');
-    if (pdfFile === file) continue;
-    all.push(readMdWritePdf(path.join(__dirname, file), path.join(outputDir, pdfFile)));
+
+  for (const [themeName, theme] of Object.entries(themes)) {
+    const suffix = `-${themeName.toLowerCase()}`;
+    for (const file of mdFiles) {
+      const pdfFile = file.replace(/\.md$/i, `${suffix}.pdf`);
+      all.push(readMdWritePdf(path.join(__dirname, file), path.join(outputDir, pdfFile), { theme }));
+    }
   }
+
   await Promise.all(all);
 }
 
