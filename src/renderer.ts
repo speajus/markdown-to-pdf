@@ -4,7 +4,7 @@ import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
 import { DEFAULTS } from './defaults.js';
-import { renderCode } from './highlight.prism.js';
+import { renderCode, loadHighlightLanguages } from './highlight.prism.js';
 import { splitEmojiSegments, containsEmoji, getEmojiRegex } from './emoji.js';
 import { preRenderEmoji } from './color-emoji.js';
 
@@ -19,6 +19,9 @@ export async function renderMarkdownToPdf(
   const layout = options?.pageLayout ?? defaultPageLayout;
   const basePath = options?.basePath ?? '';
   const syntaxHighlight = options?.syntaxHighlight !== false;
+  if (syntaxHighlight) {
+    loadHighlightLanguages(options?.languages);
+  }
   const emojiFontOpt = options?.emojiFont ?? true;
 
   // Use provided image renderer or create default Node.js renderer

@@ -94,10 +94,20 @@ export interface PdfOptions {
   renderImage?: (imageUrl: string) => Promise<Buffer>;
   /**
    * Enable syntax highlighting for fenced code blocks with a language tag.
-   * Uses Prism.js for tokenization. Supported languages: javascript, typescript, java.
+   * Uses Prism.js for tokenization.
    * @default true
    */
   syntaxHighlight?: boolean;
+  /**
+   * Which Prism.js language grammars to load for syntax highlighting.
+   *
+   * - `undefined` (default) — load **all** available Prism.js languages (~300).
+   * - An array of language identifiers (e.g. `['javascript', 'python', 'bash']`)
+   *   to load only the specified grammars (and their dependencies).
+   *
+   * Has no effect when `syntaxHighlight` is `false`.
+   */
+  languages?: string[];
   /**
    * Emoji font configuration.
    *

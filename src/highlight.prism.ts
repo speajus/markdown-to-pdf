@@ -1,21 +1,45 @@
 /**
  * pdfkit-highlight.ts
  * Syntax highlighting for PDFKit using Prism.js
- * Supports: javascript, typescript, java
  *
  * Usage:
- *   import { renderCode } from './highlight.prism.js';
+ *   import { loadHighlightLanguages, renderCode } from './highlight.prism.js';
+ *   loadHighlightLanguages(['javascript', 'python']); // or omit to load all
  *   renderCode(doc, sourceCode, { language: 'javascript', x: 50, y: 100 });
  */
 
 import Prism from 'prismjs';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-java';
-import 'prismjs/components/prism-python';
+import loadLanguages from 'prismjs/components/index.js';
 import type PDFDocument from 'pdfkit';
 import type { SyntaxHighlightTheme } from './types.js';
 import { defaultSyntaxHighlightTheme } from './styles.js';
+
+// ---------------------------------------------------------------------------
+// Language loading
+// ---------------------------------------------------------------------------
+
+let languagesLoaded = false;
+
+/**
+ * Load Prism.js language grammars for syntax highlighting.
+ *
+ * @param languages  Optional array of language identifiers to load
+ *                   (e.g. `['javascript', 'python', 'bash']`).
+ *                   When omitted or `undefined`, **all** available Prism.js
+ *                   languages (~300) are loaded.
+ *
+ * Safe to call multiple times — subsequent calls are no-ops.
+ */
+export function loadHighlightLanguages(languages?: string[]): void {
+  if (languagesLoaded) return;
+  loadLanguages.silent = true;
+  if (languages && languages.length > 0) {
+    loadLanguages(languages);
+  } else {
+    loadLanguages();           // loads every language
+  }
+  languagesLoaded = true;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -82,7 +106,12 @@ function flattenTokens(tokens: Array<string | Prism.Token>): FlatToken[] {
  */
 export function tokenizeToLines(code: string, language: string): FlatToken[][] {
   const grammar = Prism.languages[language];
-  if (!grammar) throw new Error(`Prism grammar not found for: ${language}`);
+  if (!grammar) {
+    // Grammar not loaded / unknown language — fall back to plain (unstyled) text
+    return code.split('\n').map(line =>
+      line.length > 0 ? [{ type: null, content: line }] : [],
+    );
+  }
 
   const tokens = Prism.tokenize(code, grammar);
   const flat = flattenTokens(tokens);

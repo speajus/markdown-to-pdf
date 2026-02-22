@@ -21,4 +21,5 @@ export { createBrowserImageRenderer } from './browser-image-renderer.js';
 export { createNodeImageRenderer } from './node-image-renderer.js';
 export { createBrowserColorEmojiRenderer } from './color-emoji.js';
 export { createNodeColorEmojiRenderer } from './node-color-emoji.js';
+export { loadHighlightLanguages } from './highlight.prism.js';
 
