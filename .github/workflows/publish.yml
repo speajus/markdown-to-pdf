@@ -3,6 +3,9 @@ name: Build & Publish
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
 
 jobs:
   build-and-publish:
