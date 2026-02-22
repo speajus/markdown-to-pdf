@@ -36,23 +36,26 @@ function buildEmojiRegex(): RegExp {
     // \p{Emoji_Modifier_Base} — characters that accept skin-tone modifiers
     // The rest handles ZWJ, keycap, flag, and tag sequences.
     return new RegExp(
-      '(?:' +
-        // ZWJ sequences (family, professions, etc.)
-        '(?:\\p{Emoji_Presentation}|\\p{Emoji_Modifier_Base})' +
-        '(?:\\p{Emoji_Modifier})?' +
-        '(?:\\u200D(?:\\p{Emoji_Presentation}|\\p{Emoji_Modifier_Base})(?:\\p{Emoji_Modifier})?)*)' +
-      '|' +
-        // Keycap sequences: digit/# /* + VS16 + combining enclosing keycap
-        '[0-9#*]\\uFE0F?\\u20E3' +
-      '|' +
-        // Regional indicator flag pairs
+        // Regional indicator flag pairs — MUST come first so that
+        // individual RI symbols are not consumed by the ZWJ / standalone
+        // branches before they can pair up.
         '(?:[\\u{1F1E6}-\\u{1F1FF}]){2}' +
       '|' +
         // Tag sequences (e.g. flag of England)
         '\\u{1F3F4}[\\u{E0060}-\\u{E007E}]+\\u{E007F}' +
       '|' +
-        // Standalone emoji with optional VS16
-        '[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}\\u{2300}-\\u{23FF}\\u{2B50}\\u{2B55}\\u{FE00}-\\u{FE0F}\\u{200D}]\\uFE0F?' +
+        // Keycap sequences: digit/# /* + VS16 + combining enclosing keycap
+        '[0-9#*]\\uFE0F?\\u20E3' +
+      '|' +
+        // ZWJ sequences (family, professions, etc.)
+        '(?:' +
+        '(?:\\p{Emoji_Presentation}|\\p{Emoji_Modifier_Base})' +
+        '(?:\\p{Emoji_Modifier})?' +
+        '(?:\\u200D(?:\\p{Emoji_Presentation}|\\p{Emoji_Modifier_Base})(?:\\p{Emoji_Modifier})?)*)' +
+      '|' +
+        // Standalone emoji with optional VS16 — exclude RI range
+        // (U+1F1E6–U+1F1FF) so lone indicators don't match here.
+        '[\\u{1F000}-\\u{1F1E5}\\u{1F200}-\\u{1FAFF}\\u{2600}-\\u{27BF}\\u{2300}-\\u{23FF}\\u{2B50}\\u{2B55}\\u{FE00}-\\u{FE0F}\\u{200D}]\\uFE0F?' +
       '',
       'gu',
     );
