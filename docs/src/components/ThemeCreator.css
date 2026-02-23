@@ -48,6 +48,20 @@
 .theme-creator-btn.danger { background: #c0392b; border-color: #c0392b; }
 .theme-creator-btn.danger:hover { background: #a93226; }
 
+.tc-builtin-warning {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #f39c12;
+  background: rgba(243, 156, 18, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.theme-creator-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .theme-creator-body {
   flex: 1;
   overflow-y: auto;
