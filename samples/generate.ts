@@ -34,6 +34,10 @@ async function main() {
   for (const [themeName, theme] of Object.entries(themes)) {
     const suffix = `-${themeName.toLowerCase()}`;
     for (const file of mdFiles) {
+      if (all.length >= 20){
+        await Promise.all(all);
+        all.length = 0;
+      }
       const pdfFile = file.replace(/\.md$/i, `${suffix}.pdf`);
       const pdfPath = path.join(outputDir, pdfFile);
       pdfPaths.push(pdfPath);

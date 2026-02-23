@@ -1,4 +1,4 @@
-import type { PdfOptions } from './types.js';
+import type { PdfOptions, TextStyle } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
@@ -86,13 +86,39 @@ export async function renderMarkdownToPdf(
   const tokens = marked.lexer(markdown);
   const contentWidth = doc.page.width - margins.left - margins.right;
 
+  // ── Table cell context ──────────────────────────────────────────────────
+  // When rendering inline tokens inside a table cell, the first text output
+  // must be positioned at the cell's (x, y) with the cell's width/align.
+  // Subsequent text outputs in the same cell use PDFKit's continued-flow.
+  let cellCtx: { x: number; y: number; width: number; align: string; used: boolean } | null = null;
+
+  // ── Heading context ───────────────────────────────────────────────────
+  // When rendering inline tokens inside a heading, font helpers use the
+  // heading's style (font, fontSize, color) instead of the body style.
+  let headingCtx: TextStyle | null = null;
+
   function ensureSpace(needed: number): void {
     if (doc.y + needed > doc.page.height - margins.bottom) {
       doc.addPage();
     }
   }
 
+  /** Derive the italic variant of a PDFKit built-in font name. */
+  function italicVariant(font: string): string {
+    if (font.startsWith('Times')) return font.replace(/-Bold$/, '-BoldItalic').replace(/^Times-Roman$/, 'Times-Italic');
+    // Helvetica / Courier families use "Oblique"
+    if (font.endsWith('-Bold')) return font + 'Oblique';
+    return font + '-Oblique';
+  }
+
   function applyBodyFont(bold: boolean, italic: boolean): void {
+    if (headingCtx) {
+      // Inside a heading — use heading style as the base.
+      let font = headingCtx.font;
+      if (italic) font = italicVariant(font);
+      doc.font(font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      return;
+    }
     let font = theme.body.font;
     if (bold && italic) font = 'Helvetica-BoldOblique';
     else if (bold) font = 'Helvetica-Bold';
@@ -101,6 +127,10 @@ export async function renderMarkdownToPdf(
   }
 
   function resetBodyFont(): void {
+    if (headingCtx) {
+      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      return;
+    }
     doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
   }
 
@@ -134,6 +164,14 @@ export async function renderMarkdownToPdf(
       opts = posOpts ?? {};
     } else {
       opts = xOrOpts ?? {};
+    }
+
+    // If inside a table cell and this is the first text output, apply cell positioning.
+    if (cellCtx && !cellCtx.used && firstX === undefined) {
+      firstX = cellCtx.x;
+      firstY = cellCtx.y;
+      opts = { ...opts, width: cellCtx.width, align: cellCtx.align };
+      cellCtx.used = true;
     }
 
     const hasEmoji = containsEmoji(text);
@@ -312,12 +350,26 @@ export async function renderMarkdownToPdf(
     const textW = doc.widthOfString(text);
     const textH = doc.currentLineHeight();
 
-    // Read the real flow X position from PDFKit's internal LineWrapper.
-    // After continued:true, doc.x stays at the left margin — the actual
-    // cursor position is _wrapper.startX + _wrapper.continuedX.
-    const w = (doc as any)._wrapper;
-    const flowX = w ? (w.startX + w.continuedX) : doc.x;
-    const flowY = doc.y;
+    // Determine flow position.  If this is the first output in a table cell,
+    // use the cell context coordinates; otherwise read from the LineWrapper.
+    let flowX: number;
+    let flowY: number;
+    let useCellPos = false;
+    let cellExtra: Record<string, unknown> = {};
+    if (cellCtx && !cellCtx.used) {
+      flowX = cellCtx.x;
+      flowY = cellCtx.y;
+      useCellPos = true;
+      cellExtra = { width: cellCtx.width, align: cellCtx.align };
+      cellCtx.used = true;
+    } else {
+      // Read the real flow X position from PDFKit's internal LineWrapper.
+      // After continued:true, doc.x stays at the left margin — the actual
+      // cursor position is _wrapper.startX + _wrapper.continuedX.
+      const w = (doc as any)._wrapper;
+      flowX = w ? (w.startX + w.continuedX) : doc.x;
+      flowY = doc.y;
+    }
 
     // Draw background at the current flow position (behind the text)
     doc.save();
@@ -325,17 +377,25 @@ export async function renderMarkdownToPdf(
       .fill(cs.backgroundColor);
     doc.restore();
 
-    // Render inline — no explicit x,y so PDFKit's flow advances correctly
+    // Render inline — use positioned form for cell context, flow form otherwise
     doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
-    doc.text(text, { continued });
+    if (useCellPos) {
+      doc.text(text, flowX, flowY, { continued, ...cellExtra });
+    } else {
+      doc.text(text, { continued });
+    }
     resetBodyFont();
   }
 
   function renderLink(tok: Tokens.Link, continued: boolean): void {
-    doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
+    if (headingCtx) {
+      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(theme.linkColor);
+    } else {
+      doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
+    }
     const linkText = tok.text || tok.href;
     renderTextWithEmoji(linkText, { continued, underline: true, link: tok.href });
-    doc.fillColor(theme.body.color);
+    doc.fillColor(headingCtx ? headingCtx.color : theme.body.color);
   }
 
   async function renderInlineTokens(
@@ -355,7 +415,7 @@ export async function renderMarkdownToPdf(
             await renderInlineTokens(t.tokens, cont, insideBold, insideItalic);
           } else {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(t.text, { continued: cont });
+            renderTextWithEmoji(t.text, { continued: cont, underline: false, strike: false });
           }
           break;
         }
@@ -383,12 +443,12 @@ export async function renderMarkdownToPdf(
         }
         case 'del': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Del).text, { continued: cont, strike: true });
+          renderTextWithEmoji((tok as Tokens.Del).text, { continued: cont, strike: true, underline: false });
           break;
         }
         case 'escape': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Escape).text, { continued: cont });
+          renderTextWithEmoji((tok as Tokens.Escape).text, { continued: cont, underline: false, strike: false });
           break;
         }
         case 'br': {
@@ -399,7 +459,7 @@ export async function renderMarkdownToPdf(
           const raw = (tok as any).text ?? (tok as any).raw ?? '';
           if (raw) {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(raw, { continued: cont });
+            renderTextWithEmoji(raw, { continued: cont, underline: false, strike: false });
           }
           break;
         }
@@ -467,6 +527,26 @@ export async function renderMarkdownToPdf(
     }
   }
 
+  async function renderCellTokens(
+    cell: { text: string; tokens: Token[] },
+    x: number, y: number,
+    width: number, align: string,
+    bold: boolean,
+  ): Promise<void> {
+    const savedY = doc.y;
+    if (cell.tokens && cell.tokens.length > 0) {
+      cellCtx = { x, y, width, align, used: false };
+      applyBodyFont(bold, false);
+      await renderInlineTokens(cell.tokens, false, bold, false);
+      cellCtx = null;
+    } else {
+      // Fallback: plain text (no inline tokens)
+      applyBodyFont(bold, false);
+      renderTextWithEmoji(cell.text, x, y, { width, align });
+    }
+    doc.y = savedY;
+  }
+
   async function renderTable(table: Tokens.Table): Promise<void> {
     const colCount = table.header.length;
     if (colCount === 0) return;
@@ -483,14 +563,12 @@ export async function renderMarkdownToPdf(
     doc.save();
     doc.rect(startX, y, contentWidth, rowH).fill(theme.table.headerBackground);
     doc.restore();
-    doc.font('Helvetica-Bold').fontSize(theme.body.fontSize).fillColor(theme.body.color);
     for (let c = 0; c < colCount; c++) {
       const cellX = startX + c * colWidth;
-      renderTextWithEmoji(table.header[c].text, cellX + cellPad, y + textInsetY, {
-        width: colWidth - cellPad * 2,
-        height: rowH,
-        align: table.align[c] || 'left',
-      });
+      await renderCellTokens(
+        table.header[c], cellX + cellPad, y + textInsetY,
+        colWidth - cellPad * 2, table.align[c] || 'left', true,
+      );
     }
     // Header border
     doc.save();
@@ -504,16 +582,14 @@ export async function renderMarkdownToPdf(
     y += rowH;
 
     // Body rows
-    resetBodyFont();
     for (const row of table.rows) {
       ensureSpace(rowH);
       for (let c = 0; c < colCount; c++) {
         const cellX = startX + c * colWidth;
-        renderTextWithEmoji(row[c].text, cellX + cellPad, y + textInsetY, {
-          width: colWidth - cellPad * 2,
-          height: rowH,
-          align: table.align[c] || 'left',
-        });
+        await renderCellTokens(
+          row[c], cellX + cellPad, y + textInsetY,
+          colWidth - cellPad * 2, table.align[c] || 'left', false,
+        );
       }
       doc.save();
       doc.strokeColor(theme.table.borderColor).lineWidth(0.5);
@@ -542,7 +618,13 @@ export async function renderMarkdownToPdf(
         ensureSpace(spaceAbove + style.fontSize + spaceBelow);
         doc.moveDown(spaceAbove / doc.currentLineHeight());
         doc.font(style.font).fontSize(style.fontSize).fillColor(style.color);
-        renderTextWithEmoji(t.text);
+        headingCtx = style;
+        if (t.tokens && t.tokens.length > 0) {
+          await renderInlineTokens(t.tokens, false, style.bold ?? false, style.italic ?? false);
+        } else {
+          renderTextWithEmoji(t.text);
+        }
+        headingCtx = null;
         doc.moveDown(spaceBelow / doc.currentLineHeight());
         resetBodyFont();
         break;

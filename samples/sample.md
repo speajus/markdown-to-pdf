@@ -91,9 +91,9 @@ Our on-call rotation handled ***47 incidents*** this quarter. The mean time to r
 
 | Severity | Count | Avg MTTR | Top Cause            |
 |----------|-------|----------|----------------------|
-| P1       | 3     | 8 min    | DNS failover delay   |
-| P2       | 11    | 15 min   | Memory pressure      |
-| P3       | 33    | 22 min   | Config drift         |
+| **P1**   | 3     | `8 min`  | [DNS failover](https://wiki.acme.dev/dns) delay |
+| **P2**   | 11    | `15 min` | *Memory pressure*    |
+| P3       | 33    | ~~22 min~~ `18 min` | Config drift |
 
 The most impactful improvement was adding automated canary analysis. Previously, engineers had to manually verify each deployment — now the system runs `health-check --deep` automatically and rolls back if error rates exceed thresholds.
 
