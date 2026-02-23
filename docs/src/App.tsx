@@ -130,7 +130,6 @@ function App() {
   const [customFonts, setCustomFonts] = useState<CustomFontDefinition[]>([]);
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
   const [creatorOpen, setCreatorOpen] = useState(false);
-  const [creatorEditing, setCreatorEditing] = useState(false);
   const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -181,8 +180,7 @@ function App() {
   }
 
   // Theme creator callbacks
-  function handleOpenCreator(editing: boolean) {
-    setCreatorEditing(editing);
+  function handleOpenCreator() {
     setCreatorOpen(true);
   }
 
@@ -256,18 +254,13 @@ function App() {
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
-            <button className="theme-btn" onClick={() => handleOpenCreator(false)}>
-              Create Theme
+            <button className="theme-btn" onClick={() => handleOpenCreator()}>
+              Edit Theme
             </button>
             {isCustomTheme && (
-              <>
-                <button className="theme-btn" onClick={() => handleOpenCreator(true)}>
-                  Edit
-                </button>
-                <button className="theme-btn danger" onClick={() => handleCreatorDelete(themeName)}>
-                  Delete
-                </button>
-              </>
+              <button className="theme-btn danger" onClick={() => handleCreatorDelete(themeName)}>
+                Delete
+              </button>
             )}
           </div>
         </div>
@@ -289,8 +282,8 @@ function App() {
           <div className="theme-editor-panel">
             <ThemeCreator
               initialConfig={resolveTheme(themeName)}
-              initialName={creatorEditing ? themeName : ''}
-              isEditing={creatorEditing}
+              initialName={themeName}
+              isBuiltIn={builtinThemeNames.includes(themeName)}
               onPreview={setPreviewConfig}
               onSave={handleCreatorSave}
               onDelete={handleCreatorDelete}

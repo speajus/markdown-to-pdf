@@ -46,10 +46,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export interface ThemeCreatorProps {
   /** The theme config to start editing (clone of selected theme). */
   initialConfig: ThemeConfig;
-  /** Name of the theme being edited (empty string for new). */
+  /** Name of the theme being edited. */
   initialName: string;
-  /** Whether this is editing an existing custom theme vs creating new. */
-  isEditing: boolean;
+  /** Whether the source theme is a built-in (read-only) theme. */
+  isBuiltIn: boolean;
   /** Called on every change for live preview. */
   onPreview: (config: ThemeConfig) => void;
   /** Called when user saves. */
@@ -65,7 +65,7 @@ export interface ThemeCreatorProps {
 export function ThemeCreator({
   initialConfig,
   initialName,
-  isEditing,
+  isBuiltIn,
   onPreview,
   onSave,
   onDelete,
@@ -77,6 +77,12 @@ export function ThemeCreator({
   const [fontFamilies, setFontFamilies] = useState<string[]>([]);
   const [copyLabel, setCopyLabel] = useState('Copy Theme');
   const debounceRef = useRef<number | null>(null);
+
+  // Determine if save is allowed
+  const trimmedName = name.trim();
+  const nameChanged = trimmedName !== '' && trimmedName !== initialName;
+  const isExistingCustom = !isBuiltIn && initialName !== '';
+  const saveDisabled = isBuiltIn && !nameChanged;
 
   // Debounced live preview
   const schedulePreview = useCallback(
@@ -116,6 +122,7 @@ export function ThemeCreator({
   function handleSave() {
     const trimmed = name.trim();
     if (!trimmed) { alert('Please enter a theme name.'); return; }
+    if (isBuiltIn && trimmed === initialName) { return; } // shouldn't happen since button is disabled
     saveCustomTheme(trimmed, config, fontFamilies);
     onSave(trimmed, config, fontFamilies);
   }
@@ -196,14 +203,26 @@ export function ThemeCreator({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <button className="theme-creator-btn primary" onClick={handleSave}>Save</button>
+          <button
+            className="theme-creator-btn primary"
+            onClick={handleSave}
+            disabled={saveDisabled}
+            title={saveDisabled ? 'Change the theme name to save as a new theme' : undefined}
+          >
+            Save
+          </button>
           <button className="theme-creator-btn" onClick={onClose}>Cancel</button>
         </div>
+        {isBuiltIn && !nameChanged && (
+          <div className="tc-builtin-warning">
+            Built-in themes are read-only — change the name to save as a new theme.
+          </div>
+        )}
         <div className="theme-creator-header-row">
           <button className="theme-creator-btn" onClick={handleExport}>Export JSON</button>
           <button className="theme-creator-btn" onClick={handleCopy}>{copyLabel}</button>
           <button className="theme-creator-btn" onClick={handleImport}>Import JSON</button>
-          {isEditing && onDelete && (
+          {isExistingCustom && onDelete && (
             <button className="theme-creator-btn danger" onClick={handleDelete}>Delete</button>
           )}
         </div>
