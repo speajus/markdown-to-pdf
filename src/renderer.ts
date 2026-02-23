@@ -415,7 +415,7 @@ export async function renderMarkdownToPdf(
             await renderInlineTokens(t.tokens, cont, insideBold, insideItalic);
           } else {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(t.text, { continued: cont });
+            renderTextWithEmoji(t.text, { continued: cont, underline: false, strike: false });
           }
           break;
         }
@@ -443,12 +443,12 @@ export async function renderMarkdownToPdf(
         }
         case 'del': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Del).text, { continued: cont, strike: true });
+          renderTextWithEmoji((tok as Tokens.Del).text, { continued: cont, strike: true, underline: false });
           break;
         }
         case 'escape': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Escape).text, { continued: cont });
+          renderTextWithEmoji((tok as Tokens.Escape).text, { continued: cont, underline: false, strike: false });
           break;
         }
         case 'br': {
@@ -459,7 +459,7 @@ export async function renderMarkdownToPdf(
           const raw = (tok as any).text ?? (tok as any).raw ?? '';
           if (raw) {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(raw, { continued: cont });
+            renderTextWithEmoji(raw, { continued: cont, underline: false, strike: false });
           }
           break;
         }
