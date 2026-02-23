@@ -1,7 +1,6 @@
 /**
  * Browser-specific entry point that excludes Node.js dependencies
  */
-import { renderMarkdownToPdf } from "./renderer.js";
 export { createBrowserImageRenderer } from "./browser-image-renderer.js";
 export { createBrowserColorEmojiRenderer } from './color-emoji.js';
 

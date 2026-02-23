@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { renderMarkdownToPdf, createBrowserImageRenderer, createBrowserColorEmojiRenderer } from '../../src/browser';
-import type { ThemeConfig, ColorEmojiRenderer } from '../../src/browser';
+import type { ThemeConfig, ColorEmojiRenderer, CustomFontDefinition } from '../../src/browser';
 
 /**
  * Lazily fetch the Noto Emoji font and cache the resulting Buffer so we only
@@ -40,9 +40,10 @@ function getColorEmojiRenderer(): ColorEmojiRenderer {
 interface BrowserPdfRendererProps {
   markdown: string;
   theme?: ThemeConfig;
+  customFonts?: CustomFontDefinition[];
 }
 
-export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps) {
+export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfRendererProps) {
   const [pdfUrl, setPdfUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -65,7 +66,7 @@ export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps)
 
         try {
           // Create browser image renderer
-          const renderImage = createBrowserImageRenderer(true);
+          const renderImage = createBrowserImageRenderer('');
 
           // Load the emoji font (cached after first fetch)
           const emojiFont = await loadEmojiFont();
@@ -77,6 +78,7 @@ export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps)
             theme,
             colorEmoji,
             ...(emojiFont ? { emojiFont } : { emojiFont: false }),
+            ...(customFonts && customFonts.length > 0 ? { customFonts } : {}),
           });
 
           if (!mounted) return;
@@ -110,7 +112,7 @@ export function BrowserPdfRenderer({ markdown, theme }: BrowserPdfRendererProps)
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [markdown, theme]);
+  }, [markdown, theme, customFonts]);
 
   if (loading) {
     return (

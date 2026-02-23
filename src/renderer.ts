@@ -1,4 +1,4 @@
-import type { PdfOptions, TextStyle, CustomFontDefinition } from './types.js';
+import type { PdfOptions, TextStyle } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';

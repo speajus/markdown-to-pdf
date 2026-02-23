@@ -1,7 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
-import { themes } from '../../src/browser';
+import { themes, defaultTheme } from '../../src/browser';
+import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
+import { ThemeCreator } from './components/ThemeCreator';
+import {
+  loadCustomThemes,
+  deleteCustomTheme as deleteStoredTheme,
+  type StoredTheme,
+} from './services/themeStorage';
+import { fetchGoogleFontBuffers } from './services/googleFonts';
 import '@uiw/react-md-editor/markdown-editor.css';
 import './App.css';
 
@@ -113,14 +121,92 @@ Emoji characters render correctly in the PDF:
 Try editing this markdown and see the PDF preview update live!
 `;
 
-const themeNames = Object.keys(themes);
+const builtinThemeNames = Object.keys(themes);
 
 function App() {
   const [markdown, setMarkdown] = useState<string | undefined>(defaultMarkdown);
   const [themeName, setThemeName] = useState<string>('Default');
+  const [customThemes, setCustomThemes] = useState<StoredTheme[]>([]);
+  const [customFonts, setCustomFonts] = useState<CustomFontDefinition[]>([]);
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
+  const [creatorOpen, setCreatorOpen] = useState(false);
+  const [creatorEditing, setCreatorEditing] = useState(false);
+  const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+
+  // Load custom themes from localStorage on mount
+  useEffect(() => {
+    const stored = loadCustomThemes();
+    setCustomThemes(stored);
+    // Fetch Google Fonts used by custom themes
+    for (const t of stored) {
+      for (const family of t.fontFamilies) {
+        fetchGoogleFontBuffers(family)
+          .then((buffers) => {
+            const def: CustomFontDefinition = {
+              name: family,
+              regular: buffers.regular,
+              bold: buffers.bold ?? undefined,
+              italic: buffers.italic ?? undefined,
+              boldItalic: buffers.boldItalic ?? undefined,
+            };
+            setCustomFonts((prev) =>
+              prev.some((f) => f.name === family) ? prev : [...prev, def],
+            );
+          })
+          .catch((err) => console.warn(`Failed to load font "${family}":`, err));
+      }
+    }
+  }, []);
+
+  // Resolve the active theme config
+  const allThemeNames = [...builtinThemeNames, ...customThemes.map((t) => t.name)];
+  const isCustomTheme = !builtinThemeNames.includes(themeName);
+
+  function resolveTheme(name: string): ThemeConfig {
+    if (themes[name]) return themes[name];
+    const custom = customThemes.find((t) => t.name === name);
+    return custom?.config ?? defaultTheme;
+  }
+
+  // The theme used for rendering: preview override or resolved
+  const activeTheme = previewConfig ?? resolveTheme(themeName);
+
+  // Font load handler for ThemeCreator
+  function handleFontLoad(fontDef: CustomFontDefinition) {
+    setCustomFonts((prev) =>
+      prev.some((f) => f.name === fontDef.name) ? prev : [...prev, fontDef],
+    );
+  }
+
+  // Theme creator callbacks
+  function handleOpenCreator(editing: boolean) {
+    setCreatorEditing(editing);
+    setCreatorOpen(true);
+  }
+
+  function handleCreatorSave(name: string, _config: ThemeConfig, _fontFamilies: string[]) {
+    setCreatorOpen(false);
+    setPreviewConfig(null);
+    // Reload from storage
+    const stored = loadCustomThemes();
+    setCustomThemes(stored);
+    setThemeName(name);
+  }
+
+  function handleCreatorDelete(name: string) {
+    setCreatorOpen(false);
+    setPreviewConfig(null);
+    deleteStoredTheme(name);
+    setCustomThemes(loadCustomThemes());
+    setThemeName('Default');
+  }
+
+  function handleCreatorClose() {
+    setCreatorOpen(false);
+    setPreviewConfig(null);
+  }
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -166,10 +252,23 @@ function App() {
               value={themeName}
               onChange={(e) => setThemeName(e.target.value)}
             >
-              {themeNames.map((name) => (
+              {allThemeNames.map((name) => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
+            <button className="theme-btn" onClick={() => handleOpenCreator(false)}>
+              Create Theme
+            </button>
+            {isCustomTheme && (
+              <>
+                <button className="theme-btn" onClick={() => handleOpenCreator(true)}>
+                  Edit
+                </button>
+                <button className="theme-btn danger" onClick={() => handleCreatorDelete(themeName)}>
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         </div>
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
@@ -185,10 +284,9 @@ function App() {
               preview="edit"
               highlightEnable={false}
               style={{ flex: 1 }}
-               height="100%"
-  visibleDragbar={false}
-  overflow={false}
-
+              height="100%"
+              visibleDragbar={false}
+              overflow={false}
             />
           </div>
         </div>
@@ -198,10 +296,27 @@ function App() {
         <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
           <div className="panel-header">PDF Preview (Live)</div>
           <div className="pdf-viewer">
-            <BrowserPdfRenderer markdown={markdown??''} theme={themes[themeName]} />
+            <BrowserPdfRenderer
+              markdown={markdown ?? ''}
+              theme={activeTheme}
+              customFonts={customFonts}
+            />
           </div>
         </div>
       </div>
+
+      {creatorOpen && (
+        <ThemeCreator
+          initialConfig={resolveTheme(themeName)}
+          initialName={creatorEditing ? themeName : ''}
+          isEditing={creatorEditing}
+          onPreview={setPreviewConfig}
+          onSave={handleCreatorSave}
+          onDelete={handleCreatorDelete}
+          onClose={handleCreatorClose}
+          onFontLoad={handleFontLoad}
+        />
+      )}
     </div>
   );
 }
