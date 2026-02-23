@@ -23,7 +23,7 @@ npm install
 npm run dev
 ```
 
-This will start the Vite development server. Open the URL shown in the terminal (usually http://localhost:5173) to use the editor.
+This will start the Vite development server. Open the URL shown in the terminal (usually [http://localhost:5173](http://localhost:5173)) to use the editor.
 
 ### Build for Production
 
@@ -64,4 +64,3 @@ npm run preview
 ## Customization
 
 You can customize the PDF styling by editing `src/MarkdownPDF.tsx` and modifying the `StyleSheet.create()` styles.
-

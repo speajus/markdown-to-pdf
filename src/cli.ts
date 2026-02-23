@@ -7,6 +7,9 @@ import type { PdfOptions } from './types.js';
 
 export async function readMdWritePdf(inputPath: string, outputPath: string, extraOptions?: Partial<PdfOptions>): Promise<void> {
 
+  if (inputPath === outputPath){
+    throw new Error(`input path can not be the same as output path.`)
+  }
   console.log(`Converting ${inputPath} → ${outputPath}`);
 
   const resolvedInput = path.resolve(inputPath);
