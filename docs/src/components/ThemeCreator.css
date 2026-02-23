@@ -1,0 +1,177 @@
+/* ── Theme Creator ── */
+.theme-creator {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+}
+
+.theme-creator-header {
+  background: #2c3e50;
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-creator-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-creator-name-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 14px;
+}
+.theme-creator-name-input::placeholder { color: rgba(255,255,255,0.5); }
+
+.theme-creator-btn {
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.theme-creator-btn:hover { background: rgba(255,255,255,0.25); }
+.theme-creator-btn.primary { background: #27ae60; border-color: #27ae60; }
+.theme-creator-btn.primary:hover { background: #219a52; }
+.theme-creator-btn.danger { background: #c0392b; border-color: #c0392b; }
+.theme-creator-btn.danger:hover { background: #a93226; }
+
+.theme-creator-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* ── Collapsible sections ── */
+.tc-section { border-bottom: 1px solid #e0e0e0; }
+.tc-section-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2c3e50;
+  background: #f8f9fa;
+}
+.tc-section-header:hover { background: #ecf0f1; }
+.tc-section-arrow {
+  margin-right: 8px;
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+.tc-section-arrow.open { transform: rotate(90deg); }
+.tc-section-content { padding: 8px 16px 16px; }
+
+/* ── Form fields ── */
+.tc-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.tc-field-label {
+  font-size: 12px;
+  color: #555;
+  min-width: 70px;
+}
+.tc-number-input {
+  width: 60px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+}
+.tc-toggle {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: #555; cursor: pointer;
+}
+.tc-toggle input { cursor: pointer; }
+
+.tc-heading-group {
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+.tc-heading-group-title {
+  font-weight: 600;
+  font-size: 12px;
+  color: #2c3e50;
+  margin-bottom: 6px;
+}
+
+/* ── Color input ── */
+.color-input { display: flex; align-items: center; gap: 6px; }
+.color-input-label { font-size: 12px; color: #555; min-width: 70px; }
+.color-input-controls { display: flex; align-items: center; gap: 4px; }
+.color-input-picker {
+  width: 28px; height: 28px;
+  border: 1px solid #ccc; border-radius: 3px;
+  padding: 1px; cursor: pointer; background: none;
+}
+.color-input-text {
+  width: 72px; padding: 4px 6px;
+  border: 1px solid #ccc; border-radius: 3px;
+  font-size: 11px; font-family: monospace;
+}
+
+
+.font-picker-search {
+  padding: 8px; border: none; border-bottom: 1px solid #e0e0e0;
+  font-size: 13px; outline: none;
+}
+.font-picker-list { overflow-y: auto; flex: 1; }
+.font-picker-section-label {
+  padding: 6px 10px; font-size: 10px; font-weight: 700;
+  color: #888; text-transform: uppercase; background: #f5f5f5;
+}
+.font-picker-item {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; padding: 6px 10px; border: none; background: none;
+  font-size: 12px; cursor: pointer; text-align: left;
+}
+.font-picker-item:hover { background: #e8f4fd; }
+.font-picker-item.selected { background: #d4e6f1; font-weight: 600; }
+.font-picker-item-cat { font-size: 10px; color: #999; }
+.font-picker-empty { padding: 8px 10px; font-size: 12px; color: #999; }
+
+/* ── Token color grid ── */
+.tc-token-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+/* ── Font picker ── */
+.font-picker { display: flex; align-items: center; gap: 6px; position: relative; }
+.font-picker-label { font-size: 12px; color: #555; min-width: 70px; }
+.font-picker-trigger {
+  padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;
+  background: #fff; font-size: 12px; cursor: pointer;
+  text-align: left; min-width: 140px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.font-picker-trigger:hover { border-color: #999; }
+.font-picker-dropdown {
+  position: absolute; top: 100%; left: 0; z-index: 200;
+  width: 260px; max-height: 300px;
+  background: #fff; border: 1px solid #ccc; border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column;
+}
+

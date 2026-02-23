@@ -70,8 +70,62 @@ function imageProxyPlugin(): Plugin {
   };
 }
 
+/**
+ * Vite plugin that proxies Google Fonts CSS requests so we can spoof the
+ * User-Agent header and receive TTF URLs instead of woff2.
+ *
+ * Requests to /__font_css_proxy/<encoded-css-url> are fetched server-side
+ * with an old-IE User-Agent string that causes Google Fonts to serve
+ * TrueType font URLs.
+ */
+function fontCssProxyPlugin(): Plugin {
+  return {
+    name: 'font-css-proxy',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const prefix = '/__font_css_proxy/';
+        if (!req.url?.startsWith(prefix)) return next();
+
+        const encoded = req.url.slice(prefix.length);
+        if (!encoded) {
+          res.statusCode = 400;
+          res.end('Missing URL');
+          return;
+        }
+
+        const targetUrl = decodeURIComponent(encoded);
+
+        // Only allow proxying to fonts.googleapis.com
+        if (!targetUrl.startsWith('https://fonts.googleapis.com/')) {
+          res.statusCode = 403;
+          res.end('Forbidden: only fonts.googleapis.com URLs are allowed');
+          return;
+        }
+
+        // Use an old-IE User-Agent so Google Fonts returns TTF URLs
+        const spoofedUA =
+          'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)';
+
+        https
+          .get(targetUrl, { headers: { 'User-Agent': spoofedUA } }, (proxyRes) => {
+            res.writeHead(proxyRes.statusCode || 200, {
+              'Content-Type': proxyRes.headers['content-type'] || 'text/css',
+              'Cache-Control': 'public, max-age=86400',
+              'Access-Control-Allow-Origin': '*',
+            });
+            proxyRes.pipe(res);
+          })
+          .on('error', () => {
+            res.statusCode = 502;
+            res.end('Font CSS proxy fetch failed');
+          });
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), imageProxyPlugin()],
+  plugins: [react(), imageProxyPlugin(), fontCssProxyPlugin()],
   build: {
     outDir: 'dist',
   },
