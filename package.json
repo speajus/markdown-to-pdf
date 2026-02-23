@@ -9,12 +9,19 @@
   },
   "exports": {
     "node": {
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.js"
     },
     "browser": {
+      "types": "./dist/browser.d.ts",
       "require": "./dist/browser.js",
       "import": "./dist/browser.js"
+    },
+    "default": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
     }
   },
   "files": [
