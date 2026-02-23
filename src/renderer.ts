@@ -640,6 +640,19 @@ export async function renderMarkdownToPdf(
           renderTextWithEmoji(t.text);
         }
         headingCtx = null;
+
+        // Draw an underline beneath h1 and h2
+        if (t.depth <= 2) {
+          const lineY = doc.y + 2;
+          doc.save();
+          doc.strokeColor(theme.horizontalRuleColor).lineWidth(t.depth === 1 ? 1.5 : 1)
+            .moveTo(margins.left, lineY)
+            .lineTo(margins.left + contentWidth, lineY)
+            .stroke();
+          doc.restore();
+          doc.y = lineY + 2;
+        }
+
         doc.moveDown(spaceBelow / doc.currentLineHeight());
         resetBodyFont();
         break;
