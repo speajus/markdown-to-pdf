@@ -1,4 +1,4 @@
-import type { PdfOptions, TextStyle } from './types.js';
+import type { PdfOptions, TextStyle, CustomFontDefinition } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
@@ -71,6 +71,29 @@ export async function renderMarkdownToPdf(
     }
   }
 
+  // ── Custom font registration ─────────────────────────────────────────────
+  // Register user-supplied font families so they can be referenced by name
+  // in ThemeConfig font fields.  Each variant is registered with a suffix:
+  //   name (regular), name-Bold, name-Italic, name-BoldItalic
+  // Missing variants fall back: boldItalic → bold → regular, italic → regular.
+  const customFontNames = new Set<string>();
+  if (options?.customFonts) {
+    for (const cf of options.customFonts) {
+      try {
+        doc.registerFont(cf.name, cf.regular);
+        doc.registerFont(`${cf.name}-Bold`, cf.bold ?? cf.regular);
+        doc.registerFont(`${cf.name}-Italic`, cf.italic ?? cf.regular);
+        doc.registerFont(
+          `${cf.name}-BoldItalic`,
+          cf.boldItalic ?? cf.bold ?? cf.regular,
+        );
+        customFontNames.add(cf.name);
+      } catch {
+        // Font registration failed — skip this font gracefully.
+      }
+    }
+  }
+
   // ── Color emoji pre-render ─────────────────────────────────────────────
   // When a colorEmoji renderer is provided, pre-scan the entire markdown for
   // every unique emoji and convert them all to PNG buffers up-front.  This
@@ -105,26 +128,75 @@ export async function renderMarkdownToPdf(
     }
   }
 
-  /** Derive the italic variant of a PDFKit built-in font name. */
+  /** Check whether `font` (or its base name) is a registered custom font. */
+  function isCustomFont(font: string): boolean {
+    if (customFontNames.has(font)) return true;
+    // Also match variant names like "Roboto-Bold"
+    const dash = font.lastIndexOf('-');
+    if (dash > 0) return customFontNames.has(font.substring(0, dash));
+    return false;
+  }
+
+  /** Return the base (registered) name of a custom font, stripping any variant suffix. */
+  function customFontBase(font: string): string {
+    if (customFontNames.has(font)) return font;
+    const dash = font.lastIndexOf('-');
+    if (dash > 0) {
+      const base = font.substring(0, dash);
+      if (customFontNames.has(base)) return base;
+    }
+    return font;
+  }
+
+  /** Derive the italic variant of a font name. */
   function italicVariant(font: string): string {
+    // Custom fonts use Name-Italic / Name-BoldItalic
+    if (isCustomFont(font)) {
+      const base = customFontBase(font);
+      if (font.endsWith('-Bold')) return `${base}-BoldItalic`;
+      return `${base}-Italic`;
+    }
+    // Built-in Times family
     if (font.startsWith('Times')) return font.replace(/-Bold$/, '-BoldItalic').replace(/^Times-Roman$/, 'Times-Italic');
     // Helvetica / Courier families use "Oblique"
     if (font.endsWith('-Bold')) return font + 'Oblique';
     return font + '-Oblique';
   }
 
+  /** Resolve the correct font variant (regular / bold / italic / bold-italic). */
+  function resolveFont(baseFont: string, bold: boolean, italic: boolean): string {
+    if (isCustomFont(baseFont)) {
+      const base = customFontBase(baseFont);
+      if (bold && italic) return `${base}-BoldItalic`;
+      if (bold) return `${base}-Bold`;
+      if (italic) return `${base}-Italic`;
+      return base;
+    }
+    // Built-in PDFKit fonts — strip existing variant suffix before applying,
+    // so that e.g. 'Helvetica-Bold' + bold doesn't produce 'Helvetica-Bold-Bold'.
+    if (baseFont.startsWith('Times')) {
+      if (bold && italic) return 'Times-BoldItalic';
+      if (bold) return 'Times-Bold';
+      if (italic) return 'Times-Italic';
+      return baseFont;
+    }
+    // Helvetica / Courier families: strip any existing variant suffix first
+    const family = baseFont.replace(/-(Bold|Oblique|BoldOblique)$/, '');
+    if (bold && italic) return `${family}-BoldOblique`;
+    if (bold) return `${family}-Bold`;
+    if (italic) return `${family}-Oblique`;
+    return family;
+  }
+
   function applyBodyFont(bold: boolean, italic: boolean): void {
     if (headingCtx) {
       // Inside a heading — use heading style as the base.
       let font = headingCtx.font;
-      if (italic) font = italicVariant(font);
+      if (bold || italic) font = resolveFont(font, bold, italic);
       doc.font(font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
       return;
     }
-    let font = theme.body.font;
-    if (bold && italic) font = 'Helvetica-BoldOblique';
-    else if (bold) font = 'Helvetica-Bold';
-    else if (italic) font = 'Helvetica-Oblique';
+    const font = resolveFont(theme.body.font, bold, italic);
     doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
   }
 
@@ -739,7 +811,7 @@ export async function renderMarkdownToPdf(
         for (const child of t.tokens) {
           if (child.type === 'paragraph') {
             const p = child as Tokens.Paragraph;
-            const font = bq.italic ? 'Helvetica-Oblique' : theme.body.font;
+            const font = bq.italic ? italicVariant(theme.body.font) : theme.body.font;
             doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
             doc.text('', textX, doc.y, { width: textWidth });
             await renderInlineTokens(p.tokens, false, false, bq.italic);

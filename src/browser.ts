@@ -18,6 +18,7 @@ export type {
   ThemeConfig,
   PdfOptions,
   ColorEmojiRenderer,
+  CustomFontDefinition,
 } from './types.js';
 
 export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme } from './styles.js';

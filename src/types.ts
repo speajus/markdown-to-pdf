@@ -82,6 +82,26 @@ export interface ThemeConfig {
   syntaxHighlight?: SyntaxHighlightTheme;
 }
 
+/**
+ * A custom font definition providing font data for registration with PDFKit.
+ *
+ * Supply at minimum a `name` and `regular` buffer.  Missing bold / italic /
+ * bold-italic variants fall back: boldItalic → bold → regular,
+ * italic → regular, bold → regular.
+ */
+export interface CustomFontDefinition {
+  /** The name to use in ThemeConfig font fields (e.g. 'Roboto'). */
+  name: string;
+  /** Regular weight font data. */
+  regular: Buffer;
+  /** Bold variant (falls back to regular). */
+  bold?: Buffer;
+  /** Italic variant (falls back to regular). */
+  italic?: Buffer;
+  /** Bold-italic variant (falls back to bold or regular). */
+  boldItalic?: Buffer;
+}
+
 /** Converts a single emoji string to a PNG `Buffer`. */
 export type ColorEmojiRenderer = (emoji: string) => Promise<Buffer>;
 
@@ -156,5 +176,13 @@ export interface PdfOptions {
    * monochrome font or the body font.
    */
   colorEmoji?: ColorEmojiRenderer;
+  /**
+   * Custom font definitions to register with PDFKit.
+   *
+   * Each entry provides font data (as `Buffer`s) for a named font family
+   * with optional bold, italic, and bold-italic variants.  The `name` can
+   * then be used in any `ThemeConfig` font field (e.g. `body.font`).
+   */
+  customFonts?: CustomFontDefinition[];
 }
 
