@@ -2,14 +2,14 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
 import { themes, defaultTheme } from '../../src/browser';
-import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
-import { ThemeCreator } from './components/ThemeCreator';
 import {
   loadCustomThemes,
   deleteCustomTheme as deleteStoredTheme,
   type StoredTheme,
 } from './services/themeStorage';
 import { fetchGoogleFontBuffers } from './services/googleFonts';
+import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
+import { ThemeCreator } from './components/ThemeCreator';
 import '@uiw/react-md-editor/markdown-editor.css';
 import './App.css';
 
@@ -130,7 +130,6 @@ function App() {
   const [customFonts, setCustomFonts] = useState<CustomFontDefinition[]>([]);
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
   const [creatorOpen, setCreatorOpen] = useState(false);
-  const [creatorEditing, setCreatorEditing] = useState(false);
   const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -181,8 +180,7 @@ function App() {
   }
 
   // Theme creator callbacks
-  function handleOpenCreator(editing: boolean) {
-    setCreatorEditing(editing);
+  function handleOpenCreator() {
     setCreatorOpen(true);
   }
 
@@ -256,18 +254,13 @@ function App() {
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
-            <button className="theme-btn" onClick={() => handleOpenCreator(false)}>
-              Create Theme
+            <button className="theme-btn" onClick={() => handleOpenCreator()}>
+              Edit Theme
             </button>
             {isCustomTheme && (
-              <>
-                <button className="theme-btn" onClick={() => handleOpenCreator(true)}>
-                  Edit
-                </button>
-                <button className="theme-btn danger" onClick={() => handleCreatorDelete(themeName)}>
-                  Delete
-                </button>
-              </>
+              <button className="theme-btn danger" onClick={() => handleCreatorDelete(themeName)}>
+                Delete
+              </button>
             )}
           </div>
         </div>
@@ -289,8 +282,8 @@ function App() {
           <div className="theme-editor-panel">
             <ThemeCreator
               initialConfig={resolveTheme(themeName)}
-              initialName={creatorEditing ? themeName : ''}
-              isEditing={creatorEditing}
+              initialName={themeName}
+              isBuiltIn={builtinThemeNames.includes(themeName)}
               onPreview={setPreviewConfig}
               onSave={handleCreatorSave}
               onDelete={handleCreatorDelete}
@@ -318,7 +311,17 @@ function App() {
           </div>
 
           <div className="divider" onMouseDown={handleMouseDown} />
+          <div className="divider" onMouseDown={handleMouseDown} />
 
+          <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
+            <div className="panel-header">PDF Preview (Live)</div>
+            <div className="pdf-viewer">
+              <BrowserPdfRenderer
+                markdown={markdown ?? ''}
+                theme={activeTheme}
+                customFonts={customFonts}
+              />
+            </div>
           <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
             <div className="panel-header">PDF Preview (Live)</div>
             <div className="pdf-viewer">
@@ -330,6 +333,7 @@ function App() {
             </div>
           </div>
         </div>
+    </div>
       )}
     </div>
   );
