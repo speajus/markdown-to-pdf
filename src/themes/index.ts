@@ -15,13 +15,13 @@ export const modernTheme: ThemeConfig = {
   },
   body: { font: 'Helvetica', fontSize: 11, color: '#2d3436', lineGap: 5 },
   code: {
-    inline: { font: 'Courier', fontSize: 10, color: '#e17055', backgroundColor: '#ffeaa7' },
+    inline: { font: 'Courier', fontSize: 10, color: '#2d3436', backgroundColor: '#e8e8e8' },
     block: { font: 'Courier', fontSize: 9, color: '#2d3436', backgroundColor: '#dfe6e9', padding: 10 },
   },
   blockquote: { borderColor: '#0d7377', borderWidth: 3, italic: true, indent: 20 },
   linkColor: '#0984e3',
   horizontalRuleColor: '#b2bec3',
-  table: { headerBackground: '#dfe6e9', borderColor: '#b2bec3', cellPadding: 7 },
+  table: { headerBackground: '#dfe6e9', borderColor: '#b2bec3', cellPadding: 7, zebraColor: '#f0f5f5' },
   syntaxHighlight: {
     background: '#e8f0f2',
     gutter: '#636e72',
@@ -52,13 +52,13 @@ export const academicTheme: ThemeConfig = {
   },
   body: { font: 'Times-Roman', fontSize: 12, color: '#1a1a2e', lineGap: 4 },
   code: {
-    inline: { font: 'Courier', fontSize: 10, color: '#6c3483', backgroundColor: '#f4ecf7' },
+    inline: { font: 'Courier', fontSize: 10, color: '#1a1a2e', backgroundColor: '#ececec' },
     block: { font: 'Courier', fontSize: 9, color: '#1a1a2e', backgroundColor: '#f2f3f4', padding: 8 },
   },
   blockquote: { borderColor: '#6c3483', borderWidth: 2, italic: true, indent: 24 },
   linkColor: '#2e4057',
   horizontalRuleColor: '#aab7b8',
-  table: { headerBackground: '#eaecee', borderColor: '#aab7b8', cellPadding: 6 },
+  table: { headerBackground: '#eaecee', borderColor: '#aab7b8', cellPadding: 6, zebraColor: '#f7f8f8' },
   syntaxHighlight: {
     background: '#f2f3f4',
     gutter: '#7f8c8d',
@@ -89,13 +89,13 @@ export const minimalTheme: ThemeConfig = {
   },
   body: { font: 'Helvetica', fontSize: 10, color: '#444444', lineGap: 5 },
   code: {
-    inline: { font: 'Courier', fontSize: 9, color: '#555555', backgroundColor: '#f7f7f7' },
+    inline: { font: 'Courier', fontSize: 9, color: '#333333', backgroundColor: '#eeeeee' },
     block: { font: 'Courier', fontSize: 9, color: '#444444', backgroundColor: '#fafafa', padding: 10 },
   },
   blockquote: { borderColor: '#cccccc', borderWidth: 2, italic: false, indent: 18 },
   linkColor: '#555555',
   horizontalRuleColor: '#e0e0e0',
-  table: { headerBackground: '#fafafa', borderColor: '#e0e0e0', cellPadding: 8 },
+  table: { headerBackground: '#fafafa', borderColor: '#e0e0e0', cellPadding: 8, zebraColor: '#f5f5f5' },
   syntaxHighlight: {
     background: '#f8f8f8',
     gutter: '#999999',
@@ -126,13 +126,13 @@ export const oceanTheme: ThemeConfig = {
   },
   body: { font: 'Helvetica', fontSize: 11, color: '#2c3e50', lineGap: 4 },
   code: {
-    inline: { font: 'Courier', fontSize: 10, color: '#c0392b', backgroundColor: '#eaf2f8' },
+    inline: { font: 'Courier', fontSize: 10, color: '#1b2631', backgroundColor: '#e0e0e0' },
     block: { font: 'Courier', fontSize: 9, color: '#2c3e50', backgroundColor: '#eaf2f8', padding: 8 },
   },
   blockquote: { borderColor: '#2980b9', borderWidth: 3, italic: true, indent: 20 },
   linkColor: '#2471a3',
   horizontalRuleColor: '#aed6f1',
-  table: { headerBackground: '#d4e6f1', borderColor: '#85c1e9', cellPadding: 6 },
+  table: { headerBackground: '#d4e6f1', borderColor: '#85c1e9', cellPadding: 6, zebraColor: '#eaf2f8' },
   syntaxHighlight: {
     background: '#eaf2f8',
     gutter: '#5d6d7e',

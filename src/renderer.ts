@@ -23,6 +23,7 @@ export async function renderMarkdownToPdf(
     loadHighlightLanguages(options?.languages);
   }
   const lineNumbers = options?.lineNumbers ?? false;
+  const zebraStripes = options?.zebraStripes !== false;
   const emojiFontOpt = options?.emojiFont ?? true;
 
   // Use provided image renderer or create default Node.js renderer
@@ -597,8 +598,18 @@ export async function renderMarkdownToPdf(
     y += rowH;
 
     // Body rows
-    for (const row of table.rows) {
+    const zebraColor = theme.table.zebraColor ?? '#f9f9f9';
+    for (let r = 0; r < table.rows.length; r++) {
+      const row = table.rows[r];
       ensureSpace(rowH);
+
+      // Zebra stripe: fill even rows (0-indexed, so odd visual rows) with a tinted background
+      if (zebraStripes && r % 2 === 1) {
+        doc.save();
+        doc.rect(startX, y, contentWidth, rowH).fill(zebraColor);
+        doc.restore();
+      }
+
       for (let c = 0; c < colCount; c++) {
         const cellX = startX + c * colWidth;
         await renderCellTokens(

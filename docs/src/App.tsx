@@ -5,7 +5,7 @@ import { themes } from '../../src/browser';
 import '@uiw/react-md-editor/markdown-editor.css';
 import './App.css';
 
-const defaultMarkdown = `# Welcome to Markdown to PDF Editor
+const defaultMarkdown = `# Welcome to Markdown to PDF Editor 🚀
 
 This is a **live editor** where you can test the markdown-to-pdf conversion entirely in your browser!
 
