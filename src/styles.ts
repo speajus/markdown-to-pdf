@@ -63,8 +63,8 @@ export const defaultTheme: ThemeConfig = {
     inline: {
       font: 'Courier',
       fontSize: 10,
-      color: '#c7254e',
-      backgroundColor: '#f9f2f4',
+      color: '#1a1a1a',
+      backgroundColor: '#f0f0f0',
     },
     block: {
       font: 'Courier',
@@ -86,6 +86,7 @@ export const defaultTheme: ThemeConfig = {
     headerBackground: '#f0f0f0',
     borderColor: '#cccccc',
     cellPadding: 6,
+    zebraColor: '#f9f9f9',
   },
   syntaxHighlight: defaultSyntaxHighlightTheme,
 };

@@ -39,6 +39,10 @@ export interface TableStyles {
   headerBackground: string;
   borderColor: string;
   cellPadding: number;
+  /** Background color for alternating (even) body rows when zebra striping is enabled.
+   *  @default '#f9f9f9'
+   */
+  zebraColor?: string;
 }
 
 export interface TokenColors {
@@ -117,6 +121,14 @@ export interface PdfOptions {
    * @default false
    */
   lineNumbers?: boolean;
+  /**
+   * Enable zebra striping (alternating row backgrounds) on tables.
+   *
+   * The stripe color is controlled by `theme.table.zebraColor`.
+   *
+   * @default true
+   */
+  zebraStripes?: boolean;
   /**
    * Emoji font configuration.
    *

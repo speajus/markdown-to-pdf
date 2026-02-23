@@ -88,6 +88,7 @@ interface PdfOptions {
   syntaxHighlight?: boolean; // Enable syntax highlighting (default: true)
   lineNumbers?: boolean;   // Show line numbers in code blocks (default: false)
   languages?: string[];    // Prism.js languages to load (default: all)
+  zebraStripes?: boolean;  // Zebra-stripe table rows (default: true)
 }
 ```
 
@@ -134,7 +135,7 @@ The full `ThemeConfig` interface exposes styles for:
 | `code.inline`  | Font, size, color, and background color              |
 | `code.block`   | Font, size, color, background color, and padding     |
 | `blockquote`   | Border color, border width, italic flag, and indent  |
-| `table`        | Header background, border color, and cell padding    |
+| `table`        | Header background, border color, cell padding, and zebra color |
 | `linkColor`    | Color for hyperlink text                             |
 | `horizontalRuleColor` | Color for `---` dividers                      |
 
