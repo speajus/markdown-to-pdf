@@ -2,7 +2,22 @@
 
 A lightweight TypeScript library that converts Markdown files into styled PDF documents. Built on [marked](https://github.com/markedjs/marked) for parsing and [PDFKit](https://pdfkit.org/) for PDF generation. [README.pdf](./README.pdf) | [Live Demo](https://speajus.github.io/markdown-to-pdf/)
 
-[![Live Demo](./docs/image.png)](https://speajus.github.io/markdown-to-pdf/)
+<table>
+  <tr>
+    <td align="center">
+      <strong>Editor</strong><br/>
+      <a href="https://speajus.github.io/markdown-to-pdf/">
+        <img src="./docs/image-edit.png" alt="Markdown Editor" width="400"/>
+      </a>
+    </td>
+    <td align="center">
+      <strong>Preview</strong><br/>
+      <a href="https://speajus.github.io/markdown-to-pdf/">
+        <img src="./docs/image-preview.png" alt="PDF Preview" width="400"/>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ## Features
 
@@ -128,16 +143,16 @@ await generatePdf(markdown, {
 
 The full `ThemeConfig` interface exposes styles for:
 
-| Section        | Configurable properties                             |
-| -------------- | --------------------------------------------------- |
-| `headings`     | Font, size, and color for each level (h1–h6)        |
-| `body`         | Font, size, color, and line gap                     |
-| `code.inline`  | Font, size, color, and background color              |
-| `code.block`   | Font, size, color, background color, and padding     |
-| `blockquote`   | Border color, border width, italic flag, and indent  |
-| `table`        | Header background, border color, cell padding, and zebra color |
-| `linkColor`    | Color for hyperlink text                             |
-| `horizontalRuleColor` | Color for `---` dividers                      |
+| Section | Configurable properties |
+| --- | --- |
+| headings | Font, size, and color for each level (h1–h6) |
+| body | Font, size, color, and line gap |
+| code.inline | Font, size, color, and background color |
+| code.block | Font, size, color, background color, and padding |
+| blockquote | Border color, border width, italic flag, and indent |
+| table | Header background, border color, cell padding, and zebra color |
+| linkColor | Color for hyperlink text |
+| horizontalRuleColor | Color for --- dividers |
 
 ## Project Structure
 
@@ -163,17 +178,17 @@ The full `ThemeConfig` interface exposes styles for:
 ## Dependencies
 
 | Package | Purpose |
-| ------- | ------- |
-| [marked](https://github.com/markedjs/marked) | Markdown parsing and tokenization |
-| [pdfkit](https://pdfkit.org/) | PDF document generation |
-| [@resvg/resvg-js](https://github.com/nicolo-ribaudo/resvg-js) | SVG-to-PNG rasterization for image embedding |
+| --- | --- |
+| marked | Markdown parsing and tokenization |
+| pdfkit | PDF document generation |
+| @resvg/resvg-js | SVG-to-PNG rasterization for image embedding |
 
 ## Scripts
 
 | Command | Description |
-| ------- | ----------- |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm run generate` | Generate sample PDFs from `samples/*.md` into `output/` |
+| --- | --- |
+| npm run build | Compile TypeScript to dist/ |
+| npm run generate | Generate sample PDFs from samples/*.md into output/ |
 
 ## License
 
