@@ -10,6 +10,15 @@ import {
   type StoredTheme,
 } from './services/themeStorage';
 import { fetchGoogleFontBuffers } from './services/googleFonts';
+import { themes, defaultTheme } from '../../src/browser';
+import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
+import { ThemeCreator } from './components/ThemeCreator';
+import {
+  loadCustomThemes,
+  deleteCustomTheme as deleteStoredTheme,
+  type StoredTheme,
+} from './services/themeStorage';
+import { fetchGoogleFontBuffers } from './services/googleFonts';
 import '@uiw/react-md-editor/markdown-editor.css';
 import './App.css';
 
@@ -122,10 +131,13 @@ Try editing this markdown and see the PDF preview update live!
 `;
 
 const builtinThemeNames = Object.keys(themes);
+const builtinThemeNames = Object.keys(themes);
 
 function App() {
   const [markdown, setMarkdown] = useState<string | undefined>(defaultMarkdown);
   const [themeName, setThemeName] = useState<string>('Default');
+  const [customThemes, setCustomThemes] = useState<StoredTheme[]>([]);
+  const [customFonts, setCustomFonts] = useState<CustomFontDefinition[]>([]);
   const [customThemes, setCustomThemes] = useState<StoredTheme[]>([]);
   const [customFonts, setCustomFonts] = useState<CustomFontDefinition[]>([]);
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
@@ -251,6 +263,7 @@ function App() {
               onChange={(e) => setThemeName(e.target.value)}
             >
               {allThemeNames.map((name) => (
+              {allThemeNames.map((name) => (
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
@@ -311,7 +324,17 @@ function App() {
           </div>
 
           <div className="divider" onMouseDown={handleMouseDown} />
+          <div className="divider" onMouseDown={handleMouseDown} />
 
+          <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
+            <div className="panel-header">PDF Preview (Live)</div>
+            <div className="pdf-viewer">
+              <BrowserPdfRenderer
+                markdown={markdown ?? ''}
+                theme={activeTheme}
+                customFonts={customFonts}
+              />
+            </div>
           <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
             <div className="panel-header">PDF Preview (Live)</div>
             <div className="pdf-viewer">
@@ -323,6 +346,7 @@ function App() {
             </div>
           </div>
         </div>
+      )}
       )}
     </div>
   );
