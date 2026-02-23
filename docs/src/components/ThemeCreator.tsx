@@ -75,6 +75,7 @@ export function ThemeCreator({
   const [name, setName] = useState(initialName);
   const [config, setConfig] = useState<ThemeConfig>(() => deepClone(initialConfig));
   const [fontFamilies, setFontFamilies] = useState<string[]>([]);
+  const [copyLabel, setCopyLabel] = useState('Copy Theme');
   const debounceRef = useRef<number | null>(null);
 
   // Debounced live preview
@@ -138,6 +139,26 @@ export function ThemeCreator({
     URL.revokeObjectURL(url);
   }
 
+  // ── Copy to clipboard ──
+  async function handleCopy() {
+    const json = exportThemeJson(name || 'Untitled', config, fontFamilies);
+    try {
+      await navigator.clipboard.writeText(json);
+      setCopyLabel('Copied!');
+      setTimeout(() => setCopyLabel('Copy Theme'), 1500);
+    } catch {
+      // Fallback: select-and-copy via a temporary textarea
+      const ta = document.createElement('textarea');
+      ta.value = json;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopyLabel('Copied!');
+      setTimeout(() => setCopyLabel('Copy Theme'), 1500);
+    }
+  }
+
   // ── Import ──
   function handleImport() {
     const input = document.createElement('input');
@@ -180,6 +201,7 @@ export function ThemeCreator({
         </div>
         <div className="theme-creator-header-row">
           <button className="theme-creator-btn" onClick={handleExport}>Export JSON</button>
+          <button className="theme-creator-btn" onClick={handleCopy}>{copyLabel}</button>
           <button className="theme-creator-btn" onClick={handleImport}>Import JSON</button>
           {isEditing && onDelete && (
             <button className="theme-creator-btn danger" onClick={handleDelete}>Delete</button>
