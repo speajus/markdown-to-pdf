@@ -25,7 +25,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc && mkdir -p dist/fonts && cp src/fonts/* dist/fonts/",

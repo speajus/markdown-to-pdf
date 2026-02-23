@@ -388,7 +388,13 @@ export async function renderMarkdownToPdf(
     resetBodyFont();
   }
 
-  function renderLink(tok: Tokens.Link, continued: boolean): void {
+  function renderLink(tok: Tokens.Link, continued: boolean): void | Promise<void> {
+    // If the link wraps an image, render a clickable image instead of text
+    const imgChild = tok.tokens?.find((t): t is Tokens.Image => t.type === 'image');
+    if (imgChild) {
+      return renderImage(imgChild, tok.href);
+    }
+
     if (headingCtx) {
       doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(theme.linkColor);
     } else {
@@ -435,7 +441,7 @@ export async function renderMarkdownToPdf(
           break;
         }
         case 'link': {
-          renderLink(tok as Tokens.Link, cont);
+          await renderLink(tok as Tokens.Link, cont);
           break;
         }
         case 'image': {
@@ -468,7 +474,7 @@ export async function renderMarkdownToPdf(
     }
   }
 
-  async function renderImage(tok: Tokens.Image): Promise<void> {
+  async function renderImage(tok: Tokens.Image, linkUrl?: string): Promise<void> {
     try {
       // Use the pluggable image renderer
       const imgBuffer = await imageRenderer(tok.href);
@@ -489,7 +495,15 @@ export async function renderMarkdownToPdf(
       }
 
       ensureSpace(displayHeight + 10);
+      const imgX = doc.x;
+      const imgY = doc.y;
       doc.image(imgBuffer, { width: displayWidth, height: displayHeight });
+
+      // If the image is wrapped in a link, overlay a clickable annotation
+      if (linkUrl) {
+        doc.link(imgX, imgY, displayWidth, displayHeight, linkUrl);
+      }
+
       doc.moveDown(0.5);
     } catch {
       ensureSpace(20);
