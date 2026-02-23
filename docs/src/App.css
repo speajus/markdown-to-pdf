@@ -143,7 +143,9 @@ body {
 .editor-wrapper .w-md-editor {
   height: 100% !important;
 }
-
+.editor-wrapper .w-md-editor-text {
+  height: 100%;
+}
 
 .editor-wrapper .w-md-editor-text-input {
   font-size: 14px !important;
