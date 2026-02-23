@@ -22,6 +22,7 @@ export async function renderMarkdownToPdf(
   if (syntaxHighlight) {
     loadHighlightLanguages(options?.languages);
   }
+  const lineNumbers = options?.lineNumbers ?? false;
   const emojiFontOpt = options?.emojiFont ?? true;
 
   // Use provided image renderer or create default Node.js renderer
@@ -656,7 +657,7 @@ export async function renderMarkdownToPdf(
             fontSize: cs.fontSize,
             lineHeight: 1.5,
             padding: cs.padding,
-            lineNumbers: true,
+            lineNumbers,
             drawBackground: true,
             theme: theme.syntaxHighlight,
           });

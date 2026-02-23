@@ -109,6 +109,15 @@ export interface PdfOptions {
    */
   languages?: string[];
   /**
+   * Show line numbers in fenced code blocks.
+   *
+   * Only applies when `syntaxHighlight` is enabled and the code block
+   * specifies a language.
+   *
+   * @default false
+   */
+  lineNumbers?: boolean;
+  /**
    * Emoji font configuration.
    *
    * - `true` (default) — use the bundled Noto Emoji font (Node.js only;

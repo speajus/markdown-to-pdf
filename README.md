@@ -83,6 +83,9 @@ interface PdfOptions {
   theme?: ThemeConfig;     // Typography, colors, and component styles
   pageLayout?: PageLayout; // Page size and margins
   basePath?: string;       // Base directory for resolving relative image paths
+  syntaxHighlight?: boolean; // Enable syntax highlighting (default: true)
+  lineNumbers?: boolean;   // Show line numbers in code blocks (default: false)
+  languages?: string[];    // Prism.js languages to load (default: all)
 }
 ```
 

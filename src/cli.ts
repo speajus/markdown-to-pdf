@@ -22,7 +22,7 @@ export async function readMdWritePdf(inputPath: string, outputPath: string, extr
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.resolve(outputPath), buffer);
 
-  console.log(`Done. PDF written to ${path.resolve(outputPath)}`);
+  console.log(`PDF written to ${path.resolve(outputPath)}`);
 
 }
 async function main(): Promise<void> {
