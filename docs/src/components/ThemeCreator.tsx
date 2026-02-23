@@ -165,32 +165,30 @@ export function ThemeCreator({
 
   // ── Render ──
   return (
-    <div className="theme-creator-overlay">
-      <div className="theme-creator-backdrop" onClick={onClose} />
-      <div className="theme-creator-panel">
-        {/* Header */}
-        <div className="theme-creator-header">
-          <div className="theme-creator-header-row">
-            <input
-              className="theme-creator-name-input"
-              placeholder="Theme name…"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <button className="theme-creator-btn primary" onClick={handleSave}>Save</button>
-            <button className="theme-creator-btn" onClick={onClose}>Cancel</button>
-          </div>
-          <div className="theme-creator-header-row">
-            <button className="theme-creator-btn" onClick={handleExport}>Export JSON</button>
-            <button className="theme-creator-btn" onClick={handleImport}>Import JSON</button>
-            {isEditing && onDelete && (
-              <button className="theme-creator-btn danger" onClick={handleDelete}>Delete</button>
-            )}
-          </div>
+    <div className="theme-creator">
+      {/* Header */}
+      <div className="theme-creator-header">
+        <div className="theme-creator-header-row">
+          <input
+            className="theme-creator-name-input"
+            placeholder="Theme name…"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button className="theme-creator-btn primary" onClick={handleSave}>Save</button>
+          <button className="theme-creator-btn" onClick={onClose}>Cancel</button>
         </div>
+        <div className="theme-creator-header-row">
+          <button className="theme-creator-btn" onClick={handleExport}>Export JSON</button>
+          <button className="theme-creator-btn" onClick={handleImport}>Import JSON</button>
+          {isEditing && onDelete && (
+            <button className="theme-creator-btn danger" onClick={handleDelete}>Delete</button>
+          )}
+        </div>
+      </div>
 
-        {/* Body */}
-        <div className="theme-creator-body">
+      {/* Body */}
+      <div className="theme-creator-body">
           {/* ── Typography: Headings ── */}
           <Section title="Typography — Headings">
             {HEADING_KEYS.map((hk) => (
@@ -379,7 +377,6 @@ export function ThemeCreator({
               );
             })()}
           </Section>
-        </div>
       </div>
     </div>
   );

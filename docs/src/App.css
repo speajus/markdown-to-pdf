@@ -168,3 +168,27 @@ body {
   height: 100%;
 }
 
+/* ── Theme Editor Split-Pane Layout ── */
+.theme-editor-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.theme-editor-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #f8f9fa;
+}
+
+.theme-editor-panel {
+  width: 450px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #ddd;
+  overflow: hidden;
+}
+

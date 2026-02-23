@@ -274,48 +274,62 @@ function App() {
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
       </div>
 
-      <div className="content" ref={contentRef}>
-        <div className="editor-panel" style={{ width: `${editorWidthPercent}%` }}>
-          <div className="panel-header">Markdown Editor</div>
-          <div className="editor-wrapper" style={{ height:'100%', overflow:'visible' }}>
-            <MDEditor
-              value={markdown}
-              onChange={setMarkdown}
-              preview="edit"
-              highlightEnable={false}
-              style={{ flex: 1 }}
-              height="100%"
-              visibleDragbar={false}
-              overflow={false}
+      {creatorOpen ? (
+        <div className="content theme-editor-content">
+          <div className="theme-editor-preview">
+            <div className="panel-header">Theme Preview (Live)</div>
+            <div className="pdf-viewer">
+              <BrowserPdfRenderer
+                markdown={markdown ?? ''}
+                theme={activeTheme}
+                customFonts={customFonts}
+              />
+            </div>
+          </div>
+          <div className="theme-editor-panel">
+            <ThemeCreator
+              initialConfig={resolveTheme(themeName)}
+              initialName={creatorEditing ? themeName : ''}
+              isEditing={creatorEditing}
+              onPreview={setPreviewConfig}
+              onSave={handleCreatorSave}
+              onDelete={handleCreatorDelete}
+              onClose={handleCreatorClose}
+              onFontLoad={handleFontLoad}
             />
           </div>
         </div>
+      ) : (
+        <div className="content" ref={contentRef}>
+          <div className="editor-panel" style={{ width: `${editorWidthPercent}%` }}>
+            <div className="panel-header">Markdown Editor</div>
+            <div className="editor-wrapper" style={{ height:'100%', overflow:'visible' }}>
+              <MDEditor
+                value={markdown}
+                onChange={setMarkdown}
+                preview="edit"
+                highlightEnable={false}
+                style={{ flex: 1 }}
+                height="100%"
+                visibleDragbar={false}
+                overflow={false}
+              />
+            </div>
+          </div>
 
-        <div className="divider" onMouseDown={handleMouseDown} />
+          <div className="divider" onMouseDown={handleMouseDown} />
 
-        <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
-          <div className="panel-header">PDF Preview (Live)</div>
-          <div className="pdf-viewer">
-            <BrowserPdfRenderer
-              markdown={markdown ?? ''}
-              theme={activeTheme}
-              customFonts={customFonts}
-            />
+          <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
+            <div className="panel-header">PDF Preview (Live)</div>
+            <div className="pdf-viewer">
+              <BrowserPdfRenderer
+                markdown={markdown ?? ''}
+                theme={activeTheme}
+                customFonts={customFonts}
+              />
+            </div>
           </div>
         </div>
-      </div>
-
-      {creatorOpen && (
-        <ThemeCreator
-          initialConfig={resolveTheme(themeName)}
-          initialName={creatorEditing ? themeName : ''}
-          isEditing={creatorEditing}
-          onPreview={setPreviewConfig}
-          onSave={handleCreatorSave}
-          onDelete={handleCreatorDelete}
-          onClose={handleCreatorClose}
-          onFontLoad={handleFontLoad}
-        />
       )}
     </div>
   );
