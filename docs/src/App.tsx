@@ -310,8 +310,6 @@ function App() {
           </div>
 
           <div className="divider" onMouseDown={handleMouseDown} />
-          <div className="divider" onMouseDown={handleMouseDown} />
-
           <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
             <div className="panel-header">PDF Preview (Live)</div>
             <div className="pdf-viewer">
@@ -321,16 +319,6 @@ function App() {
                 customFonts={customFonts}
               />
             </div>
-          <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
-            <div className="panel-header">PDF Preview (Live)</div>
-            <div className="pdf-viewer">
-              <BrowserPdfRenderer
-                markdown={markdown ?? ''}
-                theme={activeTheme}
-                customFonts={customFonts}
-              />
-            </div>
-          </div>
         </div>
     </div>
       )}
