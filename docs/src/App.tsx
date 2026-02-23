@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { BrowserPdfRenderer } from './BrowserPdfRenderer';
 import MDEditor from '@uiw/react-md-editor';
 import { themes } from '../../src/browser';
@@ -118,6 +118,41 @@ const themeNames = Object.keys(themes);
 function App() {
   const [markdown, setMarkdown] = useState<string | undefined>(defaultMarkdown);
   const [themeName, setThemeName] = useState<string>('Default');
+  const [editorWidthPercent, setEditorWidthPercent] = useState(50);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || !contentRef.current) return;
+      const rect = contentRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percent = (x / rect.width) * 100;
+      setEditorWidthPercent(Math.min(80, Math.max(20, percent)));
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging.current) {
+        isDragging.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   return (
     <div className="container">
@@ -140,8 +175,8 @@ function App() {
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
       </div>
 
-      <div className="content">
-        <div className="editor-panel">
+      <div className="content" ref={contentRef}>
+        <div className="editor-panel" style={{ width: `${editorWidthPercent}%` }}>
           <div className="panel-header">Markdown Editor</div>
           <div className="editor-wrapper" style={{ height:'100%', overflow:'visible' }}>
             <MDEditor
@@ -149,16 +184,18 @@ function App() {
               onChange={setMarkdown}
               preview="edit"
               highlightEnable={false}
-              style={{ flex: 1 }} 
+              style={{ flex: 1 }}
                height="100%"
   visibleDragbar={false}
   overflow={false}
-             
+
             />
           </div>
         </div>
 
-        <div className="preview-panel">
+        <div className="divider" onMouseDown={handleMouseDown} />
+
+        <div className="preview-panel" style={{ width: `${100 - editorWidthPercent}%` }}>
           <div className="panel-header">PDF Preview (Live)</div>
           <div className="pdf-viewer">
             <BrowserPdfRenderer markdown={markdown??''} theme={themes[themeName]} />

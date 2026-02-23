@@ -1,6 +1,8 @@
 # Basic-Markdown-To-PDF
 
-A lightweight TypeScript library that converts Markdown files into styled PDF documents. Built on [marked](https://github.com/markedjs/marked) for parsing and [PDFKit](https://pdfkit.org/) for PDF generation. [README.pdf](./README.pdf)
+A lightweight TypeScript library that converts Markdown files into styled PDF documents. Built on [marked](https://github.com/markedjs/marked) for parsing and [PDFKit](https://pdfkit.org/) for PDF generation. [README.pdf](./README.pdf) | [Live Demo](https://speajus.github.io/markdown-to-pdf/)
+
+[![Live Demo](./docs/image.png)](https://speajus.github.io/markdown-to-pdf/)
 
 ## Features
 
