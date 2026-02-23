@@ -296,7 +296,7 @@ function App() {
         <div className="content" ref={contentRef}>
           <div className="editor-panel" style={{ width: `${editorWidthPercent}%` }}>
             <div className="panel-header">Markdown Editor</div>
-            <div className="editor-wrapper" style={{ height:'100%', overflow:'visible' }}>
+            <div className="editor-wrapper">
               <MDEditor
                 value={markdown}
                 onChange={setMarkdown}
@@ -305,7 +305,6 @@ function App() {
                 style={{ flex: 1 }}
                 height="100%"
                 visibleDragbar={false}
-                overflow={false}
               />
             </div>
           </div>
