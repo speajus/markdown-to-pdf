@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  package-lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: publint — check package.json correctness
+        run: pnpm dlx publint
+
+      - name: attw — check TypeScript types resolve correctly
+        run: pnpm dlx @arethetypeswrong/cli --pack .
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Run integration tests
+        run: pnpm tsx --test test/*.test.ts
+
+  pack-smoke-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Pack tarball
+        run: pnpm pack
+
+      - name: Install tarball in temp project
+        run: |
+          mkdir /tmp/smoke-test && cd /tmp/smoke-test
+          npm init -y
+          npm install $GITHUB_WORKSPACE/speajus-markdown-to-pdf-*.tgz
+
+      - name: Smoke test — API (require)
+        run: |
+          cd /tmp/smoke-test
+          node -e "
+            const { generatePdf } = require('@speajus/markdown-to-pdf');
+            generatePdf('# Smoke Test').then(buf => {
+              if (buf.subarray(0, 5).toString() !== '%PDF-') {
+                console.error('Invalid PDF');
+                process.exit(1);
+              }
+              console.log('API smoke test passed — PDF size:', buf.length);
+            });
+          "
+
+      - name: Smoke test — CLI
+        run: |
+          cd /tmp/smoke-test
+          echo "# CLI Smoke Test" > test.md
+          npx markdown-to-pdf test.md test.pdf
+          node -e "
+            const fs = require('fs');
+            const buf = fs.readFileSync('test.pdf');
+            if (buf.subarray(0, 5).toString() !== '%PDF-') {
+              console.error('CLI produced invalid PDF');
+              process.exit(1);
+            }
+            console.log('CLI smoke test passed — PDF size:', buf.length);
+          "
+
