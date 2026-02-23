@@ -82,6 +82,17 @@ jobs:
       - name: Run integration tests
         run: pnpm tsx --test test/*.test.ts
 
+      - name: Check for uncommitted changes
+        run: |
+          git add --all
+          if git diff --cached --quiet; then
+            echo "Working tree clean ✅"
+          else
+            echo "::error::Tests left behind changed or untracked files:"
+            git diff --cached --stat
+            exit 1
+          fi
+
   pack-smoke-test:
     needs: build
     runs-on: ubuntu-latest
