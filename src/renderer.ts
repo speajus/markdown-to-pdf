@@ -86,6 +86,12 @@ export async function renderMarkdownToPdf(
   const tokens = marked.lexer(markdown);
   const contentWidth = doc.page.width - margins.left - margins.right;
 
+  // ── Table cell context ──────────────────────────────────────────────────
+  // When rendering inline tokens inside a table cell, the first text output
+  // must be positioned at the cell's (x, y) with the cell's width/align.
+  // Subsequent text outputs in the same cell use PDFKit's continued-flow.
+  let cellCtx: { x: number; y: number; width: number; align: string; used: boolean } | null = null;
+
   function ensureSpace(needed: number): void {
     if (doc.y + needed > doc.page.height - margins.bottom) {
       doc.addPage();
@@ -134,6 +140,14 @@ export async function renderMarkdownToPdf(
       opts = posOpts ?? {};
     } else {
       opts = xOrOpts ?? {};
+    }
+
+    // If inside a table cell and this is the first text output, apply cell positioning.
+    if (cellCtx && !cellCtx.used && firstX === undefined) {
+      firstX = cellCtx.x;
+      firstY = cellCtx.y;
+      opts = { ...opts, width: cellCtx.width, align: cellCtx.align };
+      cellCtx.used = true;
     }
 
     const hasEmoji = containsEmoji(text);
@@ -312,12 +326,26 @@ export async function renderMarkdownToPdf(
     const textW = doc.widthOfString(text);
     const textH = doc.currentLineHeight();
 
-    // Read the real flow X position from PDFKit's internal LineWrapper.
-    // After continued:true, doc.x stays at the left margin — the actual
-    // cursor position is _wrapper.startX + _wrapper.continuedX.
-    const w = (doc as any)._wrapper;
-    const flowX = w ? (w.startX + w.continuedX) : doc.x;
-    const flowY = doc.y;
+    // Determine flow position.  If this is the first output in a table cell,
+    // use the cell context coordinates; otherwise read from the LineWrapper.
+    let flowX: number;
+    let flowY: number;
+    let useCellPos = false;
+    let cellExtra: Record<string, unknown> = {};
+    if (cellCtx && !cellCtx.used) {
+      flowX = cellCtx.x;
+      flowY = cellCtx.y;
+      useCellPos = true;
+      cellExtra = { width: cellCtx.width, align: cellCtx.align };
+      cellCtx.used = true;
+    } else {
+      // Read the real flow X position from PDFKit's internal LineWrapper.
+      // After continued:true, doc.x stays at the left margin — the actual
+      // cursor position is _wrapper.startX + _wrapper.continuedX.
+      const w = (doc as any)._wrapper;
+      flowX = w ? (w.startX + w.continuedX) : doc.x;
+      flowY = doc.y;
+    }
 
     // Draw background at the current flow position (behind the text)
     doc.save();
@@ -325,9 +353,13 @@ export async function renderMarkdownToPdf(
       .fill(cs.backgroundColor);
     doc.restore();
 
-    // Render inline — no explicit x,y so PDFKit's flow advances correctly
+    // Render inline — use positioned form for cell context, flow form otherwise
     doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
-    doc.text(text, { continued });
+    if (useCellPos) {
+      doc.text(text, flowX, flowY, { continued, ...cellExtra });
+    } else {
+      doc.text(text, { continued });
+    }
     resetBodyFont();
   }
 
@@ -467,6 +499,26 @@ export async function renderMarkdownToPdf(
     }
   }
 
+  async function renderCellTokens(
+    cell: { text: string; tokens: Token[] },
+    x: number, y: number,
+    width: number, align: string,
+    bold: boolean,
+  ): Promise<void> {
+    const savedY = doc.y;
+    if (cell.tokens && cell.tokens.length > 0) {
+      cellCtx = { x, y, width, align, used: false };
+      applyBodyFont(bold, false);
+      await renderInlineTokens(cell.tokens, false, bold, false);
+      cellCtx = null;
+    } else {
+      // Fallback: plain text (no inline tokens)
+      applyBodyFont(bold, false);
+      renderTextWithEmoji(cell.text, x, y, { width, align });
+    }
+    doc.y = savedY;
+  }
+
   async function renderTable(table: Tokens.Table): Promise<void> {
     const colCount = table.header.length;
     if (colCount === 0) return;
@@ -483,14 +535,12 @@ export async function renderMarkdownToPdf(
     doc.save();
     doc.rect(startX, y, contentWidth, rowH).fill(theme.table.headerBackground);
     doc.restore();
-    doc.font('Helvetica-Bold').fontSize(theme.body.fontSize).fillColor(theme.body.color);
     for (let c = 0; c < colCount; c++) {
       const cellX = startX + c * colWidth;
-      renderTextWithEmoji(table.header[c].text, cellX + cellPad, y + textInsetY, {
-        width: colWidth - cellPad * 2,
-        height: rowH,
-        align: table.align[c] || 'left',
-      });
+      await renderCellTokens(
+        table.header[c], cellX + cellPad, y + textInsetY,
+        colWidth - cellPad * 2, table.align[c] || 'left', true,
+      );
     }
     // Header border
     doc.save();
@@ -504,16 +554,14 @@ export async function renderMarkdownToPdf(
     y += rowH;
 
     // Body rows
-    resetBodyFont();
     for (const row of table.rows) {
       ensureSpace(rowH);
       for (let c = 0; c < colCount; c++) {
         const cellX = startX + c * colWidth;
-        renderTextWithEmoji(row[c].text, cellX + cellPad, y + textInsetY, {
-          width: colWidth - cellPad * 2,
-          height: rowH,
-          align: table.align[c] || 'left',
-        });
+        await renderCellTokens(
+          row[c], cellX + cellPad, y + textInsetY,
+          colWidth - cellPad * 2, table.align[c] || 'left', false,
+        );
       }
       doc.save();
       doc.strokeColor(theme.table.borderColor).lineWidth(0.5);
