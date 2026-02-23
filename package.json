@@ -29,9 +29,11 @@
     "README.md"
   ],
   "scripts": {
+    "docs:dev":"cd docs && $npm_execpath dev",
     "build": "tsc && mkdir -p dist/fonts && cp src/fonts/* dist/fonts/",
     "generate": "tsx samples/generate.ts",
-    "test": "tsx --test test/*.test.ts && tsx samples/generate.ts && tsx ./src/cli.ts README.md README.pdf"
+    "readme":"pnpm tsx ./src/cli.ts README.md README.pdf",
+    "test": "tsx --test test/*.test.ts && tsx samples/generate.ts && pnpm run readme"
   },
   "keywords": [
     "markdown",
