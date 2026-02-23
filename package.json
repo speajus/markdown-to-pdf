@@ -1,6 +1,6 @@
 {
   "name": "@speajus/markdown-to-pdf",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "A new project created with Intent by Augment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,7 +30,11 @@
   "scripts": {
     "build": "tsc && mkdir -p dist/fonts && cp src/fonts/* dist/fonts/",
     "generate": "tsx samples/generate.ts",
+<<<<<<< HEAD
     "test": "tsx --test test/*.test.ts && tsx samples/generate.ts"
+=======
+    "test": "tsx --test test/*.test.ts"
+>>>>>>> 9af4ccd78bf9a63f15319a37901edfc7f85cbc4e
   },
   "keywords": [
     "markdown",

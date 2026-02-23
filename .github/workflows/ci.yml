@@ -82,6 +82,7 @@ jobs:
       - name: Run integration tests
         run: pnpm tsx --test test/*.test.ts
 
+<<<<<<< HEAD
       - name: Check for uncommitted changes
         run: |
           git add --all
@@ -93,6 +94,8 @@ jobs:
             exit 1
           fi
 
+=======
+>>>>>>> 9af4ccd78bf9a63f15319a37901edfc7f85cbc4e
   pack-smoke-test:
     needs: build
     runs-on: ubuntu-latest
