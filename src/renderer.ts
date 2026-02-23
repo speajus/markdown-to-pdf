@@ -1,4 +1,4 @@
-import type { PdfOptions } from './types.js';
+import type { PdfOptions, TextStyle } from './types.js';
 import { defaultTheme, defaultPageLayout } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
@@ -92,13 +92,33 @@ export async function renderMarkdownToPdf(
   // Subsequent text outputs in the same cell use PDFKit's continued-flow.
   let cellCtx: { x: number; y: number; width: number; align: string; used: boolean } | null = null;
 
+  // ── Heading context ───────────────────────────────────────────────────
+  // When rendering inline tokens inside a heading, font helpers use the
+  // heading's style (font, fontSize, color) instead of the body style.
+  let headingCtx: TextStyle | null = null;
+
   function ensureSpace(needed: number): void {
     if (doc.y + needed > doc.page.height - margins.bottom) {
       doc.addPage();
     }
   }
 
+  /** Derive the italic variant of a PDFKit built-in font name. */
+  function italicVariant(font: string): string {
+    if (font.startsWith('Times')) return font.replace(/-Bold$/, '-BoldItalic').replace(/^Times-Roman$/, 'Times-Italic');
+    // Helvetica / Courier families use "Oblique"
+    if (font.endsWith('-Bold')) return font + 'Oblique';
+    return font + '-Oblique';
+  }
+
   function applyBodyFont(bold: boolean, italic: boolean): void {
+    if (headingCtx) {
+      // Inside a heading — use heading style as the base.
+      let font = headingCtx.font;
+      if (italic) font = italicVariant(font);
+      doc.font(font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      return;
+    }
     let font = theme.body.font;
     if (bold && italic) font = 'Helvetica-BoldOblique';
     else if (bold) font = 'Helvetica-Bold';
@@ -107,6 +127,10 @@ export async function renderMarkdownToPdf(
   }
 
   function resetBodyFont(): void {
+    if (headingCtx) {
+      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      return;
+    }
     doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
   }
 
@@ -364,10 +388,14 @@ export async function renderMarkdownToPdf(
   }
 
   function renderLink(tok: Tokens.Link, continued: boolean): void {
-    doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
+    if (headingCtx) {
+      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(theme.linkColor);
+    } else {
+      doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
+    }
     const linkText = tok.text || tok.href;
     renderTextWithEmoji(linkText, { continued, underline: true, link: tok.href });
-    doc.fillColor(theme.body.color);
+    doc.fillColor(headingCtx ? headingCtx.color : theme.body.color);
   }
 
   async function renderInlineTokens(
@@ -590,7 +618,13 @@ export async function renderMarkdownToPdf(
         ensureSpace(spaceAbove + style.fontSize + spaceBelow);
         doc.moveDown(spaceAbove / doc.currentLineHeight());
         doc.font(style.font).fontSize(style.fontSize).fillColor(style.color);
-        renderTextWithEmoji(t.text);
+        headingCtx = style;
+        if (t.tokens && t.tokens.length > 0) {
+          await renderInlineTokens(t.tokens, false, style.bold ?? false, style.italic ?? false);
+        } else {
+          renderTextWithEmoji(t.text);
+        }
+        headingCtx = null;
         doc.moveDown(spaceBelow / doc.currentLineHeight());
         resetBodyFont();
         break;
