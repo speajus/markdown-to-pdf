@@ -1,6 +1,6 @@
 {
   "name": "@speajus/markdown-to-pdf",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A new project created with Intent by Augment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,20 +10,13 @@
   "exports": {
     "node": {
       "types": "./dist/index.d.ts",
-      "types": "./dist/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.js"
     },
     "browser": {
       "types": "./dist/browser.d.ts",
-      "types": "./dist/browser.d.ts",
       "require": "./dist/browser.js",
       "import": "./dist/browser.js"
-    },
-    "default": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js"
     },
     "default": {
       "types": "./dist/index.d.ts",
