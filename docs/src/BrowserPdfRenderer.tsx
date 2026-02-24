@@ -10,7 +10,7 @@ let emojiFontPromise: Promise<Buffer | null> | null = null;
 
 function loadEmojiFont(): Promise<Buffer | null> {
   if (!emojiFontPromise) {
-    emojiFontPromise = fetch('/fonts/NotoEmoji-Regular.ttf')
+    emojiFontPromise = fetch('/fonts/Twemoji.Mozilla.ttf')
       .then((res) => {
         if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
         return res.arrayBuffer();

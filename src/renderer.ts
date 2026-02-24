@@ -9,7 +9,7 @@ import { splitEmojiSegments, containsEmoji, getEmojiRegex } from './emoji.js';
 import { preRenderEmoji } from './color-emoji.js';
 
 /** Name used to register the emoji font with PDFKit */
-const EMOJI_FONT_NAME = 'NotoEmoji';
+const EMOJI_FONT_NAME = 'TwemojiMozilla';
 
 export async function renderMarkdownToPdf(
   markdown: string,
@@ -59,7 +59,7 @@ export async function renderMarkdownToPdf(
         const fontPath =
           typeof emojiFontOpt === 'string'
             ? emojiFontOpt
-            : nodePath.join(__dirname, 'fonts', 'NotoEmoji-Regular.ttf');
+            : nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
         if (nodeFs.existsSync(fontPath)) {
           doc.registerFont(EMOJI_FONT_NAME, fontPath);
           emojiEnabled = true;
