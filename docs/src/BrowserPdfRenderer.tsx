@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { renderMarkdownToPdf, createBrowserImageRenderer, createBrowserColorEmojiRenderer } from '../../src/browser';
-import type { ThemeConfig, ColorEmojiRenderer, CustomFontDefinition } from '../../src/browser';
+import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
+import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
 
 /**
  * Lazily fetch the Noto Emoji font and cache the resulting Buffer so we only
@@ -24,18 +24,6 @@ function loadEmojiFont(): Promise<Buffer | null> {
   return emojiFontPromise;
 }
 
-/**
- * Lazily create a color emoji renderer. The factory itself is cheap — the
- * actual Twemoji SVG fetches happen on first use and are cached internally.
- */
-let colorEmojiRenderer: ColorEmojiRenderer | null = null;
-
-function getColorEmojiRenderer(): ColorEmojiRenderer {
-  if (!colorEmojiRenderer) {
-    colorEmojiRenderer = createBrowserColorEmojiRenderer();
-  }
-  return colorEmojiRenderer;
-}
 
 interface BrowserPdfRendererProps {
   markdown: string;
@@ -72,11 +60,9 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
           const emojiFont = await loadEmojiFont();
 
           // Generate PDF using the refactored library (src/index.ts)
-          const colorEmoji = getColorEmojiRenderer();
           const buffer = await renderMarkdownToPdf(markdown, {
             renderImage,
             theme,
-            colorEmoji,
             ...(emojiFont ? { emojiFont } : { emojiFont: false }),
             ...(customFonts && customFonts.length > 0 ? { customFonts } : {}),
           });
