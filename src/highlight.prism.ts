@@ -103,6 +103,8 @@ export interface RenderCodeOptions {
   lineNumbers?: boolean;
   drawBackground?: boolean;
   theme?: Partial<SyntaxHighlightTheme>;
+  /** Corner radius for the code block background. @default 0 */
+  borderRadius?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -224,12 +226,17 @@ export function renderCode(
   const codeX = x + padding + gutterWidth;
   const blockHeight = lines.length * lineH + padding * 2;
 
+  const borderRadius = opts.borderRadius ?? 0;
+
   // --- Background ---
   if (drawBackground) {
-    doc
-      .save()
-      .rect(x, y, blockWidth, blockHeight)
-      .fill(theme.background);
+    doc.save();
+    if (borderRadius > 0) {
+      doc.roundedRect(x, y, blockWidth, blockHeight, borderRadius);
+    } else {
+      doc.rect(x, y, blockWidth, blockHeight);
+    }
+    doc.fill(theme.background);
     doc.restore();
   }
 

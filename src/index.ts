@@ -7,13 +7,14 @@ export type {
   TableStyles,
   TokenColors,
   SyntaxHighlightTheme,
+  SpacingConfig,
   ThemeConfig,
   PdfOptions,
   ColorEmojiRenderer,
   CustomFontDefinition,
 } from './types.js';
 
-export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme } from './styles.js';
+export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme, defaultSpacing } from './styles.js';
 export {
   renderMarkdownToPdf as generatePdf,
   renderMarkdownToPdf,

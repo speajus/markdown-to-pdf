@@ -1,5 +1,5 @@
-import type { PdfOptions, TextStyle } from './types.js';
-import { defaultTheme, defaultPageLayout } from './styles.js';
+import type { PdfOptions, SpacingConfig, TextStyle } from './types.js';
+import { defaultTheme, defaultPageLayout, defaultSpacing } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
@@ -107,6 +107,9 @@ export async function renderMarkdownToPdf(
       getEmojiRegex(),
     );
   }
+
+  // ── Spacing config ────────────────────────────────────────────────────
+  const sp: Required<SpacingConfig> = { ...defaultSpacing, ...theme.spacing };
 
   const tokens = marked.lexer(markdown);
   const contentWidth = doc.page.width - margins.left - margins.right;
@@ -568,9 +571,12 @@ export async function renderMarkdownToPdf(
       }
 
       ensureSpace(displayHeight + 10);
-      const imgX = doc.x;
+      // Compute horizontal position based on imageAlign
+      const imgX = theme.imageAlign === 'center'
+        ? margins.left + (contentWidth - displayWidth) / 2
+        : doc.x;
       const imgY = doc.y;
-      doc.image(imgBuffer, { width: displayWidth, height: displayHeight });
+      doc.image(imgBuffer, imgX, imgY, { width: displayWidth, height: displayHeight });
 
       // If the image is wrapped in a link, overlay a clickable annotation
       if (linkUrl) {
@@ -587,13 +593,13 @@ export async function renderMarkdownToPdf(
   }
 
   async function renderList(list: Tokens.List, depth: number): Promise<void> {
-    const indent = margins.left + depth * 20;
+    const indent = margins.left + depth * sp.listIndent;
     for (let idx = 0; idx < list.items.length; idx++) {
       const item = list.items[idx];
       ensureSpace(theme.body.fontSize * 2);
       resetBodyFont();
       const bullet = list.ordered ? `${(list.start as number) + idx}.` : '•';
-      doc.text(bullet, indent, doc.y, { continued: true, width: contentWidth - depth * 20 });
+      doc.text(bullet, indent, doc.y, { continued: true, width: contentWidth - depth * sp.listIndent });
       doc.text(' ', { continued: true });
       // Render item inline tokens
       const itemTokens = item.tokens;
@@ -611,7 +617,7 @@ export async function renderMarkdownToPdf(
           await renderList(child as Tokens.List, depth + 1);
         }
       }
-      doc.moveDown(0.2);
+      doc.moveDown(sp.listItemSpacing);
     }
   }
 
@@ -711,8 +717,8 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Heading;
         const key = `h${t.depth}` as keyof typeof theme.headings;
         const style = theme.headings[key];
-        const spaceAbove = style.fontSize * 0.8;
-        const spaceBelow = style.fontSize * 0.3;
+        const spaceAbove = style.fontSize * sp.headingSpaceAbove;
+        const spaceBelow = style.fontSize * sp.headingSpaceBelow;
         ensureSpace(spaceAbove + style.fontSize + spaceBelow);
         doc.moveDown(spaceAbove / doc.currentLineHeight());
         doc.font(style.font).fontSize(style.fontSize).fillColor(style.color);
@@ -745,7 +751,7 @@ export async function renderMarkdownToPdf(
         ensureSpace(theme.body.fontSize * 2);
         resetBodyFont();
         await renderInlineTokens(t.tokens, false);
-        doc.moveDown(0.5);
+        doc.moveDown(sp.paragraphSpacing);
         break;
       }
       case 'code': {
@@ -770,10 +776,11 @@ export async function renderMarkdownToPdf(
             lineNumbers,
             drawBackground: true,
             theme: theme.syntaxHighlight,
+            borderRadius: cs.borderRadius,
           });
           doc.x = margins.left;
           doc.y = newY;
-          doc.moveDown(0.5);
+          doc.moveDown(sp.codeBlockSpacing);
           resetBodyFont();
         } else {
           // Plain code block (no language or highlighting disabled)
@@ -783,8 +790,13 @@ export async function renderMarkdownToPdf(
           ensureSpace(blockH + 10);
           const x = margins.left;
           const y = doc.y;
+          const cbRadius = cs.borderRadius ?? 0;
           doc.save();
-          doc.rect(x, y, contentWidth, blockH).fill(cs.backgroundColor);
+          if (cbRadius > 0) {
+            doc.roundedRect(x, y, contentWidth, blockH, cbRadius).fill(cs.backgroundColor);
+          } else {
+            doc.rect(x, y, contentWidth, blockH).fill(cs.backgroundColor);
+          }
           doc.restore();
           doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
           let textY = y + cs.padding;
@@ -794,7 +806,7 @@ export async function renderMarkdownToPdf(
           }
           doc.x = margins.left;
           doc.y = y + blockH;
-          doc.moveDown(0.5);
+          doc.moveDown(sp.codeBlockSpacing);
           resetBodyFont();
         }
         break;
@@ -803,7 +815,7 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Blockquote;
         const bq = theme.blockquote;
         ensureSpace(30);
-        const bqPadding = 6; // vertical padding above and below text
+        const bqPadding = bq.padding ?? 6;
         const startY = doc.y;
         doc.y += bqPadding; // add top padding before text
         const textX = margins.left + bq.borderWidth + bq.indent;
@@ -815,18 +827,25 @@ export async function renderMarkdownToPdf(
             doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
             doc.text('', textX, doc.y, { width: textWidth });
             await renderInlineTokens(p.tokens, false, false, bq.italic);
-            doc.moveDown(0.3);
+            doc.moveDown(sp.blockquoteSpacing);
           } else {
             await renderToken(child);
           }
         }
         doc.y += bqPadding; // add bottom padding after text
         const endY = doc.y;
+        // Draw optional background fill behind blockquote area
+        if (bq.backgroundColor) {
+          doc.save();
+          doc.rect(margins.left + bq.borderWidth, startY, contentWidth - bq.borderWidth, endY - startY).fill(bq.backgroundColor);
+          doc.restore();
+        }
+        // Draw left border
         doc.save();
         doc.rect(margins.left, startY, bq.borderWidth, endY - startY).fill(bq.borderColor);
         doc.restore();
         doc.x = margins.left;
-        doc.moveDown(0.3);
+        doc.moveDown(sp.blockquoteSpacing);
         resetBodyFont();
         break;
       }
@@ -837,7 +856,7 @@ export async function renderMarkdownToPdf(
       }
       case 'hr': {
         ensureSpace(20);
-        doc.moveDown(0.5);
+        doc.moveDown(sp.hrSpacing);
         const y = doc.y;
         doc.save();
         doc.strokeColor(theme.horizontalRuleColor).lineWidth(1)
@@ -846,7 +865,7 @@ export async function renderMarkdownToPdf(
           .stroke();
         doc.restore();
         doc.y = y;
-        doc.moveDown(0.5);
+        doc.moveDown(sp.hrSpacing);
         resetBodyFont();
         break;
       }

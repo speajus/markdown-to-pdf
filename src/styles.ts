@@ -1,4 +1,16 @@
-import type { ThemeConfig, PageLayout, SyntaxHighlightTheme } from './types.js';
+import type { ThemeConfig, PageLayout, SpacingConfig, SyntaxHighlightTheme } from './types.js';
+
+/** Default spacing values — used as fallbacks when theme.spacing is partial or absent. */
+export const defaultSpacing: Required<SpacingConfig> = {
+  headingSpaceAbove: 0.8,
+  headingSpaceBelow: 0.3,
+  paragraphSpacing: 0.5,
+  listItemSpacing: 0.2,
+  listIndent: 20,
+  blockquoteSpacing: 0.3,
+  codeBlockSpacing: 0.5,
+  hrSpacing: 0.5,
+};
 
 /** Prism.js default light theme — used as the default (print-friendly). */
 export const defaultSyntaxHighlightTheme: SyntaxHighlightTheme = {
@@ -89,6 +101,8 @@ export const defaultTheme: ThemeConfig = {
     zebraColor: '#f9f9f9',
   },
   syntaxHighlight: defaultSyntaxHighlightTheme,
+  spacing: { ...defaultSpacing },
+  imageAlign: 'left',
 };
 
 export const defaultPageLayout: PageLayout = {

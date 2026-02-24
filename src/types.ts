@@ -26,6 +26,7 @@ export interface CodeStyle {
 
 export interface CodeBlockStyle extends CodeStyle {
   padding: number;
+  borderRadius?: number;
 }
 
 export interface BlockquoteStyle {
@@ -33,6 +34,8 @@ export interface BlockquoteStyle {
   borderWidth: number;
   italic: boolean;
   indent: number;
+  backgroundColor?: string;
+  padding?: number;
 }
 
 export interface TableStyles {
@@ -55,6 +58,17 @@ export interface SyntaxHighlightTheme {
   defaultText: string;
   lineHighlight: string;
   tokens: TokenColors;
+}
+
+export interface SpacingConfig {
+  headingSpaceAbove?: number;
+  headingSpaceBelow?: number;
+  paragraphSpacing?: number;
+  listItemSpacing?: number;
+  listIndent?: number;
+  blockquoteSpacing?: number;
+  codeBlockSpacing?: number;
+  hrSpacing?: number;
 }
 
 export interface ThemeConfig {
@@ -80,6 +94,10 @@ export interface ThemeConfig {
    * When omitted, falls back to a VS Code Dark+ inspired palette.
    */
   syntaxHighlight?: SyntaxHighlightTheme;
+  /** Configurable spacing multipliers and indentation values. */
+  spacing?: SpacingConfig;
+  /** Image horizontal alignment. */
+  imageAlign?: 'left' | 'center';
 }
 
 /**
