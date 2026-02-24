@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { ThemeConfig, CustomFontDefinition } from '../../../src/browser';
-import { defaultTheme } from '../../../src/browser';
+import { defaultTheme, defaultSpacing } from '../../../src/browser';
 import { ColorInput } from './ColorInput';
 import { FontPicker } from './FontPicker';
 import type { GoogleFontBuffers } from '../services/googleFonts';
@@ -349,6 +349,13 @@ export function ThemeCreator({
                   value={config.code.block.padding}
                   onChange={(e) => update((d) => { d.code.block.padding = Number(e.target.value); })}
                 />
+                <span className="tc-field-label">Radius</span>
+                <input
+                  type="number"
+                  className="tc-number-input"
+                  value={config.code.block.borderRadius ?? 0}
+                  onChange={(e) => update((d) => { d.code.block.borderRadius = Number(e.target.value) || undefined; })}
+                />
               </div>
               <ColorInput label="Color" value={config.code.block.color} onChange={(v) => update((d) => { d.code.block.color = v; })} />
               <ColorInput label="Background" value={config.code.block.backgroundColor} onChange={(v) => update((d) => { d.code.block.backgroundColor = v; })} />
@@ -358,11 +365,16 @@ export function ThemeCreator({
           {/* ── Blockquote ── */}
           <Section title="Blockquote">
             <ColorInput label="Border color" value={config.blockquote.borderColor} onChange={(v) => update((d) => { d.blockquote.borderColor = v; })} />
+            <ColorInput label="Background" value={config.blockquote.backgroundColor ?? ''} onChange={(v) => update((d) => { d.blockquote.backgroundColor = v || undefined; })} />
             <div className="tc-field-row">
               <span className="tc-field-label">Border width</span>
               <input type="number" className="tc-number-input" value={config.blockquote.borderWidth} onChange={(e) => update((d) => { d.blockquote.borderWidth = Number(e.target.value); })} />
               <span className="tc-field-label">Indent</span>
               <input type="number" className="tc-number-input" value={config.blockquote.indent} onChange={(e) => update((d) => { d.blockquote.indent = Number(e.target.value); })} />
+            </div>
+            <div className="tc-field-row">
+              <span className="tc-field-label">Padding</span>
+              <input type="number" className="tc-number-input" value={config.blockquote.padding ?? 0} onChange={(e) => update((d) => { d.blockquote.padding = Number(e.target.value) || undefined; })} />
             </div>
             <label className="tc-toggle">
               <input type="checkbox" checked={config.blockquote.italic} onChange={(e) => update((d) => { d.blockquote.italic = e.target.checked; })} /> Italic
@@ -373,6 +385,17 @@ export function ThemeCreator({
           <Section title="Colors & Layout">
             <ColorInput label="Link color" value={config.linkColor} onChange={(v) => update((d) => { d.linkColor = v; })} />
             <ColorInput label="HR color" value={config.horizontalRuleColor} onChange={(v) => update((d) => { d.horizontalRuleColor = v; })} />
+            <div className="tc-field-row">
+              <span className="tc-field-label">Image align</span>
+              <select
+                className="tc-select-input"
+                value={config.imageAlign ?? 'left'}
+                onChange={(e) => update((d) => { d.imageAlign = e.target.value as 'left' | 'center'; })}
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+              </select>
+            </div>
             <div className="tc-heading-group">
               <div className="tc-heading-group-title">Table</div>
               <ColorInput label="Header bg" value={config.table.headerBackground} onChange={(v) => update((d) => { d.table.headerBackground = v; })} />
@@ -383,6 +406,47 @@ export function ThemeCreator({
                 <input type="number" className="tc-number-input" value={config.table.cellPadding} onChange={(e) => update((d) => { d.table.cellPadding = Number(e.target.value); })} />
               </div>
             </div>
+          </Section>
+
+          {/* ── Spacing & Layout ── */}
+          <Section title="Spacing & Layout">
+            {(() => {
+              const sp = config.spacing ?? {};
+              function updateSP(key: keyof typeof defaultSpacing, value: number) {
+                update((d) => {
+                  if (!d.spacing) d.spacing = {};
+                  d.spacing[key] = value;
+                });
+              }
+              return (
+                <>
+                  <div className="tc-field-row">
+                    <span className="tc-field-label">Heading above</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.headingSpaceAbove ?? defaultSpacing.headingSpaceAbove} onChange={(e) => updateSP('headingSpaceAbove', Number(e.target.value))} />
+                    <span className="tc-field-label">Heading below</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.headingSpaceBelow ?? defaultSpacing.headingSpaceBelow} onChange={(e) => updateSP('headingSpaceBelow', Number(e.target.value))} />
+                  </div>
+                  <div className="tc-field-row">
+                    <span className="tc-field-label">Paragraph</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.paragraphSpacing ?? defaultSpacing.paragraphSpacing} onChange={(e) => updateSP('paragraphSpacing', Number(e.target.value))} />
+                    <span className="tc-field-label">HR spacing</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.hrSpacing ?? defaultSpacing.hrSpacing} onChange={(e) => updateSP('hrSpacing', Number(e.target.value))} />
+                  </div>
+                  <div className="tc-field-row">
+                    <span className="tc-field-label">List item</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.listItemSpacing ?? defaultSpacing.listItemSpacing} onChange={(e) => updateSP('listItemSpacing', Number(e.target.value))} />
+                    <span className="tc-field-label">List indent</span>
+                    <input type="number" className="tc-number-input" value={sp.listIndent ?? defaultSpacing.listIndent} onChange={(e) => updateSP('listIndent', Number(e.target.value))} />
+                  </div>
+                  <div className="tc-field-row">
+                    <span className="tc-field-label">Blockquote</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.blockquoteSpacing ?? defaultSpacing.blockquoteSpacing} onChange={(e) => updateSP('blockquoteSpacing', Number(e.target.value))} />
+                    <span className="tc-field-label">Code block</span>
+                    <input type="number" step="0.1" className="tc-number-input" value={sp.codeBlockSpacing ?? defaultSpacing.codeBlockSpacing} onChange={(e) => updateSP('codeBlockSpacing', Number(e.target.value))} />
+                  </div>
+                </>
+              );
+            })()}
           </Section>
 
           {/* ── Syntax Highlighting ── */}
