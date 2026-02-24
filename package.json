@@ -29,6 +29,7 @@
     "README.md"
   ],
   "scripts": {
+    "postinstall": "node -e \"const fs=require('fs'),p=require('path'),d=p.join('node_modules','pdfkit','js');if(!fs.existsSync(d)){const{execSync:e}=require('child_process');e('cd node_modules/pdfkit && corepack yarn install && corepack yarn build',{stdio:'inherit'})}\"",
     "docs:dev": "cd docs && $npm_execpath dev",
     "build": "tsc && mkdir -p dist/fonts && cp src/fonts/* dist/fonts/",
     "generate": "tsx samples/generate.ts",
@@ -50,7 +51,7 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "marked": "^17.0.2",
-    "pdfkit": "^0.17.2",
+    "pdfkit": "github:jspears/pdfkit#support-color-emoji-google",
     "prismjs": "^1.30.0"
   },
   "devDependencies": {
@@ -66,5 +67,6 @@
     "overrides": {
       "canvas": "^3.2.1"
     }
-  }
+  },
+  "packageManager": "pnpm@9.2.0+sha512.98a80fd11c2e7096747762304106432b3ddc67dcf54b5a8c01c93f68a2cd5e05e6821849522a06fb76284d41a2660d5e334f2ee3bbf29183bf2e739b1dafa771"
 }

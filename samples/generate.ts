@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import { readMdWritePdf } from '../src/cli.js';
 import { themes } from '../src/themes/index.js';
-import { createNodeColorEmojiRenderer } from '../src/node-color-emoji.js';
 import { pdf2png } from './pdf2png.js';
 
 async function convertToPng(pdfPath: string) {
@@ -29,8 +28,6 @@ async function main() {
   const pdfPaths: string[] = [];
   const all: Promise<void>[] = [];
 
-  const colorEmoji = createNodeColorEmojiRenderer();
-
   for (const [themeName, theme] of Object.entries(themes)) {
     const suffix = `-${themeName.toLowerCase()}`;
     for (const file of mdFiles) {
@@ -41,7 +38,7 @@ async function main() {
       const pdfFile = file.replace(/\.md$/i, `${suffix}.pdf`);
       const pdfPath = path.join(outputDir, pdfFile);
       pdfPaths.push(pdfPath);
-      all.push(readMdWritePdf(path.join(__dirname, file), pdfPath, { theme, colorEmoji }));
+      all.push(readMdWritePdf(path.join(__dirname, file), pdfPath, { theme }));
     }
   }
 

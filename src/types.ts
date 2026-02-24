@@ -120,9 +120,6 @@ export interface CustomFontDefinition {
   boldItalic?: Buffer;
 }
 
-/** Converts a single emoji string to a PNG `Buffer`. */
-export type ColorEmojiRenderer = (emoji: string) => Promise<Buffer>;
-
 export interface PdfOptions {
   theme?: ThemeConfig;
   pageLayout?: PageLayout;
@@ -180,20 +177,6 @@ export interface PdfOptions {
    * @default true
    */
   emojiFont?: boolean | string | Buffer;
-  /**
-   * Color emoji renderer.
-   *
-   * When provided, emoji characters are rendered as inline color PNG images
-   * (sourced from Twemoji SVGs) instead of monochrome font glyphs.
-   *
-   * Use `createNodeColorEmojiRenderer()` (Node.js) or
-   * `createBrowserColorEmojiRenderer()` (browser) to obtain a renderer.
-   *
-   * Takes priority over `emojiFont` for emoji that are successfully rendered.
-   * Emoji that fail to render (e.g. missing from Twemoji) fall back to the
-   * monochrome font or the body font.
-   */
-  colorEmoji?: ColorEmojiRenderer;
   /**
    * Custom font definitions to register with PDFKit.
    *
