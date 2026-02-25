@@ -21,14 +21,14 @@ export async function renderMarkdownToPdf(
   const zebraStripes = options?.zebraStripes !== false;
   // ── Resolve effective emoji font setting ──────────────────────────────
   // PdfOptions.emojiFont (boolean | string | Buffer) overrides theme when
-  // explicitly set; otherwise fall back to theme.emojiFont ('twemoji'|'none').
+  // explicitly set; otherwise fall back to theme.emojiFont ('twemoji'|'openmoji'|'none').
   const themeEmojiFont = theme.emojiFont ?? 'twemoji';
   const emojiFontOpt: boolean | string | Buffer =
     options?.emojiFont !== undefined
       ? options.emojiFont
-      : themeEmojiFont === 'twemoji'
-        ? true
-        : false;
+      : themeEmojiFont === 'none'
+        ? false
+        : themeEmojiFont; // 'twemoji' | 'openmoji'
 
   // Use provided image renderer or create default Node.js renderer
   const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
@@ -49,10 +49,14 @@ export async function renderMarkdownToPdf(
         const nodePath: typeof import('path') = require('path');
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nodeFs: typeof import('fs') = require('fs');
-        const fontPath =
-          typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'none'
-            ? emojiFontOpt
-            : nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
+        let fontPath: string;
+        if (typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'openmoji' && emojiFontOpt !== 'none') {
+          fontPath = emojiFontOpt; // custom file path
+        } else if (emojiFontOpt === 'openmoji') {
+          fontPath = nodePath.join(__dirname, 'fonts', 'OpenMoji-Color.ttf');
+        } else {
+          fontPath = nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
+        }
         if (nodeFs.existsSync(fontPath)) {
           resolvedEmojiFont = fontPath;
         }
