@@ -6,8 +6,8 @@ import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
  * Font file paths keyed by theme emojiFont value.
  */
 const emojiFontPaths: Record<string, string> = {
-  twemoji: '/fonts/Twemoji.Mozilla.ttf',
-  openmoji: '/fonts/OpenMoji-Color.ttf',
+  twemoji: `${import.meta.env.BASE_URL}fonts/Twemoji.Mozilla.ttf`,
+  openmoji: `${import.meta.env.BASE_URL}fonts/OpenMoji-Color.ttf`,
 };
 
 /**
