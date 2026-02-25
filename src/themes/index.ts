@@ -1,5 +1,5 @@
 import type { ThemeConfig } from '../types.js';
-import { defaultTheme } from '../styles.js';
+import { defaultTheme, defaultSpacing } from '../styles.js';
 
 export { defaultTheme } from '../styles.js';
 
@@ -38,6 +38,9 @@ export const modernTheme: ThemeConfig = {
       default: '#2d3436',
     },
   },
+  spacing: { ...defaultSpacing },
+  imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Academic — serif fonts, formal look inspired by LaTeX */
@@ -75,6 +78,9 @@ export const academicTheme: ThemeConfig = {
       default: '#1a1a2e',
     },
   },
+  spacing: { ...defaultSpacing },
+  imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Minimal — lots of whitespace, muted greys */
@@ -112,6 +118,9 @@ export const minimalTheme: ThemeConfig = {
       default: '#333333',
     },
   },
+  spacing: { ...defaultSpacing },
+  imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Ocean — deep blue palette */
@@ -149,6 +158,9 @@ export const oceanTheme: ThemeConfig = {
       default: '#1b2631',
     },
   },
+  spacing: { ...defaultSpacing },
+  imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Record of all built-in themes keyed by display name */

@@ -26,6 +26,7 @@ export interface CodeStyle {
 
 export interface CodeBlockStyle extends CodeStyle {
   padding: number;
+  borderRadius?: number;
 }
 
 export interface BlockquoteStyle {
@@ -33,6 +34,8 @@ export interface BlockquoteStyle {
   borderWidth: number;
   italic: boolean;
   indent: number;
+  backgroundColor?: string;
+  padding?: number;
 }
 
 export interface TableStyles {
@@ -55,6 +58,17 @@ export interface SyntaxHighlightTheme {
   defaultText: string;
   lineHighlight: string;
   tokens: TokenColors;
+}
+
+export interface SpacingConfig {
+  headingSpaceAbove?: number;
+  headingSpaceBelow?: number;
+  paragraphSpacing?: number;
+  listItemSpacing?: number;
+  listIndent?: number;
+  blockquoteSpacing?: number;
+  codeBlockSpacing?: number;
+  hrSpacing?: number;
 }
 
 export interface ThemeConfig {
@@ -80,6 +94,16 @@ export interface ThemeConfig {
    * When omitted, falls back to a VS Code Dark+ inspired palette.
    */
   syntaxHighlight?: SyntaxHighlightTheme;
+  /** Configurable spacing multipliers and indentation values. */
+  spacing?: SpacingConfig;
+  /** Image horizontal alignment. */
+  imageAlign?: 'left' | 'center';
+  /** Emoji font to use for rendering emoji characters.
+   * - `'twemoji'` (default) — use the bundled Twemoji.Mozilla.ttf color emoji font.
+   * - `'openmoji'` — use the bundled OpenMoji-Color.ttf (COLR) emoji font.
+   * - `'none'` — disable emoji font; emoji render with the body font.
+   */
+  emojiFont?: 'twemoji' | 'openmoji' | 'none';
 }
 
 /**
@@ -101,9 +125,6 @@ export interface CustomFontDefinition {
   /** Bold-italic variant (falls back to bold or regular). */
   boldItalic?: Buffer;
 }
-
-/** Converts a single emoji string to a PNG `Buffer`. */
-export type ColorEmojiRenderer = (emoji: string) => Promise<Buffer>;
 
 export interface PdfOptions {
   theme?: ThemeConfig;
@@ -162,20 +183,6 @@ export interface PdfOptions {
    * @default true
    */
   emojiFont?: boolean | string | Buffer;
-  /**
-   * Color emoji renderer.
-   *
-   * When provided, emoji characters are rendered as inline color PNG images
-   * (sourced from Twemoji SVGs) instead of monochrome font glyphs.
-   *
-   * Use `createNodeColorEmojiRenderer()` (Node.js) or
-   * `createBrowserColorEmojiRenderer()` (browser) to obtain a renderer.
-   *
-   * Takes priority over `emojiFont` for emoji that are successfully rendered.
-   * Emoji that fail to render (e.g. missing from Twemoji) fall back to the
-   * monochrome font or the body font.
-   */
-  colorEmoji?: ColorEmojiRenderer;
   /**
    * Custom font definitions to register with PDFKit.
    *

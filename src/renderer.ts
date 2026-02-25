@@ -1,15 +1,13 @@
-import type { PdfOptions, TextStyle } from './types.js';
-import { defaultTheme, defaultPageLayout } from './styles.js';
+import type { PdfOptions, SpacingConfig, TextStyle } from './types.js';
+import { defaultTheme, defaultPageLayout, defaultSpacing } from './styles.js';
 import PDFDocument from 'pdfkit';
 import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
 import { DEFAULTS } from './defaults.js';
 import { renderCode, loadHighlightLanguages } from './highlight.prism.js';
-import { splitEmojiSegments, containsEmoji, getEmojiRegex } from './emoji.js';
-import { preRenderEmoji } from './color-emoji.js';
 
-/** Name used to register the emoji font with PDFKit */
-const EMOJI_FONT_NAME = 'NotoEmoji';
+/** Name used to identify the emoji font (for safeFont checks). */
+const EMOJI_FONT_NAME = 'EmojiFont';
 
 /** Standard PDF fonts built into PDFKit — always available without filesystem access. */
 const STANDARD_PDF_FONTS = new Set([
@@ -32,52 +30,62 @@ export async function renderMarkdownToPdf(
   }
   const lineNumbers = options?.lineNumbers ?? false;
   const zebraStripes = options?.zebraStripes !== false;
-  const emojiFontOpt = options?.emojiFont ?? true;
+  // ── Resolve effective emoji font setting ──────────────────────────────
+  // PdfOptions.emojiFont (boolean | string | Buffer) overrides theme when
+  // explicitly set; otherwise fall back to theme.emojiFont ('twemoji'|'openmoji'|'none').
+  const themeEmojiFont = theme.emojiFont ?? 'twemoji';
+  const emojiFontOpt: boolean | string | Buffer =
+    options?.emojiFont !== undefined
+      ? options.emojiFont
+      : themeEmojiFont === 'none'
+        ? false
+        : themeEmojiFont; // 'twemoji' | 'openmoji'
 
   // Use provided image renderer or create default Node.js renderer
   const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
 
   const { margins } = layout;
 
-  const doc = new PDFDocument({ size: layout.pageSize, margins });
-  const stream = new PassThrough();
-  const chunks: Buffer[] = [];
-  doc.pipe(stream);
-  stream.on('data', (chunk: Buffer) => chunks.push(chunk));
-
-  // ── Emoji font registration ───────────────────────────────────────────────
-  // The font registration block uses dynamic require() for `path` and `fs` so
-  // that the renderer module can also be imported in browser environments where
-  // those Node.js built-ins are unavailable.  If they aren't available the
-  // try/catch simply falls through and emoji support is disabled (unless the
-  // caller passes a Buffer directly via the `emojiFont` option).
-  let emojiEnabled = false;
+  // ── Resolve emoji font for pdfkit native color emoji support ────────────
+  // The fork at jspears/pdfkit#support-color-emoji-google handles emoji
+  // segmentation and rendering (COLR/CPAL, SBIX, CBDT) internally when
+  // an `emojiFont` option is passed to the PDFDocument constructor.
+  let resolvedEmojiFont: string | Buffer | undefined;
   if (emojiFontOpt !== false) {
     try {
       if (Buffer.isBuffer(emojiFontOpt)) {
-        // Raw font data — works in both Node.js and browser environments.
-        doc.registerFont(EMOJI_FONT_NAME, emojiFontOpt);
-        emojiEnabled = true;
+        resolvedEmojiFont = emojiFontOpt;
       } else {
-        // Resolve a file path — requires Node.js built-ins.
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nodePath: typeof import('path') = require('path');
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nodeFs: typeof import('fs') = require('fs');
-        const fontPath =
-          typeof emojiFontOpt === 'string'
-            ? emojiFontOpt
-            : nodePath.join(__dirname, 'fonts', 'NotoEmoji-Regular.ttf');
+        let fontPath: string;
+        if (typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'openmoji' && emojiFontOpt !== 'none') {
+          fontPath = emojiFontOpt; // custom file path
+        } else if (emojiFontOpt === 'openmoji') {
+          fontPath = nodePath.join(__dirname, 'fonts', 'OpenMoji-Color.ttf');
+        } else {
+          fontPath = nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
+        }
         if (nodeFs.existsSync(fontPath)) {
-          doc.registerFont(EMOJI_FONT_NAME, fontPath);
-          emojiEnabled = true;
+          resolvedEmojiFont = fontPath;
         }
       }
     } catch {
-      // Font registration failed or Node.js APIs not available (browser) —
-      // fall through without emoji support.
+      // Node.js APIs not available (browser) — no emoji font.
     }
   }
+
+  const doc = new PDFDocument({
+    size: layout.pageSize,
+    margins,
+    ...(resolvedEmojiFont ? { emojiFont: resolvedEmojiFont } : {}),
+  });
+  const stream = new PassThrough();
+  const chunks: Buffer[] = [];
+  doc.pipe(stream);
+  stream.on('data', (chunk: Buffer) => chunks.push(chunk));
 
   // ── Custom font registration ─────────────────────────────────────────────
   // Register user-supplied font families so they can be referenced by name
@@ -116,19 +124,8 @@ export async function renderMarkdownToPdf(
     // Node.js `fs` not available — we're in a browser environment.
   }
 
-  // ── Color emoji pre-render ─────────────────────────────────────────────
-  // When a colorEmoji renderer is provided, pre-scan the entire markdown for
-  // every unique emoji and convert them all to PNG buffers up-front.  This
-  // lets `renderTextWithEmoji` remain synchronous during page rendering.
-  let emojiImageCache: Map<string, Buffer> | undefined;
-  const colorEmojiEnabled = !!options?.colorEmoji;
-  if (options?.colorEmoji) {
-    emojiImageCache = await preRenderEmoji(
-      markdown,
-      options.colorEmoji,
-      getEmojiRegex(),
-    );
-  }
+  // ── Spacing config ────────────────────────────────────────────────────
+  const sp: Required<SpacingConfig> = { ...defaultSpacing, ...theme.spacing };
 
   const tokens = marked.lexer(markdown);
   const contentWidth = doc.page.width - margins.left - margins.right;
@@ -263,20 +260,16 @@ export async function renderMarkdownToPdf(
   }
 
   /**
-   * Render a text string switching to the emoji font for emoji characters.
+   * Render text, delegating to `doc.text()`.
    *
-   * Preserves the caller's current font / fontSize / fillColor for the
-   * non-emoji portions.  The `continued` flag behaves exactly like the
-   * native PDFKit option — pass `true` to keep the line open.
+   * pdfkit's native color emoji support (via the `emojiFont` constructor
+   * option) handles emoji segmentation and rendering internally, so this
+   * function only normalises call signatures and handles table cell context.
    *
-   * When `colorEmojiEnabled` is true and `emojiImageCache` is populated,
-   * emoji characters are rendered as inline PNG images instead of font
-   * glyphs, with manual (x, y) positioning to keep them in the text flow.
-   *
-   * Supports both `renderTextWithEmoji(text, opts?)` and the positioned
-   * form `renderTextWithEmoji(text, x, y, opts?)` used by table cells.
+   * Supports both `renderText(text, opts?)` and the positioned form
+   * `renderText(text, x, y, opts?)` used by table cells.
    */
-  function renderTextWithEmoji(
+  function renderText(
     text: string,
     xOrOpts?: number | { continued?: boolean; [k: string]: unknown },
     yOrUndefined?: number,
@@ -302,171 +295,11 @@ export async function renderMarkdownToPdf(
       cellCtx.used = true;
     }
 
-    const hasEmoji = containsEmoji(text);
-
-    // ── Fast path: no emoji handling needed ──────────────────────────────
-    if ((!emojiEnabled && !colorEmojiEnabled) || !hasEmoji) {
-      if (firstX !== undefined) {
-        doc.text(text, firstX, firstY, opts);
-      } else {
-        doc.text(text, opts);
-      }
-      return;
+    if (firstX !== undefined) {
+      doc.text(text, firstX, firstY, opts);
+    } else {
+      doc.text(text, opts);
     }
-
-    // Remember the caller's font state so we can restore after emoji runs.
-    const prevFont = (doc as any)._font?.name ?? safeFont(theme.body.font);
-    const prevSize = (doc as any)._fontSize ?? theme.body.fontSize;
-
-    const segments = splitEmojiSegments(text);
-
-    // ── Color emoji path: render emoji as inline PNG images ──────────────
-    // Strategy: two-pass rendering.
-    //   Pass 1 – Render all text through doc.text() with `continued`,
-    //            exactly like the monochrome path.  For emoji segments,
-    //            render a space-placeholder to reserve width.  Read the
-    //            real X position from PDFKit's internal wrapper state
-    //            (_wrapper.startX + _wrapper.continuedX) — doc.x stays
-    //            at the left margin after continued:true so it is NOT
-    //            usable for positioning.
-    //   Pass 2 – Overlay emoji PNG images at the recorded positions.
-    if (colorEmojiEnabled && emojiImageCache && emojiImageCache.size > 0) {
-      const emojiRe = getEmojiRegex();
-      const emojiSize = prevSize;  // match font size
-      const emojiPlacements: Array<{ png: Buffer; x: number; y: number }> = [];
-
-      // Read the actual text-flow X from PDFKit's internal LineWrapper.
-      // After doc.text(…, {continued:true}), _wrapper.continuedX tracks
-      // cumulative rendered width; startX is the original doc.x at
-      // wrapper creation time.
-      const getFlowX = (): number => {
-        const w = (doc as any)._wrapper;
-        if (w) return w.startX + w.continuedX;
-        return firstX ?? doc.x;
-      };
-
-      // Build a space-placeholder string whose width ≈ emojiSize.
-      doc.font(prevFont).fontSize(prevSize);
-      const spaceW = doc.widthOfString(' ');
-      const spacesPerEmoji = Math.max(1, Math.round(emojiSize / spaceW));
-      const placeholder = ' '.repeat(spacesPerEmoji);
-      const placeholderW = doc.widthOfString(placeholder);
-
-      // Vertical alignment: centre emoji within the current line height.
-      const lineH = doc.currentLineHeight(true);
-      const yOffset = Math.max(0, (lineH - emojiSize) / 2);
-
-      // Only use explicit (firstX, firstY) coordinates on the very first
-      // doc.text() call, and only when no wrapper already exists (i.e.
-      // we are not continuing from a prior renderTextWithEmoji call).
-      let usedExplicitCoords = false;
-
-      for (let i = 0; i < segments.length; i++) {
-        const seg = segments[i];
-        const isLast = i === segments.length - 1;
-        const cont = isLast ? !!opts.continued : true;
-
-        if (seg.isEmoji) {
-          emojiRe.lastIndex = 0;
-          let em: RegExpExecArray | null;
-          while ((em = emojiRe.exec(seg.text)) !== null) {
-            const png = emojiImageCache.get(em[0]);
-            const isLastEmoji = isLast && emojiRe.lastIndex >= seg.text.length;
-            const eCont = isLastEmoji ? !!opts.continued : true;
-
-            if (png) {
-              // Position BEFORE rendering the placeholder.
-              const emojiX = getFlowX();
-              // For positioned calls (table cells), doc.y may be stale from
-              // a previous cell — use the explicit firstY instead.
-              const emojiY = (!usedExplicitCoords && firstY !== undefined) ? firstY : doc.y;
-
-              doc.font(prevFont).fontSize(prevSize);
-              if (!usedExplicitCoords && firstX !== undefined) {
-                doc.text(placeholder, firstX, firstY, { ...opts, continued: eCont });
-                usedExplicitCoords = true;
-              } else {
-                doc.text(placeholder, { ...opts, continued: eCont });
-              }
-
-              // Compute alignment-aware X position for the emoji image.
-              let placedX = emojiX + (placeholderW - emojiSize) / 2;
-              if (firstX !== undefined && typeof opts.width === 'number' && !(doc as any)._wrapper) {
-                // Table cell with alignment — PDFKit already rendered the
-                // placeholder at the aligned position; match it.
-                const cellW = opts.width as number;
-                const a = (opts.align as string) || 'left';
-                if (a === 'center') placedX = firstX + (cellW - emojiSize) / 2;
-                else if (a === 'right') placedX = firstX + cellW - emojiSize;
-              }
-
-              emojiPlacements.push({
-                png,
-                x: placedX,
-                y: emojiY + yOffset,
-              });
-            } else {
-              // Fallback: monochrome glyph.
-              if (emojiEnabled) doc.font(EMOJI_FONT_NAME).fontSize(prevSize);
-              if (!usedExplicitCoords && firstX !== undefined) {
-                doc.text(em[0], firstX, firstY, { ...opts, continued: isLastEmoji ? !!opts.continued : true });
-                usedExplicitCoords = true;
-              } else {
-                doc.text(em[0], { ...opts, continued: isLastEmoji ? !!opts.continued : true });
-              }
-              doc.font(prevFont).fontSize(prevSize);
-            }
-          }
-        } else {
-          // ── Text segment ──
-          doc.font(prevFont).fontSize(prevSize);
-          if (!usedExplicitCoords && firstX !== undefined) {
-            doc.text(seg.text, firstX, firstY, { ...opts, continued: cont });
-            usedExplicitCoords = true;
-          } else {
-            doc.text(seg.text, { ...opts, continued: cont });
-          }
-        }
-      }
-
-      // ── Pass 2: overlay emoji images at recorded positions ──
-      const savedY = doc.y;
-      const savedX = doc.x;
-      for (const ep of emojiPlacements) {
-        doc.image(ep.png, ep.x, ep.y, {
-          width: emojiSize,
-          height: emojiSize,
-        });
-      }
-      doc.y = savedY;
-      doc.x = savedX;
-
-      doc.font(prevFont).fontSize(prevSize);
-      return;
-    }
-
-    // ── Monochrome font path (original behaviour) ────────────────────────
-    for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i];
-      const isLast = i === segments.length - 1;
-      const cont = isLast ? !!opts.continued : true;
-
-      if (seg.isEmoji) {
-        doc.font(EMOJI_FONT_NAME).fontSize(prevSize);
-      } else {
-        doc.font(prevFont).fontSize(prevSize);
-      }
-
-      // Only pass explicit x,y for the very first segment.
-      if (i === 0 && firstX !== undefined) {
-        doc.text(seg.text, firstX, firstY, { ...opts, continued: cont });
-      } else {
-        doc.text(seg.text, { ...opts, continued: cont });
-      }
-    }
-
-    // Restore the original font so subsequent calls aren't surprised.
-    doc.font(prevFont).fontSize(prevSize);
   }
 
   function renderCodespan(text: string, continued: boolean): void {
@@ -528,7 +361,7 @@ export async function renderMarkdownToPdf(
       doc.font(safeFont(theme.body.font)).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
     }
     const linkText = tok.text || tok.href;
-    renderTextWithEmoji(linkText, { continued, underline: true, link: tok.href });
+    renderText(linkText, { continued, underline: true, link: tok.href });
     doc.fillColor(headingCtx ? headingCtx.color : theme.body.color);
   }
 
@@ -549,7 +382,7 @@ export async function renderMarkdownToPdf(
             await renderInlineTokens(t.tokens, cont, insideBold, insideItalic);
           } else {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(t.text, { continued: cont, underline: false, strike: false });
+            renderText(t.text, { continued: cont, underline: false, strike: false });
           }
           break;
         }
@@ -577,12 +410,12 @@ export async function renderMarkdownToPdf(
         }
         case 'del': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Del).text, { continued: cont, strike: true, underline: false });
+          renderText((tok as Tokens.Del).text, { continued: cont, strike: true, underline: false });
           break;
         }
         case 'escape': {
           applyBodyFont(insideBold, insideItalic);
-          renderTextWithEmoji((tok as Tokens.Escape).text, { continued: cont, underline: false, strike: false });
+          renderText((tok as Tokens.Escape).text, { continued: cont, underline: false, strike: false });
           break;
         }
         case 'br': {
@@ -593,7 +426,7 @@ export async function renderMarkdownToPdf(
           const raw = (tok as any).text ?? (tok as any).raw ?? '';
           if (raw) {
             applyBodyFont(insideBold, insideItalic);
-            renderTextWithEmoji(raw, { continued: cont, underline: false, strike: false });
+            renderText(raw, { continued: cont, underline: false, strike: false });
           }
           break;
         }
@@ -622,9 +455,12 @@ export async function renderMarkdownToPdf(
       }
 
       ensureSpace(displayHeight + 10);
-      const imgX = doc.x;
+      // Compute horizontal position based on imageAlign
+      const imgX = theme.imageAlign === 'center'
+        ? margins.left + (contentWidth - displayWidth) / 2
+        : doc.x;
       const imgY = doc.y;
-      doc.image(imgBuffer, { width: displayWidth, height: displayHeight });
+      doc.image(imgBuffer, imgX, imgY, { width: displayWidth, height: displayHeight });
 
       // If the image is wrapped in a link, overlay a clickable annotation
       if (linkUrl) {
@@ -641,13 +477,13 @@ export async function renderMarkdownToPdf(
   }
 
   async function renderList(list: Tokens.List, depth: number): Promise<void> {
-    const indent = margins.left + depth * 20;
+    const indent = margins.left + depth * sp.listIndent;
     for (let idx = 0; idx < list.items.length; idx++) {
       const item = list.items[idx];
       ensureSpace(theme.body.fontSize * 2);
       resetBodyFont();
       const bullet = list.ordered ? `${(list.start as number) + idx}.` : '•';
-      doc.text(bullet, indent, doc.y, { continued: true, width: contentWidth - depth * 20 });
+      doc.text(bullet, indent, doc.y, { continued: true, width: contentWidth - depth * sp.listIndent });
       doc.text(' ', { continued: true });
       // Render item inline tokens
       const itemTokens = item.tokens;
@@ -657,7 +493,7 @@ export async function renderMarkdownToPdf(
           if (t.tokens && t.tokens.length > 0) {
             await renderInlineTokens(t.tokens, false);
           } else {
-            renderTextWithEmoji(t.text);
+            renderText(t.text);
           }
         } else if (child.type === 'paragraph') {
           await renderInlineTokens((child as Tokens.Paragraph).tokens, false);
@@ -665,7 +501,7 @@ export async function renderMarkdownToPdf(
           await renderList(child as Tokens.List, depth + 1);
         }
       }
-      doc.moveDown(0.2);
+      doc.moveDown(sp.listItemSpacing);
     }
   }
 
@@ -684,7 +520,7 @@ export async function renderMarkdownToPdf(
     } else {
       // Fallback: plain text (no inline tokens)
       applyBodyFont(bold, false);
-      renderTextWithEmoji(cell.text, x, y, { width, align });
+      renderText(cell.text, x, y, { width, align });
     }
     doc.y = savedY;
   }
@@ -765,8 +601,8 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Heading;
         const key = `h${t.depth}` as keyof typeof theme.headings;
         const style = theme.headings[key];
-        const spaceAbove = style.fontSize * 0.8;
-        const spaceBelow = style.fontSize * 0.3;
+        const spaceAbove = style.fontSize * sp.headingSpaceAbove;
+        const spaceBelow = style.fontSize * sp.headingSpaceBelow;
         ensureSpace(spaceAbove + style.fontSize + spaceBelow);
         doc.moveDown(spaceAbove / doc.currentLineHeight());
         doc.font(safeFont(style.font)).fontSize(style.fontSize).fillColor(style.color);
@@ -774,7 +610,7 @@ export async function renderMarkdownToPdf(
         if (t.tokens && t.tokens.length > 0) {
           await renderInlineTokens(t.tokens, false, style.bold ?? false, style.italic ?? false);
         } else {
-          renderTextWithEmoji(t.text);
+          renderText(t.text);
         }
         headingCtx = null;
 
@@ -799,7 +635,7 @@ export async function renderMarkdownToPdf(
         ensureSpace(theme.body.fontSize * 2);
         resetBodyFont();
         await renderInlineTokens(t.tokens, false);
-        doc.moveDown(0.5);
+        doc.moveDown(sp.paragraphSpacing);
         break;
       }
       case 'code': {
@@ -824,10 +660,11 @@ export async function renderMarkdownToPdf(
             lineNumbers,
             drawBackground: true,
             theme: theme.syntaxHighlight,
+            borderRadius: cs.borderRadius,
           });
           doc.x = margins.left;
           doc.y = newY;
-          doc.moveDown(0.5);
+          doc.moveDown(sp.codeBlockSpacing);
           resetBodyFont();
         } else {
           // Plain code block (no language or highlighting disabled)
@@ -837,8 +674,13 @@ export async function renderMarkdownToPdf(
           ensureSpace(blockH + 10);
           const x = margins.left;
           const y = doc.y;
+          const cbRadius = cs.borderRadius ?? 0;
           doc.save();
-          doc.rect(x, y, contentWidth, blockH).fill(cs.backgroundColor);
+          if (cbRadius > 0) {
+            doc.roundedRect(x, y, contentWidth, blockH, cbRadius).fill(cs.backgroundColor);
+          } else {
+            doc.rect(x, y, contentWidth, blockH).fill(cs.backgroundColor);
+          }
           doc.restore();
           doc.font(safeFont(cs.font)).fontSize(cs.fontSize).fillColor(cs.color);
           let textY = y + cs.padding;
@@ -848,7 +690,7 @@ export async function renderMarkdownToPdf(
           }
           doc.x = margins.left;
           doc.y = y + blockH;
-          doc.moveDown(0.5);
+          doc.moveDown(sp.codeBlockSpacing);
           resetBodyFont();
         }
         break;
@@ -857,7 +699,7 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Blockquote;
         const bq = theme.blockquote;
         ensureSpace(30);
-        const bqPadding = 6; // vertical padding above and below text
+        const bqPadding = bq.padding ?? 6;
         const startY = doc.y;
         doc.y += bqPadding; // add top padding before text
         const textX = margins.left + bq.borderWidth + bq.indent;
@@ -869,18 +711,25 @@ export async function renderMarkdownToPdf(
             doc.font(safeFont(font)).fontSize(theme.body.fontSize).fillColor(theme.body.color);
             doc.text('', textX, doc.y, { width: textWidth });
             await renderInlineTokens(p.tokens, false, false, bq.italic);
-            doc.moveDown(0.3);
+            doc.moveDown(sp.blockquoteSpacing);
           } else {
             await renderToken(child);
           }
         }
         doc.y += bqPadding; // add bottom padding after text
         const endY = doc.y;
+        // Draw optional background fill behind blockquote area
+        if (bq.backgroundColor) {
+          doc.save();
+          doc.rect(margins.left + bq.borderWidth, startY, contentWidth - bq.borderWidth, endY - startY).fill(bq.backgroundColor);
+          doc.restore();
+        }
+        // Draw left border
         doc.save();
         doc.rect(margins.left, startY, bq.borderWidth, endY - startY).fill(bq.borderColor);
         doc.restore();
         doc.x = margins.left;
-        doc.moveDown(0.3);
+        doc.moveDown(sp.blockquoteSpacing);
         resetBodyFont();
         break;
       }
@@ -891,7 +740,7 @@ export async function renderMarkdownToPdf(
       }
       case 'hr': {
         ensureSpace(20);
-        doc.moveDown(0.5);
+        doc.moveDown(sp.hrSpacing);
         const y = doc.y;
         doc.save();
         doc.strokeColor(theme.horizontalRuleColor).lineWidth(1)
@@ -900,7 +749,7 @@ export async function renderMarkdownToPdf(
           .stroke();
         doc.restore();
         doc.y = y;
-        doc.moveDown(0.5);
+        doc.moveDown(sp.hrSpacing);
         resetBodyFont();
         break;
       }

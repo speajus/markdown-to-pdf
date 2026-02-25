@@ -21,7 +21,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm run build:pdfkit
       - run: pnpm run build
 
       - uses: actions/upload-artifact@v4
@@ -44,7 +45,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm run build:pdfkit
 
       - uses: actions/download-artifact@v4
         with:
@@ -72,7 +74,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm run build:pdfkit
 
       - uses: actions/download-artifact@v4
         with:
@@ -108,7 +111,7 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
 
       - uses: actions/download-artifact@v4
         with:
@@ -122,7 +125,28 @@ jobs:
         run: |
           mkdir /tmp/smoke-test && cd /tmp/smoke-test
           npm init -y
-          npm install $GITHUB_WORKSPACE/speajus-markdown-to-pdf-*.tgz
+          npm install --ignore-scripts $GITHUB_WORKSPACE/speajus-markdown-to-pdf-*.tgz
+
+      - name: Build pdfkit fork for smoke test
+        run: |
+          cd /tmp/smoke-test
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const { execSync } = require('child_process');
+            const d = path.join('node_modules', 'pdfkit', 'js');
+            if (!fs.existsSync(d)) {
+              const t = '/tmp/pdfkit-smoke-' + Date.now();
+              execSync('git clone --depth 1 --branch support-color-emoji-google https://github.com/jspears/pdfkit.git ' + t, { stdio: 'inherit' });
+              const pd = path.resolve('node_modules/pdfkit');
+              for (const f of ['lib', 'rollup.config.js', '.babelrc', 'yarn.lock']) {
+                const s = path.join(t, f);
+                if (fs.existsSync(s)) execSync('cp -r ' + s + ' ' + pd, { stdio: 'inherit' });
+              }
+              execSync('cd ' + pd + ' && npm install --ignore-scripts && npx rollup -c', { stdio: 'inherit' });
+              execSync('rm -rf ' + t, { stdio: 'inherit' });
+            }
+          "
 
       - name: Smoke test — API (require)
         run: |

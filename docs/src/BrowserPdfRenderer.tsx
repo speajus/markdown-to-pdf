@@ -1,41 +1,51 @@
 import { useState, useEffect, useRef } from 'react';
-import { renderMarkdownToPdf, createBrowserImageRenderer, createBrowserColorEmojiRenderer } from '../../src/browser';
-import type { ThemeConfig, ColorEmojiRenderer, CustomFontDefinition } from '../../src/browser';
+import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
+import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
 
 /**
- * Lazily fetch the Noto Emoji font and cache the resulting Buffer so we only
- * download it once across all renders.
+ * Font file paths keyed by theme emojiFont value.
  */
-let emojiFontPromise: Promise<Buffer | null> | null = null;
-
-function loadEmojiFont(): Promise<Buffer | null> {
-  if (!emojiFontPromise) {
-    emojiFontPromise = fetch(`${import.meta.env.BASE_URL}fonts/NotoEmoji-Regular.ttf`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
-        return res.arrayBuffer();
-      })
-      .then((ab) => Buffer.from(ab))
-      .catch((err) => {
-        console.warn('Could not load emoji font – emoji will not render:', err);
-        return null;
-      });
-  }
-  return emojiFontPromise;
-}
+const emojiFontPaths: Record<string, string> = {
+  twemoji: '/fonts/Twemoji.Mozilla.ttf',
+  openmoji: '/fonts/OpenMoji-Color.ttf',
+};
 
 /**
- * Lazily create a color emoji renderer. The factory itself is cheap — the
- * actual Twemoji SVG fetches happen on first use and are cached internally.
+ * Per-font cache so each emoji font is fetched at most once.
  */
-let colorEmojiRenderer: ColorEmojiRenderer | null = null;
+const emojiFontCache = new Map<string, Promise<Buffer | null>>();
 
-function getColorEmojiRenderer(): ColorEmojiRenderer {
-  if (!colorEmojiRenderer) {
-    colorEmojiRenderer = createBrowserColorEmojiRenderer();
-  }
-  return colorEmojiRenderer;
+/**
+ * Load the emoji font buffer for the given theme emojiFont setting.
+ * Returns `null` for `'none'` (no emoji font) and caches each font
+ * independently so switching between Twemoji and OpenMoji doesn't
+ * re-download.
+ */
+function loadEmojiFontForTheme(fontName: string): Promise<Buffer | null> {
+  if (fontName === 'none') return Promise.resolve(null);
+
+  const cached = emojiFontCache.get(fontName);
+  if (cached) return cached;
+
+  const path = emojiFontPaths[fontName];
+  if (!path) return Promise.resolve(null);
+
+  const promise = fetch(path)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
+      return res.arrayBuffer();
+    })
+    .then((ab) => Buffer.from(ab))
+    .catch((err) => {
+      console.warn(`Could not load emoji font '${fontName}' – emoji will not render:`, err);
+      emojiFontCache.delete(fontName);
+      return null;
+    });
+
+  emojiFontCache.set(fontName, promise);
+  return promise;
 }
+
 
 interface BrowserPdfRendererProps {
   markdown: string;
@@ -68,15 +78,14 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
           // Create browser image renderer
           const renderImage = createBrowserImageRenderer('');
 
-          // Load the emoji font (cached after first fetch)
-          const emojiFont = await loadEmojiFont();
+          // Load the correct emoji font based on theme setting
+          const emojiFontName = theme?.emojiFont ?? 'twemoji';
+          const emojiFont = await loadEmojiFontForTheme(emojiFontName);
 
           // Generate PDF using the refactored library (src/index.ts)
-          const colorEmoji = getColorEmojiRenderer();
           const buffer = await renderMarkdownToPdf(markdown, {
             renderImage,
             theme,
-            colorEmoji,
             ...(emojiFont ? { emojiFont } : { emojiFont: false }),
             ...(customFonts && customFonts.length > 0 ? { customFonts } : {}),
           });
