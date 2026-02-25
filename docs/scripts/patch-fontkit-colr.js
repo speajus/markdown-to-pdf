@@ -10,10 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const fontkitPaths = [
-  path.join(__dirname, '..', 'node_modules', 'fontkit'),
-  path.join(__dirname, '..', 'node_modules', 'pdfkit', 'node_modules', 'fontkit'),
-];
+const nmDir = path.join(__dirname, '..', 'node_modules');
 
 function patchFile(filePath, patches) {
   if (!fs.existsSync(filePath)) return false;
@@ -21,7 +18,8 @@ function patchFile(filePath, patches) {
   let changed = false;
   for (const [search, replace] of patches) {
     if (content.includes(search) && !content.includes(replace)) {
-      content = content.replace(search, replace);
+      // Replace ALL occurrences (some bundled files may have multiple copies)
+      content = content.split(search).join(replace);
       changed = true;
     }
   }
@@ -39,20 +37,35 @@ const layersGetterPatch = [
 
 let patchCount = 0;
 
+// 1. Patch fontkit dist/src files directly
+const fontkitPaths = [
+  path.join(nmDir, 'fontkit'),
+  path.join(nmDir, 'pdfkit', 'node_modules', 'fontkit'),
+];
+
 for (const fontkitDir of fontkitPaths) {
   if (!fs.existsSync(fontkitDir)) continue;
-
-  // Patch dist files (used by bundlers like Vite)
   for (const distFile of ['dist/browser-module.mjs', 'dist/main.cjs']) {
-    if (patchFile(path.join(fontkitDir, distFile), [layersGetterPatch])) {
-      patchCount++;
-    }
+    if (patchFile(path.join(fontkitDir, distFile), [layersGetterPatch])) patchCount++;
   }
+  if (patchFile(path.join(fontkitDir, 'src', 'glyph', 'COLRGlyph.js'), [layersGetterPatch])) patchCount++;
+}
 
-  // Patch source file
-  if (patchFile(path.join(fontkitDir, 'src', 'glyph', 'COLRGlyph.js'), [layersGetterPatch])) {
-    patchCount++;
-  }
+// 2. Patch pdfkit standalone bundles (these embed fontkit inline)
+const pdfkitBundles = [
+  path.join(nmDir, 'pdfkit', 'js', 'pdfkit.standalone.js'),
+  path.join(nmDir, 'pdfkit', 'js', 'pdfkit.js'),
+];
+
+for (const bundle of pdfkitBundles) {
+  if (patchFile(bundle, [layersGetterPatch])) patchCount++;
+}
+
+// 3. Clear Vite dep cache so it re-bundles with patched files
+const viteCacheDir = path.join(nmDir, '.vite');
+if (fs.existsSync(viteCacheDir)) {
+  fs.rmSync(viteCacheDir, { recursive: true, force: true });
+  console.log('  Cleared Vite dep cache (.vite)');
 }
 
 if (patchCount > 0) {
