@@ -3,25 +3,47 @@ import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/brows
 import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
 
 /**
- * Lazily fetch the Noto Emoji font and cache the resulting Buffer so we only
- * download it once across all renders.
+ * Font file paths keyed by theme emojiFont value.
  */
-let emojiFontPromise: Promise<Buffer | null> | null = null;
+const emojiFontPaths: Record<string, string> = {
+  twemoji: '/fonts/Twemoji.Mozilla.ttf',
+  openmoji: '/fonts/OpenMoji-Color.ttf',
+};
 
-function loadEmojiFont(): Promise<Buffer | null> {
-  if (!emojiFontPromise) {
-    emojiFontPromise = fetch('/fonts/Twemoji.Mozilla.ttf')
-      .then((res) => {
-        if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
-        return res.arrayBuffer();
-      })
-      .then((ab) => Buffer.from(ab))
-      .catch((err) => {
-        console.warn('Could not load emoji font – emoji will not render:', err);
-        return null;
-      });
-  }
-  return emojiFontPromise;
+/**
+ * Per-font cache so each emoji font is fetched at most once.
+ */
+const emojiFontCache = new Map<string, Promise<Buffer | null>>();
+
+/**
+ * Load the emoji font buffer for the given theme emojiFont setting.
+ * Returns `null` for `'none'` (no emoji font) and caches each font
+ * independently so switching between Twemoji and OpenMoji doesn't
+ * re-download.
+ */
+function loadEmojiFontForTheme(fontName: string): Promise<Buffer | null> {
+  if (fontName === 'none') return Promise.resolve(null);
+
+  const cached = emojiFontCache.get(fontName);
+  if (cached) return cached;
+
+  const path = emojiFontPaths[fontName];
+  if (!path) return Promise.resolve(null);
+
+  const promise = fetch(path)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
+      return res.arrayBuffer();
+    })
+    .then((ab) => Buffer.from(ab))
+    .catch((err) => {
+      console.warn(`Could not load emoji font '${fontName}' – emoji will not render:`, err);
+      emojiFontCache.delete(fontName);
+      return null;
+    });
+
+  emojiFontCache.set(fontName, promise);
+  return promise;
 }
 
 
@@ -56,8 +78,9 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
           // Create browser image renderer
           const renderImage = createBrowserImageRenderer('');
 
-          // Load the emoji font (cached after first fetch)
-          const emojiFont = await loadEmojiFont();
+          // Load the correct emoji font based on theme setting
+          const emojiFontName = theme?.emojiFont ?? 'twemoji';
+          const emojiFont = await loadEmojiFontForTheme(emojiFontName);
 
           // Generate PDF using the refactored library (src/index.ts)
           const buffer = await renderMarkdownToPdf(markdown, {
