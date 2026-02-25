@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "postinstall": "node -e \"const fs=require('fs'),p=require('path'),pk=p.join('node_modules','pdfkit'),d=p.join(pk,'js');if(!fs.existsSync(d)){const{execSync:e}=require('child_process');const t='/tmp/pdfkit-build-'+Date.now();e('git clone --depth 1 -b support-color-emoji-google https://github.com/jspears/pdfkit.git '+t+' && cd '+t+' && COREPACK_ENABLE_STRICT=0 corepack yarn install && COREPACK_ENABLE_STRICT=0 corepack yarn build',{stdio:'inherit'});e('cp -r '+t+'/js '+pk+'/js');e('cp -r '+t+'/lib '+pk+'/lib');e('rm -rf '+t)}\"",
+    "postinstall": "node -e \"const fs=require('fs'),p=require('path'),pk=p.join('node_modules','pdfkit'),d=p.join(pk,'js');if(!fs.existsSync(d)){const{execSync:e}=require('child_process');const t='/tmp/pdfkit-build-'+Date.now();e('git clone --depth 1 -b support-color-emoji-google https://github.com/jspears/pdfkit.git '+t+' && cd '+t+' && COREPACK_ENABLE_STRICT=0 corepack yarn install && COREPACK_ENABLE_STRICT=0 corepack yarn build',{stdio:'inherit'});e('cp -r '+t+'/js '+pk+'/js');e('cp -r '+t+'/lib '+pk+'/lib');e('rm -rf '+t)}\" && node scripts/patch-fontkit-colr.js",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
