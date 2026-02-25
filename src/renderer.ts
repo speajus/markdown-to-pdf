@@ -39,7 +39,7 @@ export async function renderMarkdownToPdf(
       ? options.emojiFont
       : themeEmojiFont === 'none'
         ? false
-        : themeEmojiFont; // 'twemoji' | 'openmoji'
+        : themeEmojiFont; // 'twemoji' | 'openmoji' | 'noto'
 
   // Use provided image renderer or create default Node.js renderer
   const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
@@ -61,10 +61,12 @@ export async function renderMarkdownToPdf(
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nodeFs: typeof import('fs') = require('fs');
         let fontPath: string;
-        if (typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'openmoji' && emojiFontOpt !== 'none') {
+        if (typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'openmoji' && emojiFontOpt !== 'noto' && emojiFontOpt !== 'none') {
           fontPath = emojiFontOpt; // custom file path
         } else if (emojiFontOpt === 'openmoji') {
           fontPath = nodePath.join(__dirname, 'fonts', 'OpenMoji-Color.ttf');
+        } else if (emojiFontOpt === 'noto') {
+          fontPath = nodePath.join(__dirname, 'fonts', 'NotoColorEmoji.ttf');
         } else {
           fontPath = nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
         }

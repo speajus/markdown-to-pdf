@@ -101,9 +101,10 @@ export interface ThemeConfig {
   /** Emoji font to use for rendering emoji characters.
    * - `'twemoji'` (default) — use the bundled Twemoji.Mozilla.ttf color emoji font.
    * - `'openmoji'` — use the bundled OpenMoji-Color.ttf (COLR) emoji font.
+   * - `'noto'` — use the bundled NotoColorEmoji.ttf (CBDT) emoji font.
    * - `'none'` — disable emoji font; emoji render with the body font.
    */
-  emojiFont?: 'twemoji' | 'openmoji' | 'none';
+  emojiFont?: 'twemoji' | 'openmoji' | 'noto' | 'none';
 }
 
 /**
