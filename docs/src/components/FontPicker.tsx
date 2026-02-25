@@ -40,6 +40,30 @@ export function FontPicker({ value, onChange, onFontLoad, label }: FontPickerPro
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // Load Google Font preview stylesheets when dropdown is open
+  useEffect(() => {
+    if (!open) return;
+
+    const results = searchGoogleFonts(query);
+
+    // Remove any existing preview links before adding new ones
+    document.querySelectorAll('link[data-font-preview]').forEach((el) => el.remove());
+
+    for (const f of results) {
+      const familyParam = f.family.replace(/ /g, '+');
+      const textParam = encodeURIComponent(f.family);
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${familyParam}&text=${textParam}&display=swap`;
+      link.dataset.fontPreview = 'true';
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      document.querySelectorAll('link[data-font-preview]').forEach((el) => el.remove());
+    };
+  }, [open, query]);
+
   async function handleSelectGoogle(family: string) {
     setLoading(family);
     setOpen(false);
@@ -110,7 +134,7 @@ export function FontPicker({ value, onChange, onFontLoad, label }: FontPickerPro
                 className={`font-picker-item${f.family === value ? ' selected' : ''}`}
                 onClick={() => handleSelectGoogle(f.family)}
               >
-                <span className="font-picker-item-name">{f.family}</span>
+                <span className="font-picker-item-name" style={{ fontFamily: `"${f.family}", ${f.category}` }}>{f.family}</span>
                 <span className="font-picker-item-cat">{f.category}</span>
               </button>
             ))}
