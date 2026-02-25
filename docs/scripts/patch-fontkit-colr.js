@@ -30,10 +30,22 @@ function patchFile(filePath, patches) {
   return changed;
 }
 
+// Patch 1: Guard against null baseGlyphRecord in COLRGlyph.layers getter
 const layersGetterPatch = [
   'let high = colr.baseGlyphRecord.length - 1;',
   'if (!colr || !colr.baseGlyphRecord) { return null; } let high = colr.baseGlyphRecord.length - 1;',
 ];
+
+// Patch 2: Don't create COLRGlyph for COLR v1 fonts (no v0 baseGlyphRecord)
+// COLR v1 uses a different paint-based structure that fontkit doesn't support.
+// Without this, COLR v1 glyphs (e.g. OpenMoji) get typed as COLR but can't
+// render, and they also won't fall back to SBIX/CBDT/SVG alternatives.
+const getGlyphPatch = [
+  'this.directory.tables.COLR && this.directory.tables.CPAL)',
+  'this.directory.tables.COLR && this.directory.tables.CPAL && this.COLR && this.COLR.baseGlyphRecord)',
+];
+
+const allPatches = [layersGetterPatch, getGlyphPatch];
 
 let patchCount = 0;
 
@@ -46,7 +58,7 @@ const fontkitPaths = [
 for (const fontkitDir of fontkitPaths) {
   if (!fs.existsSync(fontkitDir)) continue;
   for (const distFile of ['dist/browser-module.mjs', 'dist/main.cjs']) {
-    if (patchFile(path.join(fontkitDir, distFile), [layersGetterPatch])) patchCount++;
+    if (patchFile(path.join(fontkitDir, distFile), allPatches)) patchCount++;
   }
   if (patchFile(path.join(fontkitDir, 'src', 'glyph', 'COLRGlyph.js'), [layersGetterPatch])) patchCount++;
 }
@@ -58,7 +70,7 @@ const pdfkitBundles = [
 ];
 
 for (const bundle of pdfkitBundles) {
-  if (patchFile(bundle, [layersGetterPatch])) patchCount++;
+  if (patchFile(bundle, allPatches)) patchCount++;
 }
 
 // 3. Clear Vite dep cache so it re-bundles with patched files
