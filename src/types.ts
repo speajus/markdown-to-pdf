@@ -98,6 +98,11 @@ export interface ThemeConfig {
   spacing?: SpacingConfig;
   /** Image horizontal alignment. */
   imageAlign?: 'left' | 'center';
+  /** Emoji font to use for rendering emoji characters.
+   * - `'twemoji'` (default) — use the bundled Twemoji.Mozilla.ttf color emoji font.
+   * - `'none'` — disable emoji font; emoji render with the body font.
+   */
+  emojiFont?: 'twemoji' | 'none';
 }
 
 /**

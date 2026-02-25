@@ -19,7 +19,16 @@ export async function renderMarkdownToPdf(
   }
   const lineNumbers = options?.lineNumbers ?? false;
   const zebraStripes = options?.zebraStripes !== false;
-  const emojiFontOpt = options?.emojiFont ?? true;
+  // ── Resolve effective emoji font setting ──────────────────────────────
+  // PdfOptions.emojiFont (boolean | string | Buffer) overrides theme when
+  // explicitly set; otherwise fall back to theme.emojiFont ('twemoji'|'none').
+  const themeEmojiFont = theme.emojiFont ?? 'twemoji';
+  const emojiFontOpt: boolean | string | Buffer =
+    options?.emojiFont !== undefined
+      ? options.emojiFont
+      : themeEmojiFont === 'twemoji'
+        ? true
+        : false;
 
   // Use provided image renderer or create default Node.js renderer
   const imageRenderer = options?.renderImage ?? DEFAULTS.renderImage(basePath);
@@ -41,7 +50,7 @@ export async function renderMarkdownToPdf(
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const nodeFs: typeof import('fs') = require('fs');
         const fontPath =
-          typeof emojiFontOpt === 'string'
+          typeof emojiFontOpt === 'string' && emojiFontOpt !== 'twemoji' && emojiFontOpt !== 'none'
             ? emojiFontOpt
             : nodePath.join(__dirname, 'fonts', 'Twemoji.Mozilla.ttf');
         if (nodeFs.existsSync(fontPath)) {

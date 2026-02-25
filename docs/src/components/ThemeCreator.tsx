@@ -396,6 +396,17 @@ export function ThemeCreator({
                 <option value="center">Center</option>
               </select>
             </div>
+            <div className="tc-field-row">
+              <span className="tc-field-label">Emoji font</span>
+              <select
+                className="tc-select-input"
+                value={config.emojiFont ?? 'twemoji'}
+                onChange={(e) => update((d) => { d.emojiFont = e.target.value as 'twemoji' | 'none'; })}
+              >
+                <option value="twemoji">Twemoji (Color)</option>
+                <option value="none">None</option>
+              </select>
+            </div>
             <div className="tc-heading-group">
               <div className="tc-heading-group-title">Table</div>
               <ColorInput label="Header bg" value={config.table.headerBackground} onChange={(v) => update((d) => { d.table.headerBackground = v; })} />

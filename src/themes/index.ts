@@ -40,6 +40,7 @@ export const modernTheme: ThemeConfig = {
   },
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Academic — serif fonts, formal look inspired by LaTeX */
@@ -79,6 +80,7 @@ export const academicTheme: ThemeConfig = {
   },
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Minimal — lots of whitespace, muted greys */
@@ -118,6 +120,7 @@ export const minimalTheme: ThemeConfig = {
   },
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Ocean — deep blue palette */
@@ -157,6 +160,7 @@ export const oceanTheme: ThemeConfig = {
   },
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 /** Record of all built-in themes keyed by display name */

@@ -103,6 +103,7 @@ export const defaultTheme: ThemeConfig = {
   syntaxHighlight: defaultSyntaxHighlightTheme,
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
+  emojiFont: 'twemoji' as const,
 };
 
 export const defaultPageLayout: PageLayout = {
