@@ -6,6 +6,17 @@ import { PassThrough } from 'stream';
 import { DEFAULTS } from './defaults.js';
 import { renderCode, loadHighlightLanguages } from './highlight.prism.js';
 
+/** Name used to identify the emoji font (for safeFont checks). */
+const EMOJI_FONT_NAME = 'EmojiFont';
+
+/** Standard PDF fonts built into PDFKit — always available without filesystem access. */
+const STANDARD_PDF_FONTS = new Set([
+  'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
+  'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
+  'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
+  'Symbol', 'ZapfDingbats',
+]);
+
 export async function renderMarkdownToPdf(
   markdown: string,
   options?: PdfOptions,
@@ -97,6 +108,20 @@ export async function renderMarkdownToPdf(
         // Font registration failed — skip this font gracefully.
       }
     }
+  }
+
+  // ── Browser font safety ────────────────────────────────────────────────
+  // In browser environments, `fs.readFileSync` doesn't exist.  When PDFKit
+  // encounters an unknown font name it tries to load it from disk via
+  // readFileSync, which crashes in the browser.  Detect whether we're in a
+  // filesystem-capable environment so we can guard calls to `doc.font()`.
+  let fsAvailable = false;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const nodeFs: typeof import('fs') = require('fs');
+    fsAvailable = typeof nodeFs.readFileSync === 'function';
+  } catch {
+    // Node.js `fs` not available — we're in a browser environment.
   }
 
   // ── Spacing config ────────────────────────────────────────────────────
