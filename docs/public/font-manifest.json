@@ -1,0 +1,267 @@
+{
+  "Roboto": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=KFOKCnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmOClHrs6ljXfMMLoHQiAw&skey=c608c610063635f9&v=v51",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=KFOKCnqEu92Fr1Mu53ZEC9_Vu3r1gIhOszmOClHrs6ljXfMMLmbXiAw&skey=c608c610063635f9&v=v51",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWubEbWmQ&skey=a0a0114a1dcab3ac&v=v51",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuYjammQ&skey=a0a0114a1dcab3ac&v=v51"
+  },
+  "Open Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=memQYaGs126MiZpBA-UFUIcVXSCEkx2cmqvXlWq8tWZ0Pw86hd0Rk8ZkaVQ&skey=743457fe2cc29280&v=v44",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=memQYaGs126MiZpBA-UFUIcVXSCEkx2cmqvXlWq8tWZ0Pw86hd0RkyFjaVQ&skey=743457fe2cc29280&v=v44",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0C4k&skey=62c1cbfccc78b4b2&v=v44",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1y4k&skey=62c1cbfccc78b4b2&v=v44"
+  },
+  "Lato": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=S6u8w4BMUTPHjxswWA&skey=51512958f8cff7a8&v=v25",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=S6u_w4BMUTPHjxsI5wqPHw&skey=5334e9c0b67702e2&v=v25",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=S6uyw4BMUTPHvxo&skey=2d58b92a99e1c086&v=v25",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=S6u9w4BMUTPHh6UVeww&skey=3480a19627739c0d&v=v25"
+  },
+  "Montserrat": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=JTUFjIg1_i6t8kCHKm459Wx7xQYXK0vOoz6jq6R9aXw&skey=2d3c1187d5eede0f&v=v31",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=JTUFjIg1_i6t8kCHKm459Wx7xQYXK0vOoz6jq0N6aXw&skey=2d3c1187d5eede0f&v=v31",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew9&skey=7bc19f711c0de8f&v=v31",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w9&skey=7bc19f711c0de8f&v=v31"
+  },
+  "Oswald": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvgUI&skey=653237e53512d0de&v=v57",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=TK3_WkUHHAIjg75cFRf3bXL8LICs1xZogUI&skey=653237e53512d0de&v=v57"
+  },
+  "Raleway": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4WjMPrc&skey=bf44ee29381a37b0&v=v37",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4Y_LPrc&skey=bf44ee29381a37b0&v=v37",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvaooCM&skey=30a27f2564731c64&v=v37",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=1Ptxg8zYS_SKggPN4iEgvnHyvveLxVs9pYCM&skey=30a27f2564731c64&v=v37"
+  },
+  "Poppins": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=pxiGyp8kv8JHgFVrJJLedA&skey=f21d6e783fa43c88&v=v24",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=pxiDyp8kv8JHgFVrJJLmy15lEw&skey=29c3bd833a54ba8c&v=v24",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=pxiEyp8kv8JHgFVrFJM&skey=87759fb096548f6d&v=v24",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=pxiByp8kv8JHgFVrLCz7V1g&skey=cea76fe63715a67a&v=v24"
+  },
+  "Nunito": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=XRXK3I6Li01BKofIMPyPbj8d7IEAGXNirXA3iQ&skey=75768d03a8bfc23a&v=v32",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=XRXK3I6Li01BKofIMPyPbj8d7IEAGXNiSnc3iQ&skey=75768d03a8bfc23a&v=v32",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=XRXI3I6Li01BKofiOc5wtlZ2di8HDLshRTA&skey=27bb6aa8eea8a5e7&v=v32",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=XRXI3I6Li01BKofiOc5wtlZ2di8HDFwmRTA&skey=27bb6aa8eea8a5e7&v=v32"
+  },
+  "Playfair Display": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_qiTbtU&skey=f57a6d1e6bccdd9c&v=v40",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=nuFRD-vYSZviVYUb_rj3ij__anPXDTnCjmHKM4nYO7KN_k-UbtU&skey=f57a6d1e6bccdd9c&v=v40",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDT&skey=f3b68f0152604ed9&v=v40",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiukDT&skey=f3b68f0152604ed9&v=v40"
+  },
+  "Merriweather": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=u-4B0qyriQwlOrhSvowK_l5-eTxCVx0ZbwLvKH2Gk9hLmp0v5yA-xXPqCzLvPee1XYk_XSf-FmTCUF3z&skey=899922b35e8afa66&v=v33",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=u-4B0qyriQwlOrhSvowK_l5-eTxCVx0ZbwLvKH2Gk9hLmp0v5yA-xXPqCzLvPee1XYk_XSf-FmQlV13z&skey=899922b35e8afa66&v=v33",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=u-4D0qyriQwlOrhSvowK_l5UcA6zuSYEqOzpPe3HOZJ5eX1WtLaQwmYiScCmDxhtNOKl8yDr3icqEA&skey=379c1eccf863c625&v=v33",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=u-4D0qyriQwlOrhSvowK_l5UcA6zuSYEqOzpPe3HOZJ5eX1WtLaQwmYiScCmDxhtNOKl8yDrOSAqEA&skey=379c1eccf863c625&v=v33"
+  },
+  "Source Sans 3": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=nwpDtKy2OAdR1K-IwhWudF-R3woAa8opPOrG97lwqLlO9C0&skey=de11088d3defbe4c&v=v19",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=nwpDtKy2OAdR1K-IwhWudF-R3woAa8opPOrG97lwqF5J9C0&skey=de11088d3defbe4c&v=v19",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Ky461EO&skey=1497ac707ba83cff&v=v19",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Kxf7FEO&skey=1497ac707ba83cff&v=v19"
+  },
+  "Ubuntu": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=4iCu6KVjbNBYlgoKeg7w&skey=faa714a35371172&v=v21",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=4iCp6KVjbNBYlgoKejZPsmyL&skey=fa49613badbd6dc7&v=v21",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=4iCs6KVjbNBYlgo6ew&skey=7e59fc036a1a8481&v=v21",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=4iCv6KVjbNBYlgoCxCvTtA&skey=403363908a1ded4d&v=v21"
+  },
+  "PT Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=jizYRExUiTo99u79D0eEww&skey=cef7fd018888390e&v=v18",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=jizdRExUiTo99u79D0e8fOytKw&skey=2b38b88a40bdc8ec&v=v18",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=jizaRExUiTo99u79P0Y&skey=fd0b32f0f3e6a1fc&v=v18",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=jizfRExUiTo99u79B_mh4Oo&skey=a45e760d002c9b10&v=v18"
+  },
+  "Noto Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=o-0kIpQlx3QUlC5A4PNr4C5OaxRsfNNlKbCePevHtVtX57DGjDU1QDce6VQ&skey=10db4434b0359efc&v=v42",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=o-0kIpQlx3QUlC5A4PNr4C5OaxRsfNNlKbCePevHtVtX57DGjDU1QNAZ6VQ&skey=10db4434b0359efc&v=v42",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyD9A99e&skey=2b960fe17823056f&v=v42",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyAaBN9e&skey=2b960fe17823056f&v=v42"
+  },
+  "Inter": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=UcCM3FwrK3iLTcvneQg7Ca725JhhKnNqk4j1ebLhAm8SrXTc2dthjg&skey=e5dfd0c3910c7ec9&v=v20",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=UcCM3FwrK3iLTcvneQg7Ca725JhhKnNqk4j1ebLhAm8SrXTcPtxhjg&skey=e5dfd0c3910c7ec9&v=v20",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZs&skey=c491285d6722e4fa&v=v20",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZs&skey=c491285d6722e4fa&v=v20"
+  },
+  "Work Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU3msJoA&skey=9b5a6629036b6b1d&v=v24",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUOWwJoA&skey=9b5a6629036b6b1d&v=v24",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nXNis&skey=a19f1b3d756da88c&v=v24",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K67QNis&skey=a19f1b3d756da88c&v=v24"
+  },
+  "Fira Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=va9C4kDNxMZdWfMOD5VvkojN&skey=5fe19ef9a49b95be&v=v18",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=va9f4kDNxMZdWfMOD5VvkrByRBf8&skey=78bc75c716a0540e&v=v18",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=va9E4kDNxMZdWfMOD5Vfkw&skey=6bde03e5f15b0572&v=v18",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=va9B4kDNxMZdWfMOD5VnLK3uQg&skey=dba2db2fadc4e190&v=v18"
+  },
+  "Quicksand": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o18I&skey=c01f11fa5439d932&v=v37",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkBgv18I&skey=c01f11fa5439d932&v=v37"
+  },
+  "Barlow": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=7cHrv4kjgoGqM7E_Ccs_&skey=ae428d300932fbee&v=v13",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=7cHsv4kjgoGqM7E_CfOA5Voq&skey=25c93348b6ec64d8&v=v13",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=7cHpv4kjgoGqM7EPCA&skey=32d7acf8757dbad0&v=v13",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=7cHqv4kjgoGqM7E3t-4c4w&skey=f60e73b1bbf362f3&v=v13"
+  },
+  "Cabin": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=u-4V0qWljRw-Pd815fNqc8T_wAFcX-c37MPiNYlWniJ2hJXHx_KlwQ&skey=72a025bcae5df692&v=v35",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=u-4V0qWljRw-Pd815fNqc8T_wAFcX-c37MPiNYlWniJ2hJXHIPWlwQ&skey=72a025bcae5df692&v=v35",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=u-4X0qWljRw-PfU81xCKCpdpbgZJl6XFpfEd7eA9BIxxkV2EL7I&skey=d53a2c61c6b52b74&v=v35",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=u-4X0qWljRw-PfU81xCKCpdpbgZJl6XFpfEd7eA9BIxxkbqDL7I&skey=d53a2c61c6b52b74&v=v35"
+  },
+  "Arimo": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=P5sdzZCDf9_T_10c3i9MeUcyat4iJY-ERBrH&skey=cf144108a78a4937&v=v35",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=P5sdzZCDf9_T_10c3i9MeUcyat4iJY9jQxrH&skey=cf144108a78a4937&v=v35",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=P5sfzZCDf9_T_3cV7NCUECyoxNk37cxsBA&skey=6457c0ab3b693f57&v=v35",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=P5sfzZCDf9_T_3cV7NCUECyoxNk3CstsBA&skey=6457c0ab3b693f57&v=v35"
+  },
+  "Tinos": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=buE2poGnedXvwjX-fmI&skey=bebefdc6a40fd4ff&v=v25",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=buEzpoGnedXvwjX-Rt1s0Ck&skey=5e1e0bd2a77305f&v=v25",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=buE4poGnedXvwgX_&skey=c8b6aa82b57934a&v=v25",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=buE1poGnedXvwj1AW0Fq&skey=d2066bbd7f2ceff4&v=v25"
+  },
+  "Cousine": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=d6lKkaiiRdih4SpP_SEvyg&skey=411d53aa792d7323&v=v29",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=d6lPkaiiRdih4SpP_SEXdTvM1A&skey=98288f72a06d874e&v=v29",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=d6lIkaiiRdih4SpPzSA&skey=76eb36959adb8e1f&v=v29",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=d6lNkaiiRdih4SpP9Z8K6T0&skey=d102cd33d1abdbf6&v=v29"
+  },
+  "Roboto Slab": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=BngbUXZYTXPIvIBgJJSb6s3BzlRRfKOFbvjojISWaw&skey=a9ad6a4717e923f0&v=v36",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=BngbUXZYTXPIvIBgJJSb6s3BzlRRfKOFbvjoa4OWaw&skey=a9ad6a4717e923f0&v=v36"
+  },
+  "Roboto Mono": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=L0xoDF4xlVMF-BfR8bXMIjhOsXG-q2oeuFoqFrlnAOW-&skey=26ea178546e32190&v=v31",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=L0xoDF4xlVMF-BfR8bXMIjhOsXG-q2oeuFoqFrmAB-W-&skey=26ea178546e32190&v=v31",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vqPQA&skey=7b92570108d40690&v=v31",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_Of2PQA&skey=7b92570108d40690&v=v31"
+  },
+  "Noto Serif": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=ga6saw1J5X9T9RW6j9bNfFIMZhhWnFTyNZIQD1-_FXP0RgnaOg9MYBNLg8cM&skey=39fc6d597fb39b7e&v=v33",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=ga6saw1J5X9T9RW6j9bNfFIMZhhWnFTyNZIQD1-_FXP0RgnaOg9MYBOshMcM&skey=39fc6d597fb39b7e&v=v33",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=ga6iaw1J5X9T9RW6j9bNVls-hfgvz8JcMofYTa32J4wsL2JAlAhZqFCjww&skey=ff3f102bd67fc93c&v=v33",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=ga6iaw1J5X9T9RW6j9bNVls-hfgvz8JcMofYTa32J4wsL2JAlAhZT1ejww&skey=ff3f102bd67fc93c&v=v33"
+  },
+  "PT Serif": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=EJRTQgYoZZY2vCFuvAFTzrk&skey=caf1b69f1774cae7&v=v19",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=EJRQQgYoZZY2vCFuvAFT9gaQVy0&skey=8c21167c941ad566&v=v19",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=EJRVQgYoZZY2vCFuvDFS&skey=e37119e9cd703ddf&v=v19",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=EJRSQgYoZZY2vCFuvAnt65qW&skey=f3f4fc2f289c7d5b&v=v19"
+  },
+  "Libre Baskerville": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=kmKWZrc3Hgbbcjq75U4uslyuy4kn0qNccR04_RUJeby2OU36SgNJ&skey=44cd15477bf5bb2d&v=v24",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=kmKWZrc3Hgbbcjq75U4uslyuy4kn0qNccR04_RUJeby2OU0dTQNJ&skey=44cd15477bf5bb2d&v=v24",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=kmKUZrc3Hgbbcjq75U4uslyuy4kn0olVQ-LglH6T17uj8Q4SCg&skey=1ccff9706b4dcbb3&v=v24",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=kmKUZrc3Hgbbcjq75U4uslyuy4kn0olVQ-LglH6T17ujFgkSCg&skey=1ccff9706b4dcbb3&v=v24"
+  },
+  "Crimson Text": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=wlpogwHKFkZgtmSR3NB0oRJfaghV&skey=e557500e250d718b&v=v19",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=wlprgwHKFkZgtmSR3NB0oRJfajDqDtNW&skey=278c8c85e53f0d85&v=v19",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=wlp2gwHKFkZgtmSR3NB0oRJvaw&skey=28fc2c78007b71a9&v=v19",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=wlppgwHKFkZgtmSR3NB0oRJX1C12CA&skey=ac5d7eee4a23d97&v=v19"
+  },
+  "EB Garamond": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7e8QI95&skey=b76c0cb3db3b0fac&v=v32",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7dbR495&skey=b76c0cb3db3b0fac&v=v32",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RUAA&skey=fde9b303600e495b&v=v32",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-DPNUAA&skey=fde9b303600e495b&v=v32"
+  },
+  "Lora": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=0QI8MX1D_JOuMw_hLdO6T2wV9KnW-MoFkqs&skey=92aaeeb853a906d8&v=v37",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=0QI8MX1D_JOuMw_hLdO6T2wV9KnW-C0Ckqs&skey=92aaeeb853a906d8&v=v37",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=0QI6MX1D_JOuGQbT0gvTJPa787weuyJF&skey=1d294b6d956fb8e&v=v37",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=0QI6MX1D_JOuGQbT0gvTJPa787z5vCJF&skey=1d294b6d956fb8e&v=v37"
+  },
+  "Bitter": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4PzOWw&skey=7ce735f7301da1b7&v=v40",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cB_vOWw&skey=7ce735f7301da1b7&v=v40",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbfCLw&skey=c92268a3e57ee309&v=v40",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=raxhHiqOu8IVPmnRc6SY1KXhnF_Y8RHYCLw&skey=c92268a3e57ee309&v=v40"
+  },
+  "Josefin Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=Qw3JZQNVED7rKGKxtqIqX5EUCGZ2dIn0FyA96fCTtIJhKQ&skey=63d8bfdaaa359390&v=v34",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=Qw3JZQNVED7rKGKxtqIqX5EUCGZ2dIn0FyA96fCTU4VhKQ&skey=63d8bfdaaa359390&v=v34",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=Qw3PZQNVED7rKGKxtqIqX5E-AVSJrOCfjY46_DjQXMI&skey=22ddf758bcf1d5cd&v=v34",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=Qw3PZQNVED7rKGKxtqIqX5E-AVSJrOCfjY46_N_XXMI&skey=22ddf758bcf1d5cd&v=v34"
+  },
+  "Dancing Script": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7BMSoHTg&skey=c89f400061e5d0a8&v=v29",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7B1i0HTg&skey=c89f400061e5d0a8&v=v29"
+  },
+  "Pacifico": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=FwZY7-Qmy14u9lezJ96D&skey=a336e4011ec32111&v=v23"
+  },
+  "Caveat": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=WnznHAc5bAfYB2QRah7pcpNvOx-pjfJ9SIE&skey=7833cd5b856b60c9&v=v23",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=WnznHAc5bAfYB2QRah7pcpNvOx-pjRV6SIE&skey=7833cd5b856b60c9&v=v23"
+  },
+  "Satisfy": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=rP2Hp2yn6lkG50LoOZc&skey=b02738efc6e9caf3&v=v22"
+  },
+  "Lobster": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=neILzCirqoswsqX9_oY&skey=7ed805a363b4659c&v=v32"
+  },
+  "Bebas Neue": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=JTUSjIg69CK48gW7PXooxW0&skey=6bd981f07b300212&v=v16"
+  },
+  "Abril Fatface": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=zOL64pLDlL1D99S8g8PtiKchm-M&skey=3aaa84d7e0b4f9c7&v=v25"
+  },
+  "Righteous": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=1cXxaUPXBpj2rGoU7C9mjA&skey=7d7e8613ba1b398f&v=v18"
+  },
+  "Permanent Marker": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=Fh4uPib9Iyv2ucM6pGQMWimMp004Hak&skey=84f486597b8007d1&v=v16"
+  },
+  "Fira Code": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_D1sFVQ&skey=33bc0af28fd31bc7&v=v27",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_NprFVQ&skey=33bc0af28fd31bc7&v=v27"
+  },
+  "Source Code Pro": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=HI_jiYsKILxRpg3hIP6sJ7fM7PqlOPHYvDP_W9O7GQTTbI1rSg&skey=8dabcb12b10bb231&v=v31",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=HI_jiYsKILxRpg3hIP6sJ7fM7PqlOPHYvDP_W9O7GQTTi4prSg&skey=8dabcb12b10bb231&v=v31",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQhM0&skey=d94d317bc78fd84e&v=v31",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DCuXhM0&skey=d94d317bc78fd84e&v=v31"
+  },
+  "JetBrains Mono": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=tDba2o-flEEny0FZhsfKu5WU4xD-IQ-PuZJJXxfpAO-LflOT&skey=74ed26de24979d51&v=v24",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=tDba2o-flEEny0FZhsfKu5WU4xD-IQ-PuZJJXxfpAO9seVOT&skey=74ed26de24979d51&v=v24",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPg&skey=48ad01c60053c2ae&v=v24",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8L6tjPg&skey=48ad01c60053c2ae&v=v24"
+  },
+  "IBM Plex Mono": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=-F6pfjptAgt5VM-kVkqdyU8n1ioq0Q&skey=55bf1639dd561004&v=v20",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=-F6sfjptAgt5VM-kVkqdyU8n1ioSblJFhA&skey=95d3099d54717a9c&v=v20",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=-F63fjptAgt5VM-kVkqdyU8n5is&skey=b40c83751ce1954d&v=v20",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=-F6qfjptAgt5VM-kVkqdyU8n3pQP8lQ&skey=bdce5c587d610a04&v=v20"
+  },
+  "Space Mono": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=i7dNIFZifjKcF5UAWdDRYER8Qw&skey=f2396f001f60c566&v=v17",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=i7dSIFZifjKcF5UAWdDRYERE_FeaGA&skey=b23f6109ee1a67f7&v=v17",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=i7dPIFZifjKcF5UAWdDRUEU&skey=5e801b58db657470&v=v17",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=i7dMIFZifjKcF5UAWdDRaPpZYFE&skey=a27e16c9683017d3&v=v17"
+  },
+  "Inconsolata": {
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=QldgNThLqRwH-OJ1UHjlKENVzkWGVkL3GZQmAwLYxYWI2qfdm7Lpp4U8aRk&skey=20fa6569a31c71ee&v=v37",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=QldgNThLqRwH-OJ1UHjlKENVzkWGVkL3GZQmAwLYxYWI2qfdm7Lpp2I7aRk&skey=20fa6569a31c71ee&v=v37"
+  },
+  "DM Sans": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=rP2rp2ywxg089UriCZaSExd86J3t9jz86Mvy4qCRAL19DksVat-JDW3w&skey=3320fd60b11c3775&v=v17",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=rP2rp2ywxg089UriCZaSExd86J3t9jz86Mvy4qCRAL19DksVat9uCm3w&skey=3320fd60b11c3775&v=v17",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwAopxhTQ&skey=cd068b3e1b767e51&v=v17",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwARZthTQ&skey=cd068b3e1b767e51&v=v17"
+  },
+  "Rubik": {
+    "italic-400": "https://fonts.gstatic.com/l/font?kit=iJWbBXyIfDnIV7nEt3KSJbVDV49rz8tdE0Uz&skey=80e52bf85b0b1958&v=v31",
+    "italic-700": "https://fonts.gstatic.com/l/font?kit=iJWbBXyIfDnIV7nEt3KSJbVDV49rz8u6FEUz&skey=80e52bf85b0b1958&v=v31",
+    "normal-400": "https://fonts.gstatic.com/l/font?kit=iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4i1Uw&skey=cee854e66788286d&v=v31",
+    "normal-700": "https://fonts.gstatic.com/l/font?kit=iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-4I-1Uw&skey=cee854e66788286d&v=v31"
+  }
+}
