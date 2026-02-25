@@ -131,6 +131,38 @@ export async function renderMarkdownToPdf(
     return false;
   }
 
+  /**
+   * Return a safe font name that will not crash `doc.font()`.
+   *
+   * In Node.js (`fsAvailable === true`) this is a no-op — PDFKit can load
+   * fonts from the filesystem.  In browser environments, if the font is
+   * neither a standard PDF font nor a registered custom / emoji font, we
+   * return a standard fallback and log a warning so the user knows which
+   * font was unavailable.
+   */
+  function safeFont(name: string): string {
+    if (fsAvailable) return name;
+    if (STANDARD_PDF_FONTS.has(name) || isCustomFont(name) || name === EMOJI_FONT_NAME) return name;
+
+    // Determine the closest standard fallback, preserving bold/italic intent
+    // by inspecting the variant suffix added by resolveFont().
+    let fallback: string;
+    if (name.endsWith('-BoldOblique') || name.endsWith('-BoldItalic')) {
+      fallback = 'Helvetica-BoldOblique';
+    } else if (name.endsWith('-Bold')) {
+      fallback = 'Helvetica-Bold';
+    } else if (name.endsWith('-Oblique') || name.endsWith('-Italic')) {
+      fallback = 'Helvetica-Oblique';
+    } else {
+      fallback = 'Helvetica';
+    }
+
+    console.warn(
+      `[markdown-to-pdf] Font "${name}" is not available; falling back to "${fallback}"`,
+    );
+    return fallback;
+  }
+
   /** Return the base (registered) name of a custom font, stripping any variant suffix. */
   function customFontBase(font: string): string {
     if (customFontNames.has(font)) return font;
@@ -187,19 +219,19 @@ export async function renderMarkdownToPdf(
       // Inside a heading — use heading style as the base.
       let font = headingCtx.font;
       if (bold || italic) font = resolveFont(font, bold, italic);
-      doc.font(font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      doc.font(safeFont(font)).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
       return;
     }
     const font = resolveFont(theme.body.font, bold, italic);
-    doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
+    doc.font(safeFont(font)).fontSize(theme.body.fontSize).fillColor(theme.body.color);
   }
 
   function resetBodyFont(): void {
     if (headingCtx) {
-      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
+      doc.font(safeFont(headingCtx.font)).fontSize(headingCtx.fontSize).fillColor(headingCtx.color);
       return;
     }
-    doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
+    doc.font(safeFont(theme.body.font)).fontSize(theme.body.fontSize).fillColor(theme.body.color);
   }
 
   /**
@@ -250,7 +282,7 @@ export async function renderMarkdownToPdf(
     const hPad = 2;   // horizontal padding each side
     const vPad = 1;   // vertical padding each side
 
-    doc.font(cs.font).fontSize(cs.fontSize);
+    doc.font(safeFont(cs.font)).fontSize(cs.fontSize);
     const textW = doc.widthOfString(text);
     const textH = doc.currentLineHeight();
 
@@ -282,7 +314,7 @@ export async function renderMarkdownToPdf(
     doc.restore();
 
     // Render inline — use positioned form for cell context, flow form otherwise
-    doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
+    doc.font(safeFont(cs.font)).fontSize(cs.fontSize).fillColor(cs.color);
     if (useCellPos) {
       doc.text(text, flowX, flowY, { continued, ...cellExtra });
     } else {
@@ -299,9 +331,9 @@ export async function renderMarkdownToPdf(
     }
 
     if (headingCtx) {
-      doc.font(headingCtx.font).fontSize(headingCtx.fontSize).fillColor(theme.linkColor);
+      doc.font(safeFont(headingCtx.font)).fontSize(headingCtx.fontSize).fillColor(theme.linkColor);
     } else {
-      doc.font(theme.body.font).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
+      doc.font(safeFont(theme.body.font)).fontSize(theme.body.fontSize).fillColor(theme.linkColor);
     }
     const linkText = tok.text || tok.href;
     renderText(linkText, { continued, underline: true, link: tok.href });
@@ -548,7 +580,7 @@ export async function renderMarkdownToPdf(
         const spaceBelow = style.fontSize * sp.headingSpaceBelow;
         ensureSpace(spaceAbove + style.fontSize + spaceBelow);
         doc.moveDown(spaceAbove / doc.currentLineHeight());
-        doc.font(style.font).fontSize(style.fontSize).fillColor(style.color);
+        doc.font(safeFont(style.font)).fontSize(style.fontSize).fillColor(style.color);
         headingCtx = style;
         if (t.tokens && t.tokens.length > 0) {
           await renderInlineTokens(t.tokens, false, style.bold ?? false, style.italic ?? false);
@@ -596,7 +628,7 @@ export async function renderMarkdownToPdf(
             x: margins.left,
             y: doc.y,
             width: contentWidth,
-            font: cs.font,
+            font: safeFont(cs.font),
             fontSize: cs.fontSize,
             lineHeight: 1.5,
             padding: cs.padding,
@@ -625,7 +657,7 @@ export async function renderMarkdownToPdf(
             doc.rect(x, y, contentWidth, blockH).fill(cs.backgroundColor);
           }
           doc.restore();
-          doc.font(cs.font).fontSize(cs.fontSize).fillColor(cs.color);
+          doc.font(safeFont(cs.font)).fontSize(cs.fontSize).fillColor(cs.color);
           let textY = y + cs.padding;
           for (const line of lines) {
             doc.text(line, x + cs.padding, textY, { width: contentWidth - cs.padding * 2 });
@@ -651,7 +683,7 @@ export async function renderMarkdownToPdf(
           if (child.type === 'paragraph') {
             const p = child as Tokens.Paragraph;
             const font = bq.italic ? italicVariant(theme.body.font) : theme.body.font;
-            doc.font(font).fontSize(theme.body.fontSize).fillColor(theme.body.color);
+            doc.font(safeFont(font)).fontSize(theme.body.fontSize).fillColor(theme.body.color);
             doc.text('', textX, doc.y, { width: textWidth });
             await renderInlineTokens(p.tokens, false, false, bq.italic);
             doc.moveDown(sp.blockquoteSpacing);

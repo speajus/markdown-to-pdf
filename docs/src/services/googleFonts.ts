@@ -2,12 +2,15 @@
  * Google Fonts integration service.
  *
  * Provides font search (from a curated list of popular families) and
- * TTF font-buffer fetching via the Google Fonts CSS API v2.
+ * font-buffer fetching via the Google Fonts CSS API v2.
  *
- * The CSS request is routed through a Vite dev-server proxy
- * (`/__font_css_proxy/`) so we can spoof the User-Agent header and
- * receive TTF URLs instead of woff2.  The actual font-file downloads
- * go directly to fonts.gstatic.com (CORS-enabled).
+ * In development, the CSS request is routed through a Vite dev-server
+ * proxy (`/__font_css_proxy/`) which spoofs the User-Agent to get TTF
+ * URLs.  In production (e.g. GitHub Pages), the proxy is unavailable so
+ * we fetch CSS directly from fonts.googleapis.com (CORS-enabled).  The
+ * browser User-Agent causes Google to return woff2 URLs — fontkit in
+ * the PDFKit standalone build handles woff2 natively (brotli is bundled).
+ * Font-file downloads go directly to fonts.gstatic.com (CORS-enabled).
  */
 
 // ---------------------------------------------------------------------------
@@ -175,17 +178,36 @@ async function fetchFontBuffer(url: string): Promise<Buffer> {
 }
 
 /**
- * Fetch the Google Fonts CSS for a given family through the Vite proxy.
- * The proxy spoofs the User-Agent so Google returns TTF URLs.
+ * Fetch the Google Fonts CSS for a given family.
+ *
+ * Strategy:
+ * 1. Try the Vite dev-server proxy (`/__font_css_proxy/`) which spoofs the
+ *    User-Agent so Google returns TTF URLs.
+ * 2. If the proxy is unavailable (production / GitHub Pages → 404), fall back
+ *    to fetching the CSS directly from fonts.googleapis.com (CORS-enabled).
+ *    The browser User-Agent will cause Google to return woff2 URLs, which is
+ *    fine — fontkit in the PDFKit standalone build supports woff2 natively.
  */
 async function fetchFontCss(family: string): Promise<string> {
   const encodedFamily = encodeURIComponent(family);
   // Request regular (400), bold (700), italic (400i), bold-italic (700i)
   const cssUrl =
     `https://fonts.googleapis.com/css2?family=${encodedFamily}:ital,wght@0,400;0,700;1,400;1,700`;
-  const proxyUrl = `${FONT_CSS_PROXY_PREFIX}${encodeURIComponent(cssUrl)}`;
 
-  const res = await fetch(proxyUrl);
+  // 1. Try the Vite dev-server proxy first (returns TTF URLs)
+  try {
+    const proxyUrl = `${FONT_CSS_PROXY_PREFIX}${encodeURIComponent(cssUrl)}`;
+    const proxyRes = await fetch(proxyUrl);
+    if (proxyRes.ok) {
+      return proxyRes.text();
+    }
+    // Non-2xx (e.g. 404 in production) — fall through to direct fetch
+  } catch {
+    // Network error (proxy not available) — fall through to direct fetch
+  }
+
+  // 2. Fetch directly from Google Fonts (CORS-enabled, returns woff2 URLs)
+  const res = await fetch(cssUrl);
   if (!res.ok) throw new Error(`Font CSS fetch failed: ${res.status} for ${family}`);
   return res.text();
 }
@@ -195,7 +217,11 @@ async function fetchFontCss(family: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch TTF buffers for all four variants of a Google Font family.
+ * Fetch font buffers for all four variants of a Google Font family.
+ *
+ * In dev mode the buffers are TTF (via the proxy); in production they
+ * are woff2 (fetched directly).  Both formats are supported by fontkit
+ * in the PDFKit standalone build.
  *
  * Results are cached in memory so repeated calls for the same family
  * return instantly.  Missing variants (e.g. a display font that has no
