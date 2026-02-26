@@ -566,6 +566,7 @@ export async function renderMarkdownToPdf(
     for (let r = 0; r < table.rows.length; r++) {
       const row = table.rows[r];
       ensureSpace(rowH);
+      y = doc.y; // re-sync after possible page break
 
       // Zebra stripe: fill even rows (0-indexed, so odd visual rows) with a tinted background
       if (zebraStripes && r % 2 === 1) {
