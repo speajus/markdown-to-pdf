@@ -54,7 +54,15 @@ const getContoursPatch = [
   '((g) => { if (!g || typeof g._getContours !== "function") return []; return g._getContours(); })(this._font._getBaseGlyph(component.glyphID) || this._font.getGlyph(component.glyphID))',
 ];
 
-const allPatches = [layersGetterPatch, getGlyphPatch, getContoursPatch];
+// Patch 4: Fix _decode crash in TTF subsetter for COLR glyphs
+// COLRGlyph doesn't have _decode() method. The subsetter needs to handle
+// COLR glyphs gracefully by treating them as simple (non-compound) glyphs.
+const decodePatch = [
+  'let glyf = glyph._decode();',
+  'let glyf = typeof glyph._decode === "function" ? glyph._decode() : null;',
+];
+
+const allPatches = [layersGetterPatch, getGlyphPatch, getContoursPatch, decodePatch];
 
 let patchCount = 0;
 
