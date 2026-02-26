@@ -565,7 +565,9 @@ export async function renderMarkdownToPdf(
     const zebraColor = theme.table.zebraColor ?? '#f9f9f9';
     for (let r = 0; r < table.rows.length; r++) {
       const row = table.rows[r];
+      doc.y = y;           // sync doc.y BEFORE ensureSpace check
       ensureSpace(rowH);
+      y = doc.y;           // re-sync AFTER possible page break
 
       // Zebra stripe: fill even rows (0-indexed, so odd visual rows) with a tinted background
       if (zebraStripes && r % 2 === 1) {

@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-const CLI_PATH = path.resolve(__dirname, '..', 'dist', 'cli.js');
+const CLI_PATH = path.resolve(__dirname, '..', 'src', 'cli.ts');
+const TSX_PATH = path.resolve(__dirname, '..', 'node_modules', '.bin', 'tsx');
 const SAMPLES_DIR = path.resolve(__dirname, '..', 'samples');
 
 function makeTmpDir(): string {
@@ -20,7 +21,7 @@ describe('CLI', () => {
       const output = path.join(tmp, 'test.pdf');
       fs.writeFileSync(input, '# CLI Test\n\nHello from the CLI.');
 
-      execFileSync(process.execPath, [CLI_PATH, input, output], {
+      execFileSync(TSX_PATH, [CLI_PATH, input, output], {
         stdio: 'pipe',
         timeout: 30_000,
       });
@@ -40,7 +41,7 @@ describe('CLI', () => {
       const input = path.join(tmp, 'auto.md');
       fs.writeFileSync(input, '# Auto Output\n\nShould create auto.pdf');
 
-      execFileSync(process.execPath, [CLI_PATH, input], {
+      execFileSync(TSX_PATH, [CLI_PATH, input], {
         stdio: 'pipe',
         timeout: 30_000,
       });
@@ -63,7 +64,7 @@ describe('CLI', () => {
       fs.writeFileSync(input, '# Image Test\n\n![logo](./logo.png)\n');
 
       const output = path.join(tmp, 'img-test.pdf');
-      execFileSync(process.execPath, [CLI_PATH, input, output], {
+      execFileSync(TSX_PATH, [CLI_PATH, input, output], {
         stdio: 'pipe',
         timeout: 30_000,
       });
@@ -78,7 +79,7 @@ describe('CLI', () => {
 
   it('exits with code 1 when no arguments are provided', () => {
     try {
-      execFileSync(process.execPath, [CLI_PATH], { stdio: 'pipe', timeout: 10_000 });
+      execFileSync(TSX_PATH, [CLI_PATH], { stdio: 'pipe', timeout: 10_000 });
       assert.fail('Should have exited with non-zero code');
     } catch (err: any) {
       assert.ok(err.status === 1, `Expected exit code 1, got ${err.status}`);
@@ -94,7 +95,7 @@ describe('CLI', () => {
       const output = path.join(tmp, 'sub', 'dir', 'out.pdf');
       fs.writeFileSync(input, '# Nested Output\n');
 
-      execFileSync(process.execPath, [CLI_PATH, input, output], {
+      execFileSync(TSX_PATH, [CLI_PATH, input, output], {
         stdio: 'pipe',
         timeout: 30_000,
       });
