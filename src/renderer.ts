@@ -664,7 +664,10 @@ export async function renderMarkdownToPdf(
             const imgX = theme.imageAlign === 'center'
               ? margins.left + (contentWidth - displayWidth) / 2
               : doc.x;
-            doc.image(pngBuf, imgX, doc.y, { width: displayWidth, height: displayHeight });
+            const imgY = doc.y;
+            doc.image(pngBuf, imgX, imgY, { width: displayWidth, height: displayHeight });
+            // Advance past the image — doc.image() does not move doc.y
+            doc.y = imgY + displayHeight;
             doc.moveDown(0.5);
           } catch (err) {
             // Fallback: render as plain code block on error
