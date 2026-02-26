@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "build:pdfkit": "node -e \"const fs=require('fs'),p=require('path'),{execSync:e}=require('child_process'),d=p.join('node_modules','pdfkit','js');if(!fs.existsSync(d)){const t='/tmp/pdfkit-build-'+Date.now();e('git clone --depth 1 --branch support-color-emoji-google https://github.com/jspears/pdfkit.git '+t,{stdio:'inherit'});const pd=p.resolve('node_modules/pdfkit');for(const f of['lib','rollup.config.js','.babelrc','yarn.lock']){const s=p.join(t,f);if(fs.existsSync(s)){e('cp -r '+s+' '+pd,{stdio:'inherit'})}}e('cd '+pd+' && npm install --ignore-scripts && npx rollup -c',{stdio:'inherit'});e('rm -rf '+t,{stdio:'inherit'})}\"",
-    "postinstall": "node -e \"if(require('fs').existsSync('src')){require('child_process').execSync('npm run build:pdfkit',{stdio:'inherit'})}\" || true",
+    "postinstall": "node -e \"if(require('fs').existsSync('src')){require('child_process').execSync('npm run build:pdfkit',{stdio:'inherit'})}\" || true && node scripts/patch-fontkit-colr.js",
     "docs:dev": "cd docs && $npm_execpath dev",
     "build": "tsc && mkdir -p dist/fonts && cp src/fonts/* dist/fonts/",
     "generate": "tsx samples/generate.ts",

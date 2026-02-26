@@ -401,10 +401,11 @@ export function ThemeCreator({
               <select
                 className="tc-select-input"
                 value={config.emojiFont ?? 'twemoji'}
-                onChange={(e) => update((d) => { d.emojiFont = e.target.value as 'twemoji' | 'openmoji' | 'none'; })}
+                onChange={(e) => update((d) => { d.emojiFont = e.target.value as 'twemoji' | 'openmoji' | 'noto' | 'none'; })}
               >
                 <option value="twemoji">Twemoji (Color)</option>
                 <option value="openmoji">OpenMoji (Color)</option>
+                <option value="noto">Noto Color Emoji</option>
                 <option value="none">None</option>
               </select>
             </div>
