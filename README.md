@@ -14,6 +14,7 @@ A lightweight TypeScript library that converts Markdown files into styled PDF do
 - **Tables** with header row highlighting and cell borders
 - **Links** rendered as clickable PDF hyperlinks
 - **Images** — local (PNG, JPEG) and remote (HTTP/HTTPS) with automatic SVG-to-PNG conversion via [@resvg/resvg-js](https://github.com/nicolo-ribaudo/resvg-js)
+- **Mermaid diagrams** — render `mermaid` fenced code blocks as diagrams (flowchart, sequence, class, state, ER, gantt, pie, mindmap) via [@speajus/mermaid-to-svg](https://github.com/speajus/mermaid-to-svg)
 - **Horizontal rules**
 - **Automatic page breaks** when content exceeds the current page
 - **Fully themeable** — customize fonts, colors, spacing, page size, and margins
@@ -92,6 +93,50 @@ interface PdfOptions {
 }
 ```
 
+### Mermaid Diagrams
+
+Fenced code blocks with the language `mermaid` are automatically rendered as diagrams:
+
+````markdown
+```mermaid
+flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Process A]
+    B -->|No| D[Process B]
+    C --> E[End]
+    D --> E
+```
+````
+
+Mermaid theme colors are integrated with the PDF theme. Each built-in theme includes matching mermaid colors. You can also customize them:
+
+```typescript
+await generatePdf(markdown, {
+  theme: {
+    ...defaultTheme,
+    // Use a built-in mermaid theme
+    mermaid: 'forest', // 'default' | 'dark' | 'forest' | 'neutral'
+  },
+});
+
+// Or provide custom mermaid colors
+await generatePdf(markdown, {
+  theme: {
+    ...defaultTheme,
+    mermaid: {
+      background: '#ffffff',
+      primaryColor: '#4a90d9',
+      secondaryColor: '#b8d4f0',
+      lineColor: '#333333',
+      primaryTextColor: '#1a1a1a',
+      borderColor: '#4a90d9',
+    },
+  },
+});
+```
+
+Supported diagram types: flowchart, sequence, class, state, ER, gantt, pie, and mindmap.
+
 ### Page Layout
 
 ```typescript
@@ -138,19 +183,23 @@ The full `ThemeConfig` interface exposes styles for:
 | table | Header background, border color, cell padding, and zebra color |
 | linkColor | Color for hyperlink text |
 | horizontalRuleColor | Color for --- dividers |
+| mermaid | Diagram colors: primary, secondary, text, line, border, background |
 
 ## Project Structure
 
 ```
 ├── src/
-│   ├── index.ts      # Public API — generatePdf, renderMarkdownToPdf, exports
-│   ├── cli.ts        # Command-line entry point
-│   ├── renderer.ts   # Markdown-to-PDF rendering engine
-│   ├── styles.ts     # Default theme and page layout
-│   └── types.ts      # TypeScript interfaces for options and theming
+│   ├── index.ts              # Public API — generatePdf, renderMarkdownToPdf, exports
+│   ├── cli.ts                # Command-line entry point
+│   ├── renderer.ts           # Markdown-to-PDF rendering engine
+│   ├── mermaid-renderer.ts   # Mermaid diagram → PNG rendering
+│   ├── styles.ts             # Default theme and page layout
+│   ├── themes/index.ts       # Built-in theme variants
+│   └── types.ts              # TypeScript interfaces for options and theming
 ├── samples/
 │   ├── generate.ts   # Script to batch-generate sample PDFs
 │   ├── sample.md     # Full-featured sample document
+│   ├── mermaid.md    # Mermaid diagram examples (all diagram types)
 │   ├── image.md      # Image rendering tests (local, remote, SVG, broken)
 │   ├── logo.svg      # Sample SVG image
 │   ├── logo.png      # Sample PNG image
@@ -167,6 +216,7 @@ The full `ThemeConfig` interface exposes styles for:
 | marked | Markdown parsing and tokenization |
 | pdfkit | PDF document generation |
 | @resvg/resvg-js | SVG-to-PNG rasterization for image embedding |
+| @speajus/mermaid-to-svg | Mermaid diagram rendering (parse → layout → SVG) |
 
 ## Scripts
 
