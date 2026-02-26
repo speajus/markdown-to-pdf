@@ -45,7 +45,16 @@ const getGlyphPatch = [
   'this.directory.tables.COLR && this.directory.tables.CPAL && this.COLR && this.COLR.baseGlyphRecord)',
 ];
 
-const allPatches = [layersGetterPatch, getGlyphPatch];
+// Patch 3: Fix _getContours crash for composite glyphs in COLR fonts
+// When a composite TTF glyph references a component that is a COLRGlyph,
+// calling _getContours() on it crashes because COLRGlyph doesn't have that method.
+// Use _getBaseGlyph to get the TTF outline instead.
+const getContoursPatch = [
+  'this._font.getGlyph(component.glyphID)._getContours()',
+  '((g) => { if (!g || typeof g._getContours !== "function") return []; return g._getContours(); })(this._font._getBaseGlyph(component.glyphID) || this._font.getGlyph(component.glyphID))',
+];
+
+const allPatches = [layersGetterPatch, getGlyphPatch, getContoursPatch];
 
 let patchCount = 0;
 
