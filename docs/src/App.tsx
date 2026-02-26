@@ -110,7 +110,7 @@ Emoji characters render correctly in the PDF:
 
 ## Mermaid Diagrams
 
-Fenced code blocks with the \\\`mermaid\\\` language are rendered as diagrams when using the Node.js API or CLI. Supported types include flowchart, sequence, class, state, ER, gantt, pie, and mindmap.
+Fenced code blocks with the \\\`mermaid\\\` language are automatically rendered as diagrams. Supported types include flowchart, sequence, class, state, ER, gantt, pie, and mindmap.
 
 \`\`\`mermaid
 flowchart TD
@@ -142,7 +142,7 @@ pie title Time Allocation
     "Meetings" : 15
 \`\`\`
 
-> **Note:** Mermaid diagrams require Node.js and are rendered via the CLI or programmatic API. In this browser demo, they appear as code blocks.
+> Mermaid diagrams are rendered via [@speajus/mermaid-to-svg](https://github.com/speajus/mermaid-to-svg) and work in both Node.js and browser environments.
 
 ## Sample Images
 
