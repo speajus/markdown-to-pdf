@@ -11,6 +11,7 @@ export type {
   ThemeConfig,
   PdfOptions,
   CustomFontDefinition,
+  MermaidThemeConfig,
 } from './types.js';
 
 export { defaultTheme, defaultPageLayout, defaultSyntaxHighlightTheme, defaultSpacing } from './styles.js';

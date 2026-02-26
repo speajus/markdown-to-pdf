@@ -104,6 +104,7 @@ export const defaultTheme: ThemeConfig = {
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
   emojiFont: 'twemoji' as const,
+  mermaid: 'default',
 };
 
 export const defaultPageLayout: PageLayout = {

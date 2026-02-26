@@ -41,6 +41,16 @@ export const modernTheme: ThemeConfig = {
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
   emojiFont: 'twemoji' as const,
+  mermaid: {
+    background: '#ffffff',
+    primaryColor: '#0d7377',
+    secondaryColor: '#b2dfdb',
+    tertiaryColor: '#e0f2f1',
+    primaryTextColor: '#2d3436',
+    secondaryTextColor: '#636e72',
+    lineColor: '#0984e3',
+    borderColor: '#14919b',
+  },
 };
 
 /** Academic — serif fonts, formal look inspired by LaTeX */
@@ -81,6 +91,16 @@ export const academicTheme: ThemeConfig = {
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
   emojiFont: 'twemoji' as const,
+  mermaid: {
+    background: '#ffffff',
+    primaryColor: '#eaecee',
+    secondaryColor: '#d5dbdb',
+    tertiaryColor: '#f2f3f4',
+    primaryTextColor: '#1a1a2e',
+    secondaryTextColor: '#7f8c8d',
+    lineColor: '#2e4057',
+    borderColor: '#6c3483',
+  },
 };
 
 /** Minimal — lots of whitespace, muted greys */
@@ -121,6 +141,7 @@ export const minimalTheme: ThemeConfig = {
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
   emojiFont: 'twemoji' as const,
+  mermaid: 'neutral',
 };
 
 /** Ocean — deep blue palette */
@@ -161,6 +182,16 @@ export const oceanTheme: ThemeConfig = {
   spacing: { ...defaultSpacing },
   imageAlign: 'left',
   emojiFont: 'twemoji' as const,
+  mermaid: {
+    background: '#ffffff',
+    primaryColor: '#d4e6f1',
+    secondaryColor: '#aed6f1',
+    tertiaryColor: '#eaf2f8',
+    primaryTextColor: '#1b2631',
+    secondaryTextColor: '#5d6d7e',
+    lineColor: '#2471a3',
+    borderColor: '#2980b9',
+  },
 };
 
 /** Record of all built-in themes keyed by display name */

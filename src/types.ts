@@ -105,6 +105,43 @@ export interface ThemeConfig {
    * - `'none'` — disable emoji font; emoji render with the body font.
    */
   emojiFont?: 'twemoji' | 'openmoji' | 'noto' | 'none';
+  /**
+   * Mermaid diagram theme configuration.
+   *
+   * Controls how mermaid fenced code blocks are rendered as diagrams in the PDF.
+   * - `'default'` | `'dark'` | `'forest'` | `'neutral'` — use a built-in mermaid theme.
+   * - A `MermaidThemeConfig` object — provide custom colors for the diagram.
+   * - `undefined` — uses `'default'`.
+   */
+  mermaid?: MermaidThemeConfig | 'default' | 'dark' | 'forest' | 'neutral';
+}
+
+/**
+ * Custom mermaid diagram theme colors.
+ *
+ * Maps to the `Theme` interface from `@speajus/mermaid-to-svg`.
+ */
+export interface MermaidThemeConfig {
+  /** Diagram background color */
+  background?: string;
+  /** Primary node fill color */
+  primaryColor?: string;
+  /** Secondary node fill color */
+  secondaryColor?: string;
+  /** Tertiary node fill color */
+  tertiaryColor?: string;
+  /** Primary text color */
+  primaryTextColor?: string;
+  /** Secondary text color */
+  secondaryTextColor?: string;
+  /** Line / arrow color */
+  lineColor?: string;
+  /** Node border color */
+  borderColor?: string;
+  /** Font family for diagram labels */
+  fontFamily?: string;
+  /** Base font size */
+  fontSize?: number;
 }
 
 /**
