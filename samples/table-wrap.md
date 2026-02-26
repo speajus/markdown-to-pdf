@@ -3,7 +3,7 @@
 This table has 60+ rows to verify that tables render correctly across multiple PDF page breaks. Rows, borders, and zebra stripes should remain properly aligned on every page.
 
 | ID | Name | Status | Description |
-|----|------|--------|-------------|
+| --- | --- | --- | --- |
 | 1 | Alice Johnson | Active | Senior backend engineer, leads the auth team |
 | 2 | Bob Smith | Active | Frontend developer working on the dashboard |
 | 3 | Carol Williams | On Leave | Database administrator, returns next month |
@@ -69,4 +69,3 @@ This table has 60+ rows to verify that tables render correctly across multiple P
 | 63 | Liam Murphy | Active | Full-stack developer on the reporting module |
 | 64 | Monica Nash | Active | Backend developer implementing rate limiting |
 | 65 | Nolan Oliver | Inactive | Temp hire for the holiday season |
-

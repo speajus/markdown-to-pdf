@@ -46,7 +46,7 @@ export async function pdf2png(
     '../node_modules/pdfjs-dist/standard_fonts/',
   );
 
-  const loadingTask = (pdfjsLib as any).getDocument({
+  const loadingTask = pdfjsLib.getDocument({
     data: uint8,
     disableFontFace: true,
     standardFontDataUrl,
