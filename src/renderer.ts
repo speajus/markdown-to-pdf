@@ -5,7 +5,6 @@ import { marked, type Token, type Tokens } from 'marked';
 import { PassThrough } from 'stream';
 import { DEFAULTS } from './defaults.js';
 import { renderCode, loadHighlightLanguages } from './highlight.prism.js';
-import { renderMermaidToPng, cleanupMermaid } from './mermaid-renderer.js';
 
 /** Name used to identify the emoji font (for safeFont checks). */
 const EMOJI_FONT_NAME = 'EmojiFont';
@@ -651,6 +650,7 @@ export async function renderMarkdownToPdf(
         if (t.lang === 'mermaid') {
           try {
             const mermaidTheme = theme.mermaid;
+            const { renderMermaidToPng } = await import('./mermaid-renderer.js');
             const pngBuf = await renderMermaidToPng(t.text, mermaidTheme);
             const img = (doc as any).openImage(pngBuf) as { width: number; height: number };
             const maxHeight = doc.page.height - margins.top - margins.bottom;
@@ -812,7 +812,12 @@ export async function renderMarkdownToPdf(
   }
 
   // Clean up mermaid jsdom window if it was used
-  await cleanupMermaid();
+  try {
+    const { cleanupMermaid } = await import('./mermaid-renderer.js');
+    await cleanupMermaid();
+  } catch {
+    // mermaid-renderer may not be available in browser builds
+  }
 
   doc.end();
 

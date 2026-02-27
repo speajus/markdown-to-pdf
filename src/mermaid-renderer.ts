@@ -1,3 +1,4 @@
+import { DEFAULTS } from './defaults.js';
 import type { MermaidThemeConfig } from './types.js';
 
 let mermaidModule: typeof import('@speajus/mermaid-to-svg') | null = null;
@@ -40,13 +41,7 @@ export async function renderMermaidToPng(
   const result = await mod.renderMermaid(mermaidCode, { theme });
 
   // Convert SVG → PNG via resvg
-  const { Resvg } = await import('@resvg/resvg-js');
-  const resvg = new Resvg(result.svg, {
-    font: { loadSystemFonts: true },
-    fitTo: { mode: 'width', value: Math.max(result.bounds.width * 2, 800) },
-  });
-  const rendered = resvg.render();
-  return Buffer.from(rendered.asPng());
+  return DEFAULTS.renderSvg(result.svg);
 }
 
 /**

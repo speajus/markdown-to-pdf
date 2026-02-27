@@ -105,6 +105,8 @@ function renderSvgToPng(svgBuffer: Buffer): Promise<Buffer> {
   });
 }
 
+DEFAULTS.renderSvg = (svg: string) => renderSvgToPng(Buffer.from(svg));
+
 function isSvg(buf: Buffer): boolean {
   const head = buf.subarray(0, 256).toString('utf-8').trimStart();
   return head.startsWith('<svg') || head.startsWith('<?xml');

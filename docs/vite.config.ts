@@ -84,6 +84,7 @@ export default defineConfig({
       events: path.resolve(__dirname, 'node_modules/events'),
       // Use standalone browser build of PDFKit with embedded fonts
       pdfkit: path.resolve(__dirname, 'node_modules/pdfkit/js/pdfkit.standalone.js'),
+      'web-worker': path.resolve(__dirname, 'src/stub-web-worker.ts'),
     },
   },
   define: {
