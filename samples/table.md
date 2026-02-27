@@ -28,6 +28,14 @@
 | [Link](https://example.com) | ~~struck~~ | **123.45** |
 | Normal text | `code` and **bold** | *italic right* |
 
+## Multiline Cells
+
+| Feature | Details | Status |
+|---------|---------|--------|
+| Line breaks | First line<br>Second line<br/>Third line | Supported |
+| Long wrapping text | This cell contains a much longer paragraph of text that should automatically wrap within the cell boundaries and cause the row height to increase dynamically | Auto-wrapped |
+| Combined | Short intro<br>Then a longer explanation that wraps within the cell to test both line breaks and natural wrapping together | **Working** |
+
 ## Technical Reference
 
 | Method | Return Type | Description |
