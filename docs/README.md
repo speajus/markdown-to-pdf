@@ -8,6 +8,7 @@ This is an interactive demo application for testing the markdown-to-pdf conversi
 - **Real-time PDF Preview**: Uses [@react-pdf/renderer](https://react-pdf.org/) to generate and display PDFs directly in the browser
 - **No Server Required**: All PDF generation happens client-side in the browser
 - **Full Markdown Support**: Supports headings, lists, tables, code blocks, blockquotes, links, and inline formatting
+- **Mermaid Diagrams**: Fenced `mermaid` code blocks are rendered as diagrams (flowchart, sequence, class, state, ER, gantt, pie, mindmap) in both Node.js and browser environments
 
 ## Getting Started
 

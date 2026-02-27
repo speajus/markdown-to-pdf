@@ -3,7 +3,7 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
-import { DEFAULTS } from './defaults';
+import { DEFAULTS, SvgOptions } from './defaults';
 
 function isSvg(buf: Buffer): boolean {
   // Check for XML/SVG signature in the first 256 bytes
@@ -11,8 +11,8 @@ function isSvg(buf: Buffer): boolean {
   return head.startsWith('<svg') || head.startsWith('<?xml');
 }
 
-function convertSvgToPng(svgData: Buffer): Buffer {
-  const resvg = new Resvg(svgData, { font: { loadSystemFonts: true } });
+function convertSvgToPng(svgData: Buffer, options?: SvgOptions): Buffer {
+  const resvg = new Resvg(svgData, { font: { loadSystemFonts: true }, ...options });
   const rendered = resvg.render();
   return Buffer.from(rendered.asPng());
 }
@@ -59,7 +59,7 @@ function fetchImageBuffer(url: string, redirectCount = 0): Promise<Buffer> {
  * @returns A function that takes an image URL/path and returns a Buffer
  */
 export function createNodeImageRenderer(basePath: string = process.cwd()): (imageUrl: string) => Promise<Buffer> {
-  return async (imageUrl: string): Promise<Buffer> => {
+  return async (imageUrl: string, options?: SvgOptions): Promise<Buffer> => {
     let imgBuffer: Buffer;
     
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
@@ -73,7 +73,7 @@ export function createNodeImageRenderer(basePath: string = process.cwd()): (imag
 
     // Convert SVG to PNG since pdfkit doesn't support SVG natively
     if (isSvg(imgBuffer)) {
-      imgBuffer = convertSvgToPng(imgBuffer);
+      imgBuffer = convertSvgToPng(imgBuffer, options);
     }
 
     return imgBuffer;
@@ -81,3 +81,5 @@ export function createNodeImageRenderer(basePath: string = process.cwd()): (imag
 }
 
 DEFAULTS.renderImage = createNodeImageRenderer;
+
+DEFAULTS.renderSvg = async (svg: string) => convertSvgToPng(Buffer.from(svg));

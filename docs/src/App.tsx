@@ -108,6 +108,42 @@ Emoji characters render correctly in the PDF:
 
 > 💬 Blockquotes with emoji work too!
 
+## Mermaid Diagrams
+
+Fenced code blocks with the \\\`mermaid\\\` language are automatically rendered as diagrams. Supported types include flowchart, sequence, class, state, ER, gantt, pie, and mindmap.
+
+\`\`\`mermaid
+flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Process A]
+    B -->|No| D[Process B]
+    C --> E[Result]
+    D --> E
+    E --> F[End]
+\`\`\`
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant DB
+    Client->>API: POST /login
+    API->>DB: Query user
+    DB-->>API: User record
+    API-->>Client: JWT token
+\`\`\`
+
+\`\`\`mermaid
+pie title Time Allocation
+    "Development" : 40
+    "Testing" : 20
+    "Design" : 15
+    "Documentation" : 10
+    "Meetings" : 15
+\`\`\`
+
+> Mermaid diagrams are rendered via [@speajus/mermaid-to-svg](https://github.com/speajus/mermaid-to-svg) and work in both Node.js and browser environments.
+
 ## Sample Images
 
 **SVG image:**

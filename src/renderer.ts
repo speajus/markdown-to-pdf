@@ -646,6 +646,39 @@ export async function renderMarkdownToPdf(
         const t = token as Tokens.Code;
         const cs = theme.code.block;
 
+        // ── Mermaid diagrams ──────────────────────────────────────────────
+        if (t.lang === 'mermaid') {
+          try {
+            const mermaidTheme = theme.mermaid;
+            const { renderMermaidToPng } = await import('./mermaid-renderer.js');
+            const pngBuf = await renderMermaidToPng(t.text, mermaidTheme);
+            const img = (doc as any).openImage(pngBuf) as { width: number; height: number };
+            const maxHeight = doc.page.height - margins.top - margins.bottom;
+            let displayWidth = Math.min(img.width, contentWidth);
+            let displayHeight = img.height * (displayWidth / img.width);
+            if (displayHeight > maxHeight) {
+              displayHeight = maxHeight;
+              displayWidth = img.width * (displayHeight / img.height);
+            }
+            ensureSpace(displayHeight + 10);
+            const imgX = theme.imageAlign === 'center'
+              ? margins.left + (contentWidth - displayWidth) / 2
+              : doc.x;
+            const imgY = doc.y;
+            doc.image(pngBuf, imgX, imgY, { width: displayWidth, height: displayHeight });
+            // Advance past the image — doc.image() does not move doc.y
+            doc.y = imgY + displayHeight;
+            doc.moveDown(0.5);
+          } catch (err) {
+            // Fallback: render as plain code block on error
+            ensureSpace(20);
+            resetBodyFont();
+            doc.text(`[Mermaid diagram error: ${(err as Error).message}]`);
+            doc.moveDown(0.3);
+          }
+          break;
+        }
+
         // Use syntax highlighting when a language is specified and highlighting is enabled
         if (syntaxHighlight && t.lang) {
           const lines = t.text.split('\n');
@@ -776,6 +809,14 @@ export async function renderMarkdownToPdf(
   // ── Main loop ─────────────────────────────────────────────────────────────
   for (const token of tokens) {
     await renderToken(token);
+  }
+
+  // Clean up mermaid jsdom window if it was used
+  try {
+    const { cleanupMermaid } = await import('./mermaid-renderer.js');
+    await cleanupMermaid();
+  } catch {
+    // mermaid-renderer may not be available in browser builds
   }
 
   doc.end();
