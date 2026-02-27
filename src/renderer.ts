@@ -601,11 +601,13 @@ export async function renderMarkdownToPdf(
 
     // ── Measure header row height ──
     let headerH = minRowH;
+    let maxHeaderTextHeight = 0;
     for (let c = 0; c < colCount; c++) {
       const h = measureCellHeight(table.header[c], textWidth, true);
+      maxHeaderTextHeight = Math.max(maxHeaderTextHeight, h);
       headerH = Math.max(headerH, h + cellPad * 2 + 4);
     }
-    const headerTextInsetY = (headerH - (headerH - cellPad * 2)) / 2;
+    const headerTextInsetY = (headerH - maxHeaderTextHeight) / 2;
 
     // Header row background
     doc.save();
@@ -636,11 +638,13 @@ export async function renderMarkdownToPdf(
 
       // ── Measure row height ──
       let rowH = minRowH;
+      let maxRowTextHeight = 0;
       for (let c = 0; c < colCount; c++) {
         const h = measureCellHeight(row[c], textWidth, false);
+        maxRowTextHeight = Math.max(maxRowTextHeight, h);
         rowH = Math.max(rowH, h + cellPad * 2 + 4);
       }
-      const textInsetY = cellPad;
+      const textInsetY = (rowH - maxRowTextHeight) / 2;
 
       doc.y = y;           // sync doc.y BEFORE ensureSpace check
       ensureSpace(rowH);
