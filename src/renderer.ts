@@ -483,6 +483,7 @@ export async function renderMarkdownToPdf(
         doc.link(imgX, imgY, displayWidth, displayHeight, linkUrl);
       }
 
+      doc.y = imgY + displayHeight;
       doc.moveDown(0.5);
     } catch {
       ensureSpace(20);
