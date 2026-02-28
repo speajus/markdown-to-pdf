@@ -196,13 +196,49 @@ function App() {
   const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlError, setUrlError] = useState<string | null>(null);
+  const [pendingDownload, setPendingDownload] = useState(false);
+  const downloadFilenameRef = useRef('document.pdf');
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
-  // Load markdown from ?url= query parameter on mount
+  // Load markdown from ?url= query parameter and handle ?theme= and ?download on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Handle ?theme= parameter
+    const themeParam = params.get('theme');
+    if (themeParam) {
+      const matchedTheme = builtinThemeNames.find(
+        (name) => name.toLowerCase() === themeParam.toLowerCase(),
+      );
+      if (matchedTheme) {
+        setThemeName(matchedTheme);
+      }
+      // Invalid theme names silently fall back to Default (already the default)
+    }
+
+    // Handle ?download parameter
+    const downloadParam = params.get('download');
+    if (downloadParam !== null) {
+      setPendingDownload(true);
+    }
+
     const url = params.get('url');
+
+    // Derive download filename from URL
+    if (url && url.startsWith('http')) {
+      try {
+        const pathname = new URL(url).pathname;
+        const basename = pathname.split('/').pop();
+        if (basename) {
+          const name = basename.replace(/\.(md|markdown|txt)$/i, '');
+          downloadFilenameRef.current = `${name || 'document'}.pdf`;
+        }
+      } catch {
+        // keep default filename
+      }
+    }
+
     if (!url) return;
 
     // Validate scheme
@@ -324,6 +360,18 @@ function App() {
     setPreviewConfig(null);
   }
 
+  // Handle auto-download when PDF is ready
+  const handlePdfReady = useCallback((blobUrl: string) => {
+    if (!pendingDownload) return;
+    setPendingDownload(false);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = downloadFilenameRef.current;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, [pendingDownload]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     isDragging.current = true;
@@ -401,6 +449,7 @@ function App() {
                 markdown={markdown ?? ''}
                 theme={activeTheme}
                 customFonts={customFonts}
+                onPdfReady={handlePdfReady}
               />
             </div>
           </div>
@@ -442,6 +491,7 @@ function App() {
                 markdown={markdown ?? ''}
                 theme={activeTheme}
                 customFonts={customFonts}
+                onPdfReady={handlePdfReady}
               />
             </div>
         </div>
