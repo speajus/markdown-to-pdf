@@ -40,6 +40,50 @@ The built files will be in `../dist-docs`.
 npm run preview
 ```
 
+## Query Parameters
+
+The demo app supports query parameters for loading external markdown, selecting themes, and triggering automatic PDF downloads. These parameters compose together, making it easy to create shareable links.
+
+### `?url=` — Load External Markdown
+
+Load markdown content from a URL instead of using the built-in editor.
+
+- **HTTP(S) URLs**: `?url=https://example.com/file.md`
+- **Data URIs**: `?url=data:text/markdown;base64,IyBIZWxsbw==`
+- **GitHub Gist URLs**: `?url=https://gist.github.com/user/id` (automatically converted to raw URL)
+
+> **Note:** Remote servers must allow CORS (Cross-Origin Resource Sharing) for the fetch to succeed.
+
+### `?theme=` — Set Initial Theme
+
+Set the PDF theme on load. Available themes (case-insensitive):
+
+- `Default`
+- `Modern`
+- `Academic`
+- `Minimal`
+- `Ocean`
+
+Invalid theme names fall back to `Default`.
+
+Example: `?theme=Ocean`
+
+### `?download` — Auto-Download PDF
+
+Automatically download the generated PDF once rendering completes. The filename is derived from the loaded URL, or defaults to `document.pdf`.
+
+Example: `?download`
+
+### Combined Example
+
+All three parameters can be used together:
+
+```
+http://localhost:5173/?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md&theme=Ocean&download
+```
+
+This will load the project README from GitHub, apply the Ocean theme, and automatically download the resulting PDF.
+
 ## How It Works
 
 1. **Markdown Editor**: The left panel uses `@uiw/react-md-editor` which provides a feature-rich markdown editing experience
