@@ -125,7 +125,7 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts, onPdfReady }:
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [markdown, theme, customFonts]);
+  }, [markdown, theme, customFonts, onPdfReady]);
 
   if (loading) {
     return (
