@@ -154,6 +154,22 @@ pie title Time Allocation
 
 ![PNG demo](https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png)
 
+## Load External Markdown
+
+You can load markdown from a URL using query parameters:
+
+- **\`?url=\`** — load markdown from a URL (supports http, data URIs, and GitHub Gists)
+- **\`?theme=\`** — set the PDF theme (Default, Modern, Academic, Minimal, Ocean)
+- **\`?download\`** — automatically download the PDF on load
+
+### Examples
+
+- [Load this project's README](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md)
+- [README with Ocean theme](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md&theme=Ocean)
+- [README with Modern theme + auto-download](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md&theme=Modern&download)
+
+---
+
 Try editing this markdown and see the PDF preview update live!
 `;
 
