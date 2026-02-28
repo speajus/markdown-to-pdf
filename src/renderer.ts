@@ -424,6 +424,20 @@ export async function renderMarkdownToPdf(
           doc.moveDown(0.5);
           break;
         }
+        case 'html': {
+          const htmlText = ((tok as any).text ?? (tok as any).raw ?? '').trim();
+          if (/^<br\s*\/?>$/i.test(htmlText)) {
+            doc.moveDown(0.5);
+          } else {
+            // Non-br HTML: render as text (fall through to default behavior)
+            const raw = (tok as any).text ?? (tok as any).raw ?? '';
+            if (raw) {
+              applyBodyFont(insideBold, insideItalic);
+              renderText(raw, { continued: cont, underline: false, strike: false });
+            }
+          }
+          break;
+        }
         default: {
           const raw = (tok as any).text ?? (tok as any).raw ?? '';
           if (raw) {
@@ -469,6 +483,7 @@ export async function renderMarkdownToPdf(
         doc.link(imgX, imgY, displayWidth, displayHeight, linkUrl);
       }
 
+      doc.y = imgY + displayHeight;
       doc.moveDown(0.5);
     } catch {
       ensureSpace(20);
@@ -527,44 +542,110 @@ export async function renderMarkdownToPdf(
     doc.y = savedY;
   }
 
+  /**
+   * Extract plain text from cell tokens, converting <br> HTML tokens to \n
+   * so that heightOfString can measure the full multiline content.
+   */
+  function cellPlainText(cell: { text: string; tokens: Token[] }): string {
+    if (!cell.tokens || cell.tokens.length === 0) return cell.text;
+    function extract(tokens: Token[]): string {
+      let result = '';
+      for (const tok of tokens) {
+        if (tok.type === 'br') {
+          result += '\n';
+        } else if (tok.type === 'html') {
+          const raw = ((tok as any).text ?? (tok as any).raw ?? '').trim();
+          if (/^<br\s*\/?>$/i.test(raw)) {
+            result += '\n';
+          } else {
+            result += (tok as any).text ?? (tok as any).raw ?? '';
+          }
+        } else if ((tok as any).tokens && (tok as any).tokens.length > 0) {
+          result += extract((tok as any).tokens);
+        } else {
+          result += (tok as any).text ?? (tok as any).raw ?? '';
+        }
+      }
+      return result;
+    }
+    return extract(cell.tokens);
+  }
+
+  /**
+   * Measure the height a cell needs given its content and available width.
+   */
+  function measureCellHeight(
+    cell: { text: string; tokens: Token[] },
+    cellWidth: number,
+    bold: boolean,
+  ): number {
+    const text = cellPlainText(cell);
+    const font = bold
+      ? safeFont(resolveFont(theme.body.font, true, false))
+      : safeFont(theme.body.font);
+    doc.font(font).fontSize(theme.body.fontSize);
+    return doc.heightOfString(text, { width: cellWidth });
+  }
+
   async function renderTable(table: Tokens.Table): Promise<void> {
     const colCount = table.header.length;
     if (colCount === 0) return;
     const cellPad = theme.table.cellPadding;
     const colWidth = contentWidth / colCount;
-    const rowH = theme.body.fontSize + cellPad * 2 + 4;
-    const textInsetY = (rowH - theme.body.fontSize) / 2;
+    const minRowH = theme.body.fontSize + cellPad * 2 + 4;
+    const textWidth = colWidth - cellPad * 2;
 
-    ensureSpace(rowH * 2);
+    ensureSpace(minRowH * 2);
     const startX = margins.left;
     let y = doc.y;
 
-    // Header row
+    // ── Measure header row height ──
+    let headerH = minRowH;
+    let maxHeaderTextHeight = 0;
+    for (let c = 0; c < colCount; c++) {
+      const h = measureCellHeight(table.header[c], textWidth, true);
+      maxHeaderTextHeight = Math.max(maxHeaderTextHeight, h);
+      headerH = Math.max(headerH, h + cellPad * 2 + 4);
+    }
+    const headerTextInsetY = (headerH - maxHeaderTextHeight) / 2;
+
+    // Header row background
     doc.save();
-    doc.rect(startX, y, contentWidth, rowH).fill(theme.table.headerBackground);
+    doc.rect(startX, y, contentWidth, headerH).fill(theme.table.headerBackground);
     doc.restore();
     for (let c = 0; c < colCount; c++) {
       const cellX = startX + c * colWidth;
       await renderCellTokens(
-        table.header[c], cellX + cellPad, y + textInsetY,
-        colWidth - cellPad * 2, table.align[c] || 'left', true,
+        table.header[c], cellX + cellPad, y + headerTextInsetY,
+        textWidth, table.align[c] || 'left', true,
       );
     }
     // Header border
     doc.save();
     doc.strokeColor(theme.table.borderColor).lineWidth(0.5);
-    doc.rect(startX, y, contentWidth, rowH).stroke();
+    doc.rect(startX, y, contentWidth, headerH).stroke();
     for (let c = 1; c < colCount; c++) {
       const cx = startX + c * colWidth;
-      doc.moveTo(cx, y).lineTo(cx, y + rowH).stroke();
+      doc.moveTo(cx, y).lineTo(cx, y + headerH).stroke();
     }
     doc.restore();
-    y += rowH;
+    y += headerH;
 
     // Body rows
     const zebraColor = theme.table.zebraColor ?? '#f9f9f9';
     for (let r = 0; r < table.rows.length; r++) {
       const row = table.rows[r];
+
+      // ── Measure row height ──
+      let rowH = minRowH;
+      let maxRowTextHeight = 0;
+      for (let c = 0; c < colCount; c++) {
+        const h = measureCellHeight(row[c], textWidth, false);
+        maxRowTextHeight = Math.max(maxRowTextHeight, h);
+        rowH = Math.max(rowH, h + cellPad * 2 + 4);
+      }
+      const textInsetY = (rowH - maxRowTextHeight) / 2;
+
       doc.y = y;           // sync doc.y BEFORE ensureSpace check
       ensureSpace(rowH);
       y = doc.y;           // re-sync AFTER possible page break
@@ -580,7 +661,7 @@ export async function renderMarkdownToPdf(
         const cellX = startX + c * colWidth;
         await renderCellTokens(
           row[c], cellX + cellPad, y + textInsetY,
-          colWidth - cellPad * 2, table.align[c] || 'left', false,
+          textWidth, table.align[c] || 'left', false,
         );
       }
       doc.save();
