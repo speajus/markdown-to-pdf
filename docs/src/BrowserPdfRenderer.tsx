@@ -65,9 +65,11 @@ interface BrowserPdfRendererProps {
   markdown: string;
   theme?: ThemeConfig;
   customFonts?: CustomFontDefinition[];
+  /** Called with the blob URL whenever a new PDF is generated successfully. */
+  onPdfReady?: (blobUrl: string) => void;
 }
 
-export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfRendererProps) {
+export function BrowserPdfRenderer({ markdown, theme, customFonts, onPdfReady }: BrowserPdfRendererProps) {
   const [pdfUrl, setPdfUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -113,6 +115,7 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
           objectUrl = URL.createObjectURL(blob);
           setPdfUrl(objectUrl);
           trackPdfGenerated();
+          onPdfReady?.(objectUrl);
         } catch (err) {
           if (!mounted) return;
           setError(err instanceof Error ? err.message : 'Failed to generate PDF');
@@ -136,7 +139,7 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [markdown, theme, customFonts]);
+  }, [markdown, theme, customFonts, onPdfReady]);
 
   if (loading) {
     return (

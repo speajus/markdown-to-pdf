@@ -154,8 +154,51 @@ pie title Time Allocation
 
 ![PNG demo](https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png)
 
+## Load External Markdown
+
+You can load markdown from a URL using query parameters:
+
+- **\`?url=\`** — load markdown from a URL (supports http, data URIs, and GitHub Gists)
+- **\`?theme=\`** — set the PDF theme (Default, Modern, Academic, Minimal, Ocean)
+- **\`?download\`** — automatically download the PDF on load
+
+### Examples
+
+- [Load this project's README](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md)
+- [README with Ocean theme](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md&theme=Ocean)
+- [README with Modern theme + auto-download](./?url=https://raw.githubusercontent.com/speajus/markdown-to-pdf/main/README.md&theme=Modern&download)
+
+---
+
 Try editing this markdown and see the PDF preview update live!
 `;
+
+/**
+ * Decode a `data:` URI into its text content.
+ * Supports `base64` encoding and plain text (with optional charset).
+ */
+function decodeDataUrl(url: string): string {
+  // data:[<mediatype>][;base64],<data>
+  const commaIdx = url.indexOf(',');
+  if (commaIdx === -1) throw new Error('Invalid data URL: missing comma');
+  const meta = url.slice(5, commaIdx); // after "data:"
+  const encoded = url.slice(commaIdx + 1);
+  if (meta.endsWith(';base64')) {
+    return atob(encoded);
+  }
+  return decodeURIComponent(encoded);
+}
+
+/**
+ * If the URL points to a GitHub Gist page, convert it to the raw content URL.
+ */
+function resolveGistUrl(url: string): string {
+  const match = url.match(/^https:\/\/gist\.github\.com\/([^/]+)\/([^/]+)\/?$/);
+  if (match) {
+    return `https://gist.githubusercontent.com/${match[1]}/${match[2]}/raw`;
+  }
+  return url;
+}
 
 const builtinThemeNames = Object.keys(themes);
 
@@ -167,8 +210,104 @@ function App() {
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
   const [creatorOpen, setCreatorOpen] = useState(false);
   const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
+  const [urlLoading, setUrlLoading] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [pendingDownload, setPendingDownload] = useState(false);
+  const downloadFilenameRef = useRef('document.pdf');
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+
+  // Load markdown from ?url= query parameter and handle ?theme= and ?download on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    // Handle ?theme= parameter
+    const themeParam = params.get('theme');
+    if (themeParam) {
+      const matchedTheme = builtinThemeNames.find(
+        (name) => name.toLowerCase() === themeParam.toLowerCase(),
+      );
+      if (matchedTheme) {
+        setThemeName(matchedTheme);
+      }
+      // Invalid theme names silently fall back to Default (already the default)
+    }
+
+    // Handle ?download parameter
+    const downloadParam = params.get('download');
+    if (downloadParam !== null) {
+      setPendingDownload(true);
+    }
+
+    const url = params.get('url');
+
+    // Derive download filename from URL
+    if (url && url.startsWith('http')) {
+      try {
+        const pathname = new URL(url).pathname;
+        const basename = pathname.split('/').pop();
+        if (basename) {
+          const name = basename.replace(/\.(md|markdown|txt)$/i, '');
+          downloadFilenameRef.current = `${name || 'document'}.pdf`;
+        }
+      } catch {
+        // keep default filename
+      }
+    }
+
+    if (!url) return;
+
+    // Validate scheme
+    if (!/^(https?:\/\/|data:)/i.test(url)) {
+      setUrlError('Invalid URL: must start with http://, https://, or data:');
+      return;
+    }
+
+    // Handle data: URLs synchronously
+    if (url.startsWith('data:')) {
+      try {
+        setMarkdown(decodeDataUrl(url));
+      } catch (err) {
+        setUrlError(`Failed to decode data URL: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      return;
+    }
+
+    // Fetch remote URL
+    const fetchUrl = resolveGistUrl(url);
+    let cancelled = false;
+    setUrlLoading(true);
+    setUrlError(null);
+
+    // Proxy http(s) URLs through the Vite dev server to avoid CORS issues
+    const proxyUrl = fetchUrl.match(/^https?:\/\//)
+      ? '/__md_proxy/' + encodeURIComponent(fetchUrl)
+      : fetchUrl;
+
+    fetch(proxyUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        return res.text();
+      })
+      .then((text) => {
+        if (!cancelled) {
+          setMarkdown(text);
+          setUrlLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          const isCors = err instanceof TypeError;
+          const hint = isCors
+            ? ' This may be due to CORS restrictions — the remote server must include Access-Control-Allow-Origin headers.'
+            : '';
+          setUrlError(`Failed to load URL: ${err instanceof Error ? err.message : String(err)}.${hint}`);
+          setUrlLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, []);
 
   // Load custom themes from localStorage on mount
   useEffect(() => {
@@ -242,6 +381,18 @@ function App() {
     setPreviewConfig(null);
   }
 
+  // Handle auto-download when PDF is ready
+  const handlePdfReady = useCallback((blobUrl: string) => {
+    if (!pendingDownload) return;
+    setPendingDownload(false);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = downloadFilenameRef.current;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, [pendingDownload]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     isDragging.current = true;
@@ -309,6 +460,13 @@ function App() {
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
       </div>
 
+      {urlLoading && (
+        <div className="url-banner url-loading">Loading markdown from URL…</div>
+      )}
+      {urlError && (
+        <div className="url-banner url-error">{urlError}</div>
+      )}
+
       {creatorOpen ? (
         <div className="content theme-editor-content">
           <div className="theme-editor-preview">
@@ -318,6 +476,7 @@ function App() {
                 markdown={markdown ?? ''}
                 theme={activeTheme}
                 customFonts={customFonts}
+                onPdfReady={handlePdfReady}
               />
             </div>
           </div>
@@ -359,6 +518,7 @@ function App() {
                 markdown={markdown ?? ''}
                 theme={activeTheme}
                 customFonts={customFonts}
+                onPdfReady={handlePdfReady}
               />
             </div>
         </div>
