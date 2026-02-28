@@ -2,6 +2,27 @@ import { useState, useEffect, useRef } from 'react';
 import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
 import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
 
+declare global {
+  interface Window {
+    goatcounter?: {
+      count: (opts: { path: string; title: string; event: true }) => void;
+    };
+  }
+}
+
+/** Throttle GoatCounter events to at most once per 30 seconds. */
+let lastEventTime = 0;
+const EVENT_THROTTLE_MS = 30_000;
+
+function trackPdfGenerated() {
+  const now = Date.now();
+  if (now - lastEventTime < EVENT_THROTTLE_MS) return;
+  lastEventTime = now;
+  if (window.goatcounter?.count) {
+    window.goatcounter.count({ path: 'pdf-generated', title: 'PDF Generated', event: true });
+  }
+}
+
 /**
  * Font file paths keyed by theme emojiFont value.
  */
@@ -99,6 +120,7 @@ export function BrowserPdfRenderer({ markdown, theme, customFonts }: BrowserPdfR
           const blob = new Blob([uint8Array], { type: 'application/pdf' });
           objectUrl = URL.createObjectURL(blob);
           setPdfUrl(objectUrl);
+          trackPdfGenerated();
         } catch (err) {
           if (!mounted) return;
           setError(err instanceof Error ? err.message : 'Failed to generate PDF');
