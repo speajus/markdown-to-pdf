@@ -157,6 +157,33 @@ pie title Time Allocation
 Try editing this markdown and see the PDF preview update live!
 `;
 
+/**
+ * Decode a `data:` URI into its text content.
+ * Supports `base64` encoding and plain text (with optional charset).
+ */
+function decodeDataUrl(url: string): string {
+  // data:[<mediatype>][;base64],<data>
+  const commaIdx = url.indexOf(',');
+  if (commaIdx === -1) throw new Error('Invalid data URL: missing comma');
+  const meta = url.slice(5, commaIdx); // after "data:"
+  const encoded = url.slice(commaIdx + 1);
+  if (meta.endsWith(';base64')) {
+    return atob(encoded);
+  }
+  return decodeURIComponent(encoded);
+}
+
+/**
+ * If the URL points to a GitHub Gist page, convert it to the raw content URL.
+ */
+function resolveGistUrl(url: string): string {
+  const match = url.match(/^https:\/\/gist\.github\.com\/([^/]+)\/([^/]+)\/?$/);
+  if (match) {
+    return `https://gist.githubusercontent.com/${match[1]}/${match[2]}/raw`;
+  }
+  return url;
+}
+
 const builtinThemeNames = Object.keys(themes);
 
 function App() {
@@ -167,8 +194,63 @@ function App() {
   const [editorWidthPercent, setEditorWidthPercent] = useState(50);
   const [creatorOpen, setCreatorOpen] = useState(false);
   const [previewConfig, setPreviewConfig] = useState<ThemeConfig | null>(null);
+  const [urlLoading, setUrlLoading] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+
+  // Load markdown from ?url= query parameter on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+    if (!url) return;
+
+    // Validate scheme
+    if (!/^(https?:\/\/|data:)/i.test(url)) {
+      setUrlError('Invalid URL: must start with http://, https://, or data:');
+      return;
+    }
+
+    // Handle data: URLs synchronously
+    if (url.startsWith('data:')) {
+      try {
+        setMarkdown(decodeDataUrl(url));
+      } catch (err) {
+        setUrlError(`Failed to decode data URL: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      return;
+    }
+
+    // Fetch remote URL
+    const fetchUrl = resolveGistUrl(url);
+    let cancelled = false;
+    setUrlLoading(true);
+    setUrlError(null);
+
+    fetch(fetchUrl)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        return res.text();
+      })
+      .then((text) => {
+        if (!cancelled) {
+          setMarkdown(text);
+          setUrlLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          const isCors = err instanceof TypeError;
+          const hint = isCors
+            ? ' This may be due to CORS restrictions — the remote server must include Access-Control-Allow-Origin headers.'
+            : '';
+          setUrlError(`Failed to load URL: ${err instanceof Error ? err.message : String(err)}.${hint}`);
+          setUrlLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, []);
 
   // Load custom themes from localStorage on mount
   useEffect(() => {
@@ -302,6 +384,13 @@ function App() {
         </div>
         <div className="info">Edit markdown on the left, see PDF preview on the right</div>
       </div>
+
+      {urlLoading && (
+        <div className="url-banner url-loading">Loading markdown from URL…</div>
+      )}
+      {urlError && (
+        <div className="url-banner url-error">{urlError}</div>
+      )}
 
       {creatorOpen ? (
         <div className="content theme-editor-content">
