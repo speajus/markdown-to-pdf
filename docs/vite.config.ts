@@ -70,8 +70,73 @@ function imageProxyPlugin(): Plugin {
   };
 }
 
+/**
+ * Vite plugin that proxies remote markdown requests to avoid CORS issues.
+ * Requests to /__md_proxy/<encoded-url> are fetched server-side and returned.
+ */
+function markdownProxyPlugin(): Plugin {
+  return {
+    name: 'markdown-proxy',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const prefix = '/__md_proxy/';
+        if (!req.url?.startsWith(prefix)) return next();
+
+        const encoded = req.url.slice(prefix.length);
+        if (!encoded) {
+          res.statusCode = 400;
+          res.end('Missing URL');
+          return;
+        }
+
+        const targetUrl = decodeURIComponent(encoded);
+        const client = targetUrl.startsWith('https') ? https : http;
+
+        const proxyReq = client.get(
+          targetUrl,
+          { headers: { 'User-Agent': 'markdown-to-pdf-proxy' } },
+          (proxyRes) => {
+            // Follow one redirect
+            if (
+              proxyRes.statusCode &&
+              proxyRes.statusCode >= 300 &&
+              proxyRes.statusCode < 400 &&
+              proxyRes.headers.location
+            ) {
+              const redirectClient = proxyRes.headers.location.startsWith('https') ? https : http;
+              redirectClient
+                .get(proxyRes.headers.location, { headers: { 'User-Agent': 'markdown-to-pdf-proxy' } }, (rRes) => {
+                  res.writeHead(rRes.statusCode || 200, {
+                    'Content-Type': rRes.headers['content-type'] || 'text/plain; charset=utf-8',
+                    'Cache-Control': 'public, max-age=300',
+                  });
+                  rRes.pipe(res);
+                })
+                .on('error', () => {
+                  res.statusCode = 502;
+                  res.end('Proxy redirect failed');
+                });
+              return;
+            }
+
+            res.writeHead(proxyRes.statusCode || 200, {
+              'Content-Type': proxyRes.headers['content-type'] || 'text/plain; charset=utf-8',
+              'Cache-Control': 'public, max-age=300',
+            });
+            proxyRes.pipe(res);
+          },
+        );
+        proxyReq.on('error', () => {
+          res.statusCode = 502;
+          res.end('Proxy fetch failed');
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), imageProxyPlugin()],
+  plugins: [react(), imageProxyPlugin(), markdownProxyPlugin()],
   build: {
     outDir: 'dist',
   },

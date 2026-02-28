@@ -279,7 +279,12 @@ function App() {
     setUrlLoading(true);
     setUrlError(null);
 
-    fetch(fetchUrl)
+    // Proxy http(s) URLs through the Vite dev server to avoid CORS issues
+    const proxyUrl = fetchUrl.match(/^https?:\/\//)
+      ? '/__md_proxy/' + encodeURIComponent(fetchUrl)
+      : fetchUrl;
+
+    fetch(proxyUrl)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         return res.text();
