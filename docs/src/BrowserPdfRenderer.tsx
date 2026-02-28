@@ -2,14 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { renderMarkdownToPdf, createBrowserImageRenderer } from '../../src/browser';
 import type { ThemeConfig, CustomFontDefinition } from '../../src/browser';
 
-declare global {
-  interface Window {
-    goatcounter?: {
-      count: (opts: { path: string; title: string; event: true }) => void;
-    };
-  }
-}
-
 /** Throttle GoatCounter events to at most once per 30 seconds. */
 let lastEventTime = 0;
 const EVENT_THROTTLE_MS = 30_000;

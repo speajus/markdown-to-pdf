@@ -284,7 +284,13 @@ function App() {
             <select
               id="theme-select"
               value={themeName}
-              onChange={(e) => setThemeName(e.target.value)}
+              onChange={(e) => {
+                const newTheme = e.target.value;
+                setThemeName(newTheme);
+                if (window.goatcounter?.count) {
+                  window.goatcounter.count({ path: `theme-changed/${newTheme}`, title: `Theme: ${newTheme}`, event: true });
+                }
+              }}
             >
               {allThemeNames.map((name) => (
                 <option key={name} value={name}>{name}</option>
