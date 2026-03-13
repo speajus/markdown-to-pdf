@@ -17,12 +17,13 @@ async function convertToPng(pdfPath: string) {
     console.log(`  → ${pngPath}`);
   }
 }
+function readMdFiles(){
+  return fs.readdirSync(__dirname).filter((f) => f.endsWith(".md"));
+}
 
-async function main() {
+async function main(mdFiles = readMdFiles()) {
   const outputDir = path.join(__dirname, '..', 'output');
   fs.mkdirSync(outputDir, { recursive: true });
-
-  const mdFiles = fs.readdirSync(__dirname).filter((f) => f.endsWith('.md'));
 
   // Step 1: Generate all PDFs in parallel
   const pdfPaths: string[] = [];
@@ -50,7 +51,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main(process.argv.slice(2)).catch((err) => {
   console.error('Error:', err);
   process.exit(1);
 });
