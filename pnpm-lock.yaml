@@ -15,8 +15,11 @@ importers:
         specifier: ^2.6.2
         version: 2.6.2
       '@speajus/mermaid-to-svg':
-        specifier: ^0.1.5
-        version: 0.1.5(@noble/hashes@1.8.0)(canvas@3.2.1)
+        specifier: ^0.1.6
+        version: 0.1.6(@noble/hashes@1.8.0)(canvas@3.2.1)
+      isomorphic-dompurify:
+        specifier: ^3.3.0
+        version: 3.3.0(@noble/hashes@1.8.0)(canvas@3.2.1)
       marked:
         specifier: ^17.0.2
         version: 17.0.2
@@ -378,8 +381,8 @@ packages:
     resolution: {integrity: sha512-xBaJish5OeGmniDj9cW5PRa/PtmuVU3ziqrbr5xJj901ZDN4TosrVaNZpEiLZAxdfnhAe7uQ7QFWfjPe9d9K2Q==}
     engines: {node: '>= 10'}
 
-  '@speajus/mermaid-to-svg@0.1.5':
-    resolution: {integrity: sha512-Dy+tQy6Dzcp6TgpiK7GveQ2qq+Izl54Vfb39a/6iJVan8mFssp45LV9RAA7T9c4zYPLeGaTOYunvLb6qKY0Lfg==}
+  '@speajus/mermaid-to-svg@0.1.6':
+    resolution: {integrity: sha512-6AQXzgpJg1WlYjXFHjJIZ84Ggc1B5R9YLRvrqwMumf0up+FyFalSxNtw9+2Gf6wyN6Qvvu56I2XtuTQp/MMZAw==}
     hasBin: true
 
   '@swc/helpers@0.5.19':
@@ -761,6 +764,9 @@ packages:
   dompurify@3.3.1:
     resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
 
+  dompurify@3.3.3:
+    resolution: {integrity: sha512-Oj6pzI2+RqBfFG+qOaOLbFXLQ90ARpcGG6UePL82bJLtdsa6CYJD7nmiU8MW9nQNOtCHV3lZ/Bzq1X0QYbBZCA==}
+
   elkjs@0.9.3:
     resolution: {integrity: sha512-f/ZeWvW/BCXbhGEf1Ujp29EASo/lk1FDnETgNKwJrsVvGZhUWCZyg3xLJjAsxfOmt8KjswHmI5EwCQcPMpOYhQ==}
 
@@ -837,6 +843,10 @@ packages:
 
   is-potential-custom-element-name@1.0.1:
     resolution: {integrity: sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==}
+
+  isomorphic-dompurify@3.3.0:
+    resolution: {integrity: sha512-Xx3GlNZNAXIISX49OMpfNgxrRU49KVQ5hqnK2zbkqkPucdWnCZXquTMK/COnb8pmIOJlfiaNYav9qyHX3gRDMA==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
 
   js-md5@0.8.3:
     resolution: {integrity: sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==}
@@ -1394,7 +1404,7 @@ snapshots:
       '@resvg/resvg-js-win32-ia32-msvc': 2.6.2
       '@resvg/resvg-js-win32-x64-msvc': 2.6.2
 
-  '@speajus/mermaid-to-svg@0.1.5(@noble/hashes@1.8.0)(canvas@3.2.1)':
+  '@speajus/mermaid-to-svg@0.1.6(@noble/hashes@1.8.0)(canvas@3.2.1)':
     dependencies:
       '@resvg/resvg-js': 2.6.2
       elkjs: 0.9.3
@@ -1836,6 +1846,10 @@ snapshots:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
+  dompurify@3.3.3:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   elkjs@0.9.3: {}
 
   end-of-stream@1.4.5:
@@ -1937,6 +1951,15 @@ snapshots:
   internmap@2.0.3: {}
 
   is-potential-custom-element-name@1.0.1: {}
+
+  isomorphic-dompurify@3.3.0(@noble/hashes@1.8.0)(canvas@3.2.1):
+    dependencies:
+      dompurify: 3.3.3
+      jsdom: 28.1.0(@noble/hashes@1.8.0)(canvas@3.2.1)
+    transitivePeerDependencies:
+      - '@noble/hashes'
+      - canvas
+      - supports-color
 
   js-md5@0.8.3: {}
 

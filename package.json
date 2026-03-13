@@ -1,6 +1,6 @@
 {
   "name": "@speajus/markdown-to-pdf",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "A new project created with Intent by Augment.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -52,7 +52,8 @@
   "type": "commonjs",
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "@speajus/mermaid-to-svg": "^0.1.5",
+    "@speajus/mermaid-to-svg": "^0.1.6",
+    "isomorphic-dompurify": "^3.3.0",
     "marked": "^17.0.2",
     "pdfkit": "github:jspears/pdfkit#support-color-emoji-google",
     "prismjs": "^1.30.0"

@@ -1,12 +1,13 @@
 import { DEFAULTS } from './defaults.js';
 import type { MermaidThemeConfig } from './types.js';
+import DOMPurify  from 'isomorphic-dompurify';
 
 let mermaidModule: typeof import('@speajus/mermaid-to-svg') | null = null;
 
 async function loadMermaid(): Promise<typeof import('@speajus/mermaid-to-svg')> {
   if (!mermaidModule) {
-    const win = ('window' in globalThis) ? globalThis.window : ((globalThis as any).window = globalThis);
-    if (!win.DOMPurify){
+    const win:any = ('window' in globalThis) ? globalThis.window : ((globalThis as any).window = globalThis);
+    if (!('DOMPurify' in win)) {
       win.DOMPurify = await import("isomorphic-dompurify");
     }
     mermaidModule = await import('@speajus/mermaid-to-svg');
