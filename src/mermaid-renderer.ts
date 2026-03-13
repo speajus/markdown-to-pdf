@@ -5,6 +5,10 @@ let mermaidModule: typeof import('@speajus/mermaid-to-svg') | null = null;
 
 async function loadMermaid(): Promise<typeof import('@speajus/mermaid-to-svg')> {
   if (!mermaidModule) {
+    const win = ('window' in globalThis) ? globalThis.window : ((globalThis as any).window = globalThis);
+    if (!win.DOMPurify){
+      win.DOMPurify = await import("isomorphic-dompurify");
+    }
     mermaidModule = await import('@speajus/mermaid-to-svg');
   }
   return mermaidModule;
