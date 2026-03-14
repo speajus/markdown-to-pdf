@@ -21,7 +21,8 @@ function readMdFiles(){
   return fs.readdirSync(__dirname).filter((f) => f.endsWith(".md"));
 }
 
-async function main(mdFiles = readMdFiles()) {
+async function main(files:string[]) {
+  const mdFiles = files.length ? files : readMdFiles();
   const outputDir = path.join(__dirname, '..', 'output');
   fs.mkdirSync(outputDir, { recursive: true });
 
